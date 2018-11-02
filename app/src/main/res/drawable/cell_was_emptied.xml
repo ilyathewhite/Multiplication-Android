@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item app:state_empty="true">
+    <item app:state_empty="true" android:drawable="@drawable/number_button">
         <layer-list>
             <item>
                 <shape>
@@ -12,7 +12,7 @@
             </item>
         </layer-list>
     </item>
-    <item app:state_filled="true">
+    <item app:state_filled="true" android:drawable="@drawable/number_button">
         <layer-list>
             <item>
                 <shape>
@@ -39,6 +39,17 @@
             <item>
                 <shape>
                     <solid android:color="@color/appLightGray" />
+                    <stroke android:width="1dp" android:color="@color/appDarkGray" />
+                    <corners android:radius="4dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape>
+                    <solid android:color="#00FF00" />
                     <stroke android:width="1dp" android:color="@color/appDarkGray" />
                     <corners android:radius="4dp" />
                 </shape>
