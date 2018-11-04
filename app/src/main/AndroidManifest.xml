@@ -13,17 +13,16 @@
                 android:name=".MainActivity"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:label="@string/app_name"
-                android:theme="@style/AppTheme.NoActionBar">
+                android:theme="@style/AnimationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
                 android:name=".TrainingActivity"
                 android:label="@string/title_activity_training"
-                android:theme="@style/AppTheme.ActionBar">
+                android:theme="@style/AnimationActivity">
         </activity>
     </application>
 

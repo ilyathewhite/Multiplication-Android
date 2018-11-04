@@ -12,19 +12,14 @@ const val TRAINING_ACTIVITY_MULTIPLICAND = "ru.mathtasks.multiplicationtable.tra
 
 class TrainingActivity : Activity() {
 
-    private var multiplier = 0
-    private var multiplicand = 0
     private var answer : Int? = null
-    private val LEFT_INDENT = 30
-    private val RIGHT_INDENT = 40
+    private lateinit var taskProvider: TaskProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
 
-        val prevMultiplier = 3
-        this.multiplier = 5
-        this.multiplicand = intent.getIntExtra(TRAINING_ACTIVITY_MULTIPLICAND, 0)
+        this.taskProvider = TaskProvider(intent.getIntExtra(TRAINING_ACTIVITY_MULTIPLICAND, 0))
 
         class B(val button_id:Int, val value: Int);
         val buttons = arrayOf(
@@ -45,8 +40,9 @@ class TrainingActivity : Activity() {
         updateTask()
 
         val field = findViewById<LinearLayout>(R.id.ll_field)
+		field.removeAllViews()
         field.post {
-            val dim = min(field.width - LEFT_INDENT - RIGHT_INDENT, field.height) / 10
+            val dim = min(field.width/(taskProvider.multiplier+2), field.height/10)	// 1 extra before, 2 extra after
 
             var animatedCells = mutableListOf<CellView>()
             for(m in 1..10) {
@@ -57,23 +53,23 @@ class TrainingActivity : Activity() {
                 field.addView(hl)
                 val number = TextView(this).apply {
                     text = m.toString()
-                    layoutParams = ViewGroup.LayoutParams(LEFT_INDENT, dim)
-                    setTextColor(resources.getColor(if (m <= multiplier) R.color.fieldNumberActive else R.color.fieldNumberInactive))
+                    layoutParams = ViewGroup.LayoutParams(dim, dim)
+                    setTextColor(resources.getColor(if (m <= taskProvider.multiplier) R.color.fieldNumberActive else R.color.fieldNumberInactive))
                     textAlignment = View.TEXT_ALIGNMENT_VIEW_END
                     setPadding(0, 0, 10, 0)
                 }
                 hl.addView(number)
 
-                for(n in 1..multiplicand) {
+                for(n in 1..taskProvider.multiplier) {
                     val v1 = (when {
-                        m <= prevMultiplier -> CellView(this, CellState.Filled)
-                        m <= multiplier -> CellView(this, CellState.ToBeFilled, CellState.Filled, CellAnimationDirection.TopToBottom)
+                        m <= taskProvider.hintFrom -> CellView(this, CellState.Filled)
+                        m <= taskProvider.multiplier -> CellView(this, CellState.ToBeFilled, CellState.Filled, CellAnimationDirection.TopToBottom)
                         else -> CellView(this, CellState.Empty)
                     }).apply {
                         setPadding(3,3,3,3)
                         layoutParams = ViewGroup.LayoutParams(dim, dim)
                     }
-                    if(m in prevMultiplier..multiplier)
+                    if(m in taskProvider.hintFrom..taskProvider.multiplier)
                         animatedCells.add(v1)
                     hl.addView(v1)
                 }
@@ -108,7 +104,7 @@ class TrainingActivity : Activity() {
     }
 
     private fun updateTask() {
-        findViewById<TextView>(R.id.tv_task).text = "$multiplier  \u00D7  $multiplicand  =  "
+        findViewById<TextView>(R.id.tv_task).text = "${taskProvider.multiplier}  \u00D7  ${taskProvider.multiplicand}  =  "
         findViewById<TextView>(R.id.tv_answer).text = answer?.toString()?:""
     }
 }
