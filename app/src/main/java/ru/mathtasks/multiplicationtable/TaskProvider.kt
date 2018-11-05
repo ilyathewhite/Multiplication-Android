@@ -43,6 +43,9 @@ class TaskProvider(val multiplier: Int) {
         else if (endOfSet)
             stages.removeAt(0)
         else {
+            lastMultiplicants.add(multiplicand)
+            if(lastMultiplicants.size > MAX_LAST_MULTIPLICANTS)
+                lastMultiplicants.removeAt(0)
             stages[0].multiplicands.removeAt(0)
             if (endOfSet) {
                 lastMultiplicants.clear()

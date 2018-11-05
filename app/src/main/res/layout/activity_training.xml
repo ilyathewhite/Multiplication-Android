@@ -24,20 +24,24 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/ll_field"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_weight="1"
-        android:background="@android:color/holo_green_light"
-        android:orientation="vertical"></LinearLayout>
+            android:id="@+id/ll_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical"></LinearLayout>
     <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp" android:layout_marginRight="5dp">
+    >
 
         <TableRow android:layout_width="match_parent" android:layout_height="match_parent"
         >
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1">
+            </Space>
             <Button
                     android:text="1"
                     android:id="@+id/btn_1"
@@ -45,7 +49,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="2"
@@ -54,7 +58,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="3"
@@ -63,7 +67,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="4"
@@ -72,7 +76,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="5"
@@ -81,14 +85,24 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="BS"
                     android:id="@+id/btn_bs"
                     style="@style/ButtonStyle"/>
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1">
+            </Space>
         </TableRow>
         <TableRow android:layout_width="match_parent" android:layout_height="match_parent">
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1">
+            </Space>
             <Button
                     android:text="6"
                     android:id="@+id/btn_6"
@@ -96,7 +110,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="7"
@@ -105,7 +119,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="8"
@@ -114,7 +128,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="9"
@@ -123,7 +137,7 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="0"
@@ -132,12 +146,17 @@
             <Space
                     android:layout_width="0dp"
                     android:layout_height="1dp"
-                    android:layout_weight="1">
+                    android:layout_weight="2">
             </Space>
             <Button
                     android:text="OK"
                     android:id="@+id/btn_ok"
                     style="@style/ButtonStyle"/>
+            <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1">
+            </Space>
         </TableRow>
     </TableLayout>
 </LinearLayout>
