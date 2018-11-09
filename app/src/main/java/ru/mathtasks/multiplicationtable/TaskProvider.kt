@@ -13,8 +13,9 @@ class TaskProvider(val multiplier: Int) {
           Stage(true, mutableListOf(10, 8, 6, 4, 2), arrayOf(0)),
           Stage(false, (1..30).map { java.util.Random().nextInt(9) + 1 }.toMutableList(), arrayOf(0, 5, 10)))
 
+    private var prevMultiplicands = mutableSetOf<Int>()
     private val MAX_LAST_MULTIPLICANTS = 3
-    private val lastMultiplicants = mutableListOf<Int>()
+    private val lastMultiplicands = mutableListOf<Int>()
 
     val endOfGame get() = stages.size == 0
 
@@ -24,11 +25,13 @@ class TaskProvider(val multiplier: Int) {
 
     val nextMultiplicands get() = stages[0].multiplicands.toTypedArray()
 
+    fun isPrevMultiplicand(multiplicand: Int) = stages[0].showPrevAnswers && prevMultiplicands.contains(multiplicand)
+
     val hintFrom : Int get() {
         val multiplicand = multiplicand
         var min = 10
         var result = -1
-        for (m in if (lastMultiplicants.size == 0) stages[0].hintFrom.toMutableList() else lastMultiplicants) {
+        for (m in if (lastMultiplicands.size == 0) stages[0].hintFrom.toMutableList() else lastMultiplicands) {
             if (Math.abs(m - multiplicand) in 1..(min - 1)) {
                 min = Math.abs(m - multiplicand)
                 result = m
@@ -43,12 +46,14 @@ class TaskProvider(val multiplier: Int) {
         else if (endOfSet)
             stages.removeAt(0)
         else {
-            lastMultiplicants.add(multiplicand)
-            if(lastMultiplicants.size > MAX_LAST_MULTIPLICANTS)
-                lastMultiplicants.removeAt(0)
+            prevMultiplicands.add(multiplicand)
+            lastMultiplicands.add(multiplicand)
+            if(lastMultiplicands.size > MAX_LAST_MULTIPLICANTS)
+                lastMultiplicands.removeAt(0)
             stages[0].multiplicands.removeAt(0)
             if (endOfSet) {
-                lastMultiplicants.clear()
+                prevMultiplicands.clear()
+                lastMultiplicands.clear()
                 if (stages.size == 1)
                     stages.removeAt(0)
             }
