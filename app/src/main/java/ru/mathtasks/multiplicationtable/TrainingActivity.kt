@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import java.lang.Math.min
 import android.animation.AnimatorSet
+import android.content.Intent
 import android.support.v4.content.ContextCompat
 import android.view.View
 import java.lang.Math.max
@@ -28,6 +29,7 @@ class TrainingActivity : Activity() {
     private lateinit var outField: FrameLayout
     private lateinit var field: LinearLayout
     private var answer: Int? = null
+    private var qErrors = 0
     private var attempt = 1
     private var keyboardEnabled = true
 
@@ -151,14 +153,30 @@ class TrainingActivity : Activity() {
             return;
         keyboardEnabled = false
         val correct = answer == taskProvider.multiplier * taskProvider.multiplicand
+        if(!correct)
+            qErrors++
         animateAnswer(correct) {
             answer = null
             attempt = if (correct) 1 else attempt + 1
-            if (correct)
+            if (correct) {
+                startActivity(Intent(this, EndOfSetActivity::class.java).apply {
+                    putExtra(END_OF_SET_ACTIVITY_Q_ERRORS, qErrors)
+                })
                 taskProvider.nextTask()
-            if (!taskProvider.endOfGame && !taskProvider.endOfSet) {
-                updateTask()
-                drawField()
+            }
+            when {
+                taskProvider.endOfSet -> {
+                    startActivity(Intent(this, EndOfSetActivity::class.java).apply {
+                        putExtra(END_OF_SET_ACTIVITY_Q_ERRORS, qErrors)
+                    })
+                    qErrors = 0
+                }
+                taskProvider.endOfGame -> {
+                }
+                else -> {
+                    updateTask()
+                    drawField()
+                }
             }
             keyboardEnabled = true
         }

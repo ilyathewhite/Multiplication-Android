@@ -16,13 +16,16 @@
                 android:theme="@style/AnimationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
                 android:name=".TrainingActivity"
-                android:label="@string/title_activity_training"
                 android:theme="@style/AnimationActivity">
+        </activity>
+        <activity android:name=".EndOfSetActivity"
+                  android:theme="@style/AnimationActivity">
         </activity>
     </application>
 
