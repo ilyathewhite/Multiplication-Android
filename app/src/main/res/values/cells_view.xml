@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="cellsAnimationFastDuration">100</integer>
+    <integer name="cellsAnimationHint1Duration">500</integer>
+    <integer name="cellsAnimationHint2Duration">2000</integer>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="cellEmpty">#FFFFFF</color>
+    <color name="cellEmptyStroke">@color/appDarkGray</color>
+    <color name="cellFilled">@color/appOrange</color>
+    <color name="cellFilledStroke">@color/appDarkRed</color>
+    <color name="cellToBeFilled">#FFFFFF</color>
+    <color name="cellToBeFilledStroke">@color/appDarkRed</color>
+    <color name="cellWasEmptied">@color/appLightGray</color>
+    <color name="cellWasEmptiedStroke">@color/appDarkGray</color>
+
+    <dimen name="cellMargin">3dp</dimen>
+    <dimen name="cellCornerRadius">4dp</dimen>
+    <dimen name="cellStrokeWidth">1dp</dimen>
+</resources>

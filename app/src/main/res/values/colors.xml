@@ -15,8 +15,5 @@
     <color name="appLightOrange">#FFE1AF</color>
     <color name="appDarkGray">#646464</color>
 
-    <color name="fieldNumberActive">#000000</color>
-    <color name="fieldNumberInactive">@color/appLightGray</color>
-
     <color name="successBadge">#ffa100</color>
 </resources>

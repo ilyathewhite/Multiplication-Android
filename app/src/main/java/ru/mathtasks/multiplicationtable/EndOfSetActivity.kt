@@ -1,19 +1,24 @@
 package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.transition.*
 import android.view.animation.AccelerateInterpolator
+import android.widget.Button
 
-
-const val END_OF_SET_ACTIVITY_Q_ERRORS = "ru.mathtasks.multiplicationtable.end_of_set_activity.q_errors"
 
 class EndOfSetActivity : Activity() {
+    companion object {
+        const val INPUT_Q_ERRORS = "ru.mathtasks.multiplicationtable.end_of_set_activity.q_errors"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_of_set)
+
+
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -31,6 +36,19 @@ class EndOfSetActivity : Activity() {
                     TransitionManager.go(scene3, ChangeBounds() . apply {
                         interpolator = AccelerateInterpolator(1.0f)
                         duration = 1200
+                        addListener(object : TransitionListenerAdapter() {
+                            override fun onTransitionEnd(transition: Transition) {
+                                findViewById<Button>(R.id.btn_next_drill).setOnClickListener {
+                                    setResult(Activity.RESULT_OK, null);
+                                    finish();
+                                }
+
+                                findViewById<Button>(R.id.btn_end_practice).setOnClickListener{
+                                    setResult(Activity.RESULT_CANCELED, null);
+                                    finish();
+                                }
+                            }
+                        })
                     })
                 }
             })
