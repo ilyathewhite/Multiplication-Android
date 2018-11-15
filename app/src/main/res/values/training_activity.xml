@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="trainingActivityNextMultiplierFontSize">10dp</dimen>
+    <dimen name="trainingActivityNextMultiplierFontSize">8dp</dimen>
     <dimen name="trainingActivityNextMultiplierInterval">20dp</dimen>
+    <integer name="trainingActivityNextMultiplierCrossFadeDuration">1000</integer>
+    <integer name="trainingActivityNextMultiplierTransformDuration">2000</integer>
 </resources>

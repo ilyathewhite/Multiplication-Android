@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -35,7 +36,7 @@ class FieldRowView : LinearLayout {
         this.tvMultiplier = TextView(context).apply {
             gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
             text = multiplier.toString()
-            textSize = Math.min(dimension / 5f, 20f)    // TODO
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, dimension.toFloat() / 2)
             layoutParams = ViewGroup.LayoutParams(dimension, dimension)
             setPadding(0, 0, 10, 0)
         }
@@ -50,19 +51,19 @@ class FieldRowView : LinearLayout {
                     gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
                     layoutParams = FrameLayout.LayoutParams(dimension, dimension)
                     setPadding(10, 0, 0, 0)
-                    textSize = Math.min(dimension / 5f, 20f)    // TODO
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, dimension.toFloat() / 2)
                     setTextColor(ContextCompat.getColor(context, R.color.fieldRowViewProduct))
                 }
             }
             inAnimation = AnimationUtils.loadAnimation(context, R.anim.field_row_view_text_fade_in)
-            outAnimation = AnimationUtils.loadAnimation(context,R.anim.field_row_view_text_fade_out)
+            outAnimation = AnimationUtils.loadAnimation(context, R.anim.field_row_view_text_fade_out)
         }
         this.addView(tsProduct)
     }
 
     fun animateIsMultiplierActive(value: Boolean): Animator {
         val toColor = ContextCompat.getColor(context, if (value) R.color.fieldRowViewMultiplicandActive else R.color.fieldRowViewMultiplicandInactive)
-        return ValueAnimator.ofArgb(tvMultiplier.currentTextColor, toColor) .apply {
+        return ValueAnimator.ofArgb(tvMultiplier.currentTextColor, toColor).apply {
             this.duration = resources.getInteger(R.integer.fieldRowViewIsMultiplierActiveAnimationDuration).toLong()
             addUpdateListener { animator ->
                 tvMultiplier.setTextColor(animator.animatedValue as Int)
@@ -76,7 +77,7 @@ class FieldRowView : LinearLayout {
             ProductShowType.Question -> "?"
             ProductShowType.Number -> (multiplier * multiplicand).toString()
         }
-        if(newText == product)
+        if (newText == product)
             return
         product = newText
         tsProduct.setText(product)

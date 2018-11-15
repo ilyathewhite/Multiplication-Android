@@ -1,15 +1,16 @@
 package ru.mathtasks.multiplicationtable
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
+import android.animation.*
 import android.app.Activity
 import android.os.Bundle
 import android.widget.*
 import java.lang.Math.min
 import android.content.Intent
+import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
+import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import java.lang.Math.max
 
 
@@ -71,7 +72,8 @@ class TrainingActivity : Activity() {
         for (nextMultiplier in taskProvider.nextMultipliers) {
             val tv = TextView(this).apply {
                 text = nextMultiplier.toString()
-                textSize = resources.getDimension(R.dimen.trainingActivityNextMultiplierFontSize)
+                setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.trainingActivityNextMultiplierFontSize))
+                setTypeface(null, Typeface.BOLD)
                 maxLines = 1
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                     setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.trainingActivityNextMultiplierInterval), 0)
@@ -99,12 +101,14 @@ class TrainingActivity : Activity() {
         findViewById<TextView>(R.id.tv_answer).text = answer?.toString() ?: ""
     }
 
-    private fun animateTask(animateNextMultiplier: Boolean) {
-        val textAnimators = mutableListOf<Animator>()
-        val fastAnimators = mutableListOf<Animator>()
-        val longAnimators = mutableListOf<Animator>()
+    private fun animateTask(nextMultiplier: Boolean) {
+        val startupAnimators = mutableListOf<Animator>()
+        if (nextMultiplier)
+            startupAnimators.add(animateNextMultiplier())
+        val prepareFieldAnimators = mutableListOf<Animator>()
+        val transitFieldAnimators = mutableListOf<Animator>()
         for (r in fieldRows) {
-            textAnimators.add(r.animateIsMultiplierActive(r.multiplier <= taskProvider.multiplier))
+            startupAnimators.add(r.animateIsMultiplierActive(r.multiplier <= taskProvider.multiplier))
             r.animateProductShowType(
                 when {
                     r.multiplier == taskProvider.multiplier -> ProductShowType.Question
@@ -114,31 +118,89 @@ class TrainingActivity : Activity() {
                 }
             )
             if (r.multiplier > max(taskProvider.hintFrom, taskProvider.multiplier))
-                fastAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+                prepareFieldAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
             else if (r.multiplier <= min(taskProvider.hintFrom, taskProvider.multiplier))
-                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
             else if (attemptIdx == 1 && taskProvider.hintFrom < taskProvider.multiplier)
-                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
             else if (attemptIdx == 1 && taskProvider.hintFrom > taskProvider.multiplier)
-                fastAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+                prepareFieldAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
             else if (taskProvider.hintFrom < taskProvider.multiplier) {
-                fastAnimators.add(r.animateCells(CellState.ToBeFilled, AnimationType.Fast))
-                longAnimators.add(r.animateCells(CellState.Filled, if (attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
+                prepareFieldAnimators.add(r.animateCells(CellState.ToBeFilled, AnimationType.Fast))
+                transitFieldAnimators.add(r.animateCells(CellState.Filled, if (attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
             } else if (taskProvider.hintFrom > taskProvider.multiplier) {
-                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
-                longAnimators.add(0, r.animateCells(CellState.WasEmptied, if (attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
+                prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                transitFieldAnimators.add(0, r.animateCells(CellState.WasEmptied, if (attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
             }
         }
         taskAnimator?.end()
         taskAnimator = AnimatorSet().apply {
             playTogether(
-                AnimatorSet().apply { playTogether(textAnimators) },
+                AnimatorSet().apply { playTogether(startupAnimators) },
                 AnimatorSet().apply {
                     playSequentially(
-                        AnimatorSet().apply { playTogether(fastAnimators) },
-                        AnimatorSet().apply { playSequentially(longAnimators) })
+                        AnimatorSet().apply { playTogether(prepareFieldAnimators) },
+                        AnimatorSet().apply { playSequentially(transitFieldAnimators) })
                 })
             start()
+        }
+    }
+
+    private fun animateNextMultiplier(): Animator {
+        val nextMultiplier = nextMultipliers[0]
+        val nextMultiplierLoc: IntArray = intArrayOf(0, 0)
+        nextMultiplier.getLocationOnScreen(nextMultiplierLoc)
+
+        val rlOuter = findViewById<RelativeLayout>(R.id.rl_outer)
+        val rlOuterLoc: IntArray = intArrayOf(0, 0)
+        rlOuter.getLocationOnScreen(rlOuterLoc)
+
+        val startX = nextMultiplierLoc[0] - rlOuterLoc[0]
+        val startY = nextMultiplierLoc[1] - rlOuterLoc[1]
+
+        val initAnimators = mutableListOf<Animator>()
+        initAnimators.add(ObjectAnimator.ofFloat(nextMultiplier, View.ALPHA, 1f, 0f)
+            .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong()))
+
+        val tv = TextView(this).apply {
+            text = nextMultiplier.text
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, nextMultiplier.textSize)
+            alpha = 0f
+            setTypeface(null, Typeface.ITALIC)
+            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                setMargins(startX, startY, 0, 0)
+            }
+        }
+
+        rlOuter.addView(tv)
+        initAnimators.add(ObjectAnimator.ofFloat(tv, View.ALPHA, 0f, 1f)
+            .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong()))
+
+        val tvMultiplier = findViewById<TextView>(R.id.tv_multiplier)
+        val startTextSize = nextMultiplier.textSize
+        val endTextSize = tvMultiplier.textSize
+        val tvMultiplierLoc: IntArray = intArrayOf(0, 0)
+        tvMultiplier.getLocationOnScreen(tvMultiplierLoc)
+        var endX = tvMultiplierLoc[0] - rlOuterLoc[0]
+        var endY = tvMultiplierLoc[1] - rlOuterLoc[1]
+        val transformAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = resources.getInteger(R.integer.trainingActivityNextMultiplierTransformDuration).toLong()
+            addUpdateListener { animator ->
+                val progress = animator.animatedValue as Float
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (endTextSize - startTextSize)*progress)
+                tv.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    setMargins((startX + (endX - startX) * progress).toInt(), (startY + (endY - startY) * progress).toInt(), 0, 0)
+                }
+            }
+        }
+
+        return AnimatorSet().apply {
+            playSequentially(AnimatorSet().apply { playTogether(initAnimators) }, transformAnimator)
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    rlOuter.removeView(tv)
+                }
+            })
         }
     }
 
