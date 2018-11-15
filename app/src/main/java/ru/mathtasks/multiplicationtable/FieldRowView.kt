@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 
 enum class ProductShowType { None, Question, Number }
+
 class FieldRowView : LinearLayout {
     private val multiplier: Int
     val multiplicand: Int

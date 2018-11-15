@@ -5,7 +5,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".EndOfSetActivity" android:id="@+id/constraintLayout">
+        tools:context=".EndOfSetActivity" android:id="@+id/cl_outer">
 
     <LinearLayout
             android:id="@+id/ll_buttons"
@@ -31,30 +31,39 @@
                 android:paddingTop="15dp" android:paddingLeft="30dp" android:paddingRight="30dp"
                 android:textSize="20dp" style="@style/Widget.AppCompat.Button.Borderless"/>
     </LinearLayout>
-    <ImageView
-            android:id="@+id/iv_success_badge" android:src="@drawable/success_badge"
-            android:layout_height="wrap_content" android:layout_width="wrap_content"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_default="percent"
-            app:layout_constraintWidth_percent="0.8" app:layout_constraintHorizontal_bias="0.5"/>
-    <ImageView
-            android:src="@drawable/success_badge_mark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/iv_mark"
-            app:layout_constraintTop_toTopOf="@+id/iv_success_badge"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_success_badge"
-            app:layout_constraintEnd_toEndOf="@+id/iv_success_badge"
-            app:layout_constraintStart_toStartOf="@+id/iv_success_badge"
-    />
-    <ImageView
+    <android.support.constraint.ConstraintLayout
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:id="@+id/iv_mark_cover" app:layout_constraintStart_toStartOf="@+id/iv_mark"
-            app:layout_constraintEnd_toEndOf="@+id/iv_mark"
-            app:layout_constraintTop_toTopOf="@+id/iv_mark"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_mark" android:background="@color/successBadge"
-            android:layout_marginStart="64dp" android:layout_marginTop="64dp" android:layout_marginEnd="64dp"
-            android:layout_marginBottom="64dp"/>
+            android:layout_height="0dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintWidth_default="percent" app:layout_constraintWidth_percent="0.8"
+            android:id="@+id/cl_badge">
+
+        <ImageView
+                android:id="@+id/iv_success_badge" android:src="@drawable/success_badge"
+                android:layout_height="0dp" android:layout_width="0dp"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+        />
+        <ImageView
+                android:src="@drawable/success_badge_mark"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/iv_mark"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+        />
+        <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/iv_mark_cover"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:background="@color/successBadge"
+                app:layout_constraintHeight_default="percent" app:layout_constraintHeight_percent="0.4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintWidth_default="percent"
+                app:layout_constraintWidth_percent="0.6" app:layout_constraintHorizontal_bias="0.5"/>
+    </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

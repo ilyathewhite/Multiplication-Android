@@ -25,6 +25,7 @@ class TrainingActivity : Activity() {
     private var answer: Int? = null
     private var qErrors = 0
     private var attemptIdx = 1
+    private var taskAnimator: Animator? = null
     private var keyboardEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +98,8 @@ class TrainingActivity : Activity() {
                 longAnimators.add(0, r.animate(CellState.WasEmptied, if(attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
             }
         }
-        AnimatorSet().apply {
+        taskAnimator?.end()
+        taskAnimator = AnimatorSet().apply {
             playSequentially(
                 AnimatorSet().apply { playTogether(fastAnimators) },
                 AnimatorSet().apply { playSequentially(longAnimators) })
@@ -157,13 +159,12 @@ class TrainingActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == END_OF_SET_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+            if (resultCode != Activity.RESULT_OK)
+                finish()
+            else {
                 taskProvider.nextTask()
                 animateTask()
                 updateTask()
-            }
-            else {
-                finish()
             }
         }
     }
@@ -175,7 +176,11 @@ class TrainingActivity : Activity() {
             visibility = View.VISIBLE
             animate().alpha(1f).setStartDelay(0).setDuration(100).setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(p0: Animator?) {
-                    findViewById<ImageView>(R.id.iv_mark).animate().alpha(0f).setStartDelay(500).setDuration(500)
+                    findViewById<ImageView>(R.id.iv_mark)
+                        .animate()
+                        .alpha(0f)
+                        .setStartDelay(500)
+                        .setDuration(500)
                         .setListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(p0: Animator?) {
                                 visibility = View.GONE

@@ -19,7 +19,7 @@ class CellsView : ImageView
         this.multiplier = multiplier
         this.dimension = dimension
         this.cells = (1..multiplier).map { CellView(context) }.toTypedArray()
-        val cellMargin = context.resources.getDimensionPixelSize(R.dimen.cellMargin)
+        val cellMargin = resources.getDimensionPixelSize(R.dimen.cellMargin)
         background = LayerDrawable(cells).apply {
             for (i in 0 until cells.size)
                 setLayerInset(i, i * dimension + cellMargin, cellMargin, (multiplier - 1 - i) * dimension + cellMargin, cellMargin)
@@ -34,10 +34,12 @@ class CellsView : ImageView
             AnimationType.HintFwd2, AnimationType.HintBack2 -> R.integer.cellsAnimationHint2Duration
         }).toLong()
         var animators = cells.map { cell -> cell.animate(toState, duration / multiplier) }
-        return when(type) {
-            AnimationType.Fast -> AnimatorSet().apply { playTogether(animators); }
-            AnimationType.HintFwd1, AnimationType.HintFwd2 -> AnimatorSet().apply { playSequentially(animators); }
-            AnimationType.HintBack1, AnimationType.HintBack2 -> AnimatorSet().apply { playSequentially(animators.reversed()); }
+        return AnimatorSet().apply {
+            when(type) {
+                AnimationType.Fast -> playTogether(animators)
+                AnimationType.HintFwd1, AnimationType.HintFwd2 -> playSequentially(animators)
+                AnimationType.HintBack1, AnimationType.HintBack2 -> playSequentially(animators.reversed())
+            }
         }
     }
 }

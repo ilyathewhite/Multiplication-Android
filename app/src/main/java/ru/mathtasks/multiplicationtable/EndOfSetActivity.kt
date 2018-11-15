@@ -1,12 +1,13 @@
 package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
-import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.transition.*
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
+import android.support.constraint.ConstraintSet
 
 
 class EndOfSetActivity : Activity() {
@@ -18,44 +19,57 @@ class EndOfSetActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_of_set)
 
+        findViewById<Button>(R.id.btn_next_drill).setOnClickListener {
+            setResult(Activity.RESULT_OK, null)
+            finish()
+        }
 
+        findViewById<Button>(R.id.btn_end_practice).setOnClickListener {
+            setResult(Activity.RESULT_CANCELED, null)
+            finish()
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
-        if(!hasFocus)
+        if (!hasFocus)
             return;
 
-        val scene2 = Scene.getSceneForLayout(findViewById<ConstraintLayout>(R.id.constraintLayout),R.layout.activity_end_of_set2,this)
-
-        TransitionManager.go(scene2, ChangeBounds() . apply {
+        val badge = findViewById<ConstraintLayout>(R.id.cl_badge)
+        TransitionManager.beginDelayedTransition(badge, ChangeBounds().apply {
             interpolator = AccelerateInterpolator(1.0f)
-            duration = 1200
+            duration = resources.getInteger(R.integer.endOfSetCheckMarkAnimationDuration).toLong()
             addListener(object : TransitionListenerAdapter() {
-                override fun onTransitionEnd(p0: Transition) {
-                    val scene3 = Scene.getSceneForLayout(findViewById<ConstraintLayout>(R.id.constraintLayout),R.layout.activity_end_of_set3,this@EndOfSetActivity)
-                    TransitionManager.go(scene3, ChangeBounds() . apply {
-                        interpolator = AccelerateInterpolator(1.0f)
-                        duration = 1200
-                        addListener(object : TransitionListenerAdapter() {
-                            override fun onTransitionEnd(transition: Transition) {
-                                findViewById<Button>(R.id.btn_next_drill).setOnClickListener {
-                                    setResult(Activity.RESULT_OK, null);
-                                    finish();
-                                }
-
-                                findViewById<Button>(R.id.btn_end_practice).setOnClickListener{
-                                    setResult(Activity.RESULT_CANCELED, null);
-                                    finish();
-                                }
-                            }
-                        })
-                    })
+                override fun onTransitionEnd(transition: Transition) {
+                    animateOuter()
                 }
             })
         })
+
+        ConstraintSet().apply {
+            clone(badge)
+            setHorizontalBias(R.id.iv_mark_cover, 0.8f)
+            constrainPercentWidth(R.id.iv_mark_cover, 0f)
+            applyTo(badge)
+        }
+    }
+
+    private fun animateOuter() {
+        val outer = findViewById<ConstraintLayout>(R.id.cl_outer)
+        TransitionManager.beginDelayedTransition(outer, ChangeBounds().apply {
+            interpolator = AccelerateInterpolator(1.0f)
+            duration = resources.getInteger(R.integer.endOfSetSuccessBadgeAnimationDuration).toLong()
+        })
+
+        ConstraintSet().apply {
+            clone(outer)
+            setVerticalBias(R.id.cl_badge, 0.1f)
+            setVerticalBias(R.id.ll_buttons, 0.9f)
+            applyTo(outer)
+        }
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
+        setResult(Activity.RESULT_OK, null)
+        finish()
     }
 }
