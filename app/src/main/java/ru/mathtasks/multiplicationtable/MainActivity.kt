@@ -10,7 +10,7 @@ class MainActivity : Activity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_page);
+        setContentView(R.layout.activity_main);
 
         class B(val button_id:Int, val multiplicand: Int);
         val buttons = arrayOf(

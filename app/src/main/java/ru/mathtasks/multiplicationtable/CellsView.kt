@@ -10,21 +10,21 @@ enum class AnimationType { Fast, HintFwd1, HintFwd2, HintBack1, HintBack2 }
 
 class CellsView : ImageView
 {
-    private val multiplier: Int
+    private val multiplicand: Int
     private val dimension: Int
     private var cells: Array<CellView>
 
-    constructor(context: Context, multiplier: Int, dimension: Int) : super(context)
+    constructor(context: Context, multiplicand: Int, dimension: Int) : super(context)
     {
-        this.multiplier = multiplier
+        this.multiplicand = multiplicand
         this.dimension = dimension
-        this.cells = (1..multiplier).map { CellView(context) }.toTypedArray()
+        this.cells = (1..multiplicand).map { CellView(context) }.toTypedArray()
         val cellMargin = resources.getDimensionPixelSize(R.dimen.cellMargin)
         background = LayerDrawable(cells).apply {
             for (i in 0 until cells.size)
-                setLayerInset(i, i * dimension + cellMargin, cellMargin, (multiplier - 1 - i) * dimension + cellMargin, cellMargin)
+                setLayerInset(i, i * dimension + cellMargin, cellMargin, (multiplicand - 1 - i) * dimension + cellMargin, cellMargin)
         }
-        layoutParams = ViewGroup.LayoutParams(dimension * multiplier, dimension)
+        layoutParams = ViewGroup.LayoutParams(dimension * multiplicand, dimension)
     }
 
     fun animate(toState: CellState, type: AnimationType) : AnimatorSet {
@@ -33,7 +33,7 @@ class CellsView : ImageView
             AnimationType.HintFwd1, AnimationType.HintBack1 -> R.integer.cellsAnimationHint1Duration
             AnimationType.HintFwd2, AnimationType.HintBack2 -> R.integer.cellsAnimationHint2Duration
         }).toLong()
-        var animators = cells.map { cell -> cell.animate(toState, duration / multiplier) }
+        var animators = cells.map { cell -> cell.animate(toState, duration / multiplicand) }
         return AnimatorSet().apply {
             when(type) {
                 AnimationType.Fast -> playTogether(animators)

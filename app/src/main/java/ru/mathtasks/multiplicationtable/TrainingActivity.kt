@@ -22,6 +22,7 @@ class TrainingActivity : Activity() {
 
     private lateinit var taskProvider: TaskProvider
     private lateinit var fieldRows: List<FieldRowView>
+    private var nextMultipliers = mutableListOf<TextView>()
     private var answer: Int? = null
     private var qErrors = 0
     private var attemptIdx = 1
@@ -51,58 +52,92 @@ class TrainingActivity : Activity() {
         findViewById<Button>(R.id.btn_bs).setOnClickListener { onBsKey() }
         findViewById<Button>(R.id.btn_ok).setOnClickListener { onOkKey() }
         updateTask()
+        createNextMultipliers()
 
         val outField = findViewById<FrameLayout>(R.id.fl_outField)
         outField.post {
-            val dimension = min(outField.width / (taskProvider.multiplier + 2), outField.height / 10)
-            this.fieldRows = (1..10).map { m -> FieldRowView(this, taskProvider.multiplier, m, dimension) }.toList()
+            val dimension = min(outField.width / (taskProvider.multiplicand + 2), outField.height / 10)
+            this.fieldRows = (1..10).map { m -> FieldRowView(this, taskProvider.multiplicand, m, dimension) }.toList()
             val field = findViewById<LinearLayout>(R.id.ll_field)
             for (row in fieldRows)
                 field.addView(row)
-            animateTask()
+            animateTask(false)
         }
     }
 
+    private fun createNextMultipliers() {
+        nextMultipliers.clear()
+        val llNextMultipliers = findViewById<LinearLayout>(R.id.ll_nextMultipliers)
+        for (nextMultiplier in taskProvider.nextMultipliers) {
+            val tv = TextView(this).apply {
+                text = nextMultiplier.toString()
+                textSize = resources.getDimension(R.dimen.trainingActivityNextMultiplierFontSize)
+                maxLines = 1
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.trainingActivityNextMultiplierInterval), 0)
+                }
+            }
+            llNextMultipliers.addView(tv)
+            nextMultipliers.add(tv)
+        }
+        llNextMultipliers.post { setupNextMultipliers() }
+    }
+
+    private fun setupNextMultipliers() {
+        val llNextMultipliers = findViewById<LinearLayout>(R.id.ll_nextMultipliers)
+        val tvMultiplier = findViewById<TextView>(R.id.tv_multiplier)
+        val leftMargin = tvMultiplier.left + tvMultiplier.width / 2 - nextMultipliers[0].width / 2
+        llNextMultipliers.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            setMargins(leftMargin, 0, 0, 0)
+        }
+        for (tv in nextMultipliers)
+            tv.alpha = if (tv.right + leftMargin > this.window.decorView.width) 0f else 1f
+    }
+
     private fun updateTask() {
-        findViewById<TextView>(R.id.tv_task).text = "${taskProvider.multiplier}  \u00D7  ${taskProvider.multiplicand}  =  "
+        findViewById<TextView>(R.id.tv_multiplier).text = taskProvider.multiplier.toString()
         findViewById<TextView>(R.id.tv_answer).text = answer?.toString() ?: ""
     }
 
-    private fun animateTask() {
+    private fun animateTask(animateNextMultiplier: Boolean) {
+        val textAnimators = mutableListOf<Animator>()
         val fastAnimators = mutableListOf<Animator>()
         val longAnimators = mutableListOf<Animator>()
-        for(r in fieldRows) {
-            r.isMultiplicandActive = r.multiplicand <= taskProvider.multiplicand
-            r.productShowType = when {
-                r.multiplicand == taskProvider.multiplicand -> ProductShowType.Question
-                taskProvider.isPrevMultiplicand(r.multiplicand) ||
-                        (r.multiplicand == taskProvider.hintFrom && attemptIdx > 1) -> ProductShowType.Number
-                else -> ProductShowType.None
-            }
-            if(r.multiplicand > max(taskProvider.hintFrom, taskProvider.multiplicand))
-                fastAnimators.add(r.animate(CellState.Empty, AnimationType.Fast))
-            else if(r.multiplicand <= min(taskProvider.hintFrom, taskProvider.multiplicand))
-                fastAnimators.add(r.animate(CellState.Filled, AnimationType.Fast))
-            else if(attemptIdx == 1 && taskProvider.hintFrom < taskProvider.multiplicand)
-                fastAnimators.add(r.animate(CellState.Filled, AnimationType.Fast))
-            else if(attemptIdx == 1 && taskProvider.hintFrom > taskProvider.multiplicand)
-                fastAnimators.add(r.animate(CellState.Empty, AnimationType.Fast))
-            else if(taskProvider.hintFrom < taskProvider.multiplicand)
-            {
-                fastAnimators.add(r.animate(CellState.ToBeFilled, AnimationType.Fast))
-                longAnimators.add(r.animate(CellState.Filled, if(attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
-            }
-            else if(taskProvider.hintFrom > taskProvider.multiplicand)
-            {
-                fastAnimators.add(r.animate(CellState.Filled, AnimationType.Fast))
-                longAnimators.add(0, r.animate(CellState.WasEmptied, if(attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
+        for (r in fieldRows) {
+            textAnimators.add(r.animateIsMultiplierActive(r.multiplier <= taskProvider.multiplier))
+            r.animateProductShowType(
+                when {
+                    r.multiplier == taskProvider.multiplier -> ProductShowType.Question
+                    taskProvider.isPrevMultiplier(r.multiplier) ||
+                            (r.multiplier == taskProvider.hintFrom && attemptIdx > 1) -> ProductShowType.Number
+                    else -> ProductShowType.None
+                }
+            )
+            if (r.multiplier > max(taskProvider.hintFrom, taskProvider.multiplier))
+                fastAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+            else if (r.multiplier <= min(taskProvider.hintFrom, taskProvider.multiplier))
+                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+            else if (attemptIdx == 1 && taskProvider.hintFrom < taskProvider.multiplier)
+                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+            else if (attemptIdx == 1 && taskProvider.hintFrom > taskProvider.multiplier)
+                fastAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+            else if (taskProvider.hintFrom < taskProvider.multiplier) {
+                fastAnimators.add(r.animateCells(CellState.ToBeFilled, AnimationType.Fast))
+                longAnimators.add(r.animateCells(CellState.Filled, if (attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
+            } else if (taskProvider.hintFrom > taskProvider.multiplier) {
+                fastAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                longAnimators.add(0, r.animateCells(CellState.WasEmptied, if (attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
             }
         }
         taskAnimator?.end()
         taskAnimator = AnimatorSet().apply {
-            playSequentially(
-                AnimatorSet().apply { playTogether(fastAnimators) },
-                AnimatorSet().apply { playSequentially(longAnimators) })
+            playTogether(
+                AnimatorSet().apply { playTogether(textAnimators) },
+                AnimatorSet().apply {
+                    playSequentially(
+                        AnimatorSet().apply { playTogether(fastAnimators) },
+                        AnimatorSet().apply { playSequentially(longAnimators) })
+                })
             start()
         }
     }
@@ -125,7 +160,7 @@ class TrainingActivity : Activity() {
         if (!keyboardEnabled)
             return;
         keyboardEnabled = false
-        val correct = answer == taskProvider.multiplier * taskProvider.multiplicand
+        val correct = answer == taskProvider.multiplicand * taskProvider.multiplier
         if (!correct)
             qErrors++
         animateAnswer(correct) {
@@ -143,14 +178,13 @@ class TrainingActivity : Activity() {
                     taskProvider.endOfGame -> {
                     }
                     else -> {
-                        animateTask()
+                        animateTask(true)
                         updateTask()
                     }
                 }
-            }
-            else {
+            } else {
                 updateTask()
-                animateTask()
+                animateTask(false)
             }
             keyboardEnabled = true
         }
@@ -158,12 +192,13 @@ class TrainingActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == END_OF_SET_ACTIVITY_REQUEST_CODE) {
+        if (requestCode == END_OF_SET_ACTIVITY_REQUEST_CODE) {
             if (resultCode != Activity.RESULT_OK)
                 finish()
             else {
                 taskProvider.nextTask()
-                animateTask()
+                createNextMultipliers()
+                animateTask(false)
                 updateTask()
             }
         }

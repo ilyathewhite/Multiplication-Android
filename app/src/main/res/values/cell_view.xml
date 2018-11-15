@@ -9,7 +9,7 @@
     <color name="cellWasEmptied">@color/appLightGray</color>
     <color name="cellWasEmptiedStroke">@color/appDarkGray</color>
 
-    <dimen name="cellMargin">3dp</dimen>
+    <dimen name="cellMargin">1dp</dimen>
     <dimen name="cellCornerRadius">4dp</dimen>
     <dimen name="cellStrokeWidth">1dp</dimen>
 </resources>
