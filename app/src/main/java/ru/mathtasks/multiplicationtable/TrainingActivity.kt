@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.activity_training.*
 import java.lang.Math.max
 
 
@@ -97,7 +98,7 @@ class TrainingActivity : Activity() {
     }
 
     private fun updateTask() {
-        findViewById<TextView>(R.id.tv_multiplier).text = taskProvider.multiplier.toString()
+        findViewById<TextView>(R.id.tv_multiplicand).text = taskProvider.multiplicand.toString()
         findViewById<TextView>(R.id.tv_answer).text = answer?.toString() ?: ""
     }
 
@@ -105,6 +106,8 @@ class TrainingActivity : Activity() {
         val startupAnimators = mutableListOf<Animator>()
         if (nextMultiplier)
             startupAnimators.add(animateNextMultiplier())
+        else
+            findViewById<TextView>(R.id.tv_multiplier).text = taskProvider.multiplier.toString()
         val prepareFieldAnimators = mutableListOf<Animator>()
         val transitFieldAnimators = mutableListOf<Animator>()
         for (r in fieldRows) {
@@ -155,12 +158,14 @@ class TrainingActivity : Activity() {
         val rlOuterLoc: IntArray = intArrayOf(0, 0)
         rlOuter.getLocationOnScreen(rlOuterLoc)
 
-        val startX = nextMultiplierLoc[0] - rlOuterLoc[0]
-        val startY = nextMultiplierLoc[1] - rlOuterLoc[1]
+        val nextMultiplierStartX = nextMultiplierLoc[0] - rlOuterLoc[0]
+        val nextMultiplierStartY = nextMultiplierLoc[1] - rlOuterLoc[1]
 
         val initAnimators = mutableListOf<Animator>()
-        initAnimators.add(ObjectAnimator.ofFloat(nextMultiplier, View.ALPHA, 1f, 0f)
-            .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong()))
+        initAnimators.add(
+            ObjectAnimator.ofFloat(nextMultiplier, View.ALPHA, 1f, 0f)
+                .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong())
+        )
 
         val tv = TextView(this).apply {
             text = nextMultiplier.text
@@ -168,28 +173,49 @@ class TrainingActivity : Activity() {
             alpha = 0f
             setTypeface(null, Typeface.ITALIC)
             layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                setMargins(startX, startY, 0, 0)
+                setMargins(nextMultiplierStartX, nextMultiplierStartY, 0, 0)
             }
         }
 
         rlOuter.addView(tv)
-        initAnimators.add(ObjectAnimator.ofFloat(tv, View.ALPHA, 0f, 1f)
-            .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong()))
+        initAnimators.add(
+            ObjectAnimator.ofFloat(tv, View.ALPHA, 0f, 1f)
+                .setDuration(resources.getInteger(R.integer.trainingActivityNextMultiplierCrossFadeDuration).toLong())
+        )
 
-        val tvMultiplier = findViewById<TextView>(R.id.tv_multiplier)
+        val multiplier = findViewById<TextView>(R.id.tv_multiplier)
+        multiplier.alpha = 0f
         val startTextSize = nextMultiplier.textSize
-        val endTextSize = tvMultiplier.textSize
-        val tvMultiplierLoc: IntArray = intArrayOf(0, 0)
-        tvMultiplier.getLocationOnScreen(tvMultiplierLoc)
-        var endX = tvMultiplierLoc[0] - rlOuterLoc[0]
-        var endY = tvMultiplierLoc[1] - rlOuterLoc[1]
+        val endTextSize = multiplier.textSize
+
+        val multiplierLoc: IntArray = intArrayOf(0, 0)
+        multiplier.getLocationOnScreen(multiplierLoc)
+        val nextMultiplierEndX = multiplierLoc[0] - rlOuterLoc[0]
+        val nextMultiplierEndY = multiplierLoc[1] - rlOuterLoc[1]
+
+        val nextNextMultiplier = if (nextMultipliers.size > 1) nextMultipliers[1] else null
+        val startMargin = (nextMultiplier.layoutParams as LinearLayout.LayoutParams).leftMargin
+        var endMargin = 0
+        if (nextNextMultiplier != null) {
+            val nextNextMultiplierLoc: IntArray = intArrayOf(0, 0)
+            nextNextMultiplier.getLocationOnScreen(nextNextMultiplierLoc)
+            endMargin = startMargin + nextMultiplierLoc[0] - nextNextMultiplierLoc[0]
+        }
         val transformAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = resources.getInteger(R.integer.trainingActivityNextMultiplierTransformDuration).toLong()
             addUpdateListener { animator ->
                 val progress = animator.animatedValue as Float
-                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (endTextSize - startTextSize)*progress)
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, startTextSize + (endTextSize - startTextSize) * progress)
                 tv.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins((startX + (endX - startX) * progress).toInt(), (startY + (endY - startY) * progress).toInt(), 0, 0)
+                    setMargins(
+                        (nextMultiplierStartX + (nextMultiplierEndX - nextMultiplierStartX) * progress).toInt(),
+                        (nextMultiplierStartY + (nextMultiplierEndY - nextMultiplierStartY) * progress).toInt(), 0, 0
+                    )
+                }
+                if (nextNextMultiplier != null) {
+                    nextMultiplier.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        setMargins((startMargin + (endMargin - startMargin) * progress).toInt(), 0, (nextMultiplier.layoutParams as LinearLayout.LayoutParams).rightMargin, 0)
+                    }
                 }
             }
         }
@@ -199,6 +225,13 @@ class TrainingActivity : Activity() {
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     rlOuter.removeView(tv)
+                    findViewById<LinearLayout>(R.id.ll_nextMultipliers).removeView(nextMultiplier)
+                    nextMultipliers.removeAt(0)
+                    nextNextMultiplier?.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        setMargins(startMargin, 0, (nextMultiplier.layoutParams as LinearLayout.LayoutParams).rightMargin, 0)
+                    }
+                    multiplier.alpha = 1f
+                    multiplier.text = nextMultiplier.text
                 }
             })
         }
