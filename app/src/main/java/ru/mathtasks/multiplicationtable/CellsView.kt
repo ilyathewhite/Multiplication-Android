@@ -8,22 +8,16 @@ import android.widget.ImageView
 
 enum class AnimationType { Fast, HintFwd1, HintFwd2, HintBack1, HintBack2 }
 
-class CellsView : ImageView
+class CellsView(context: Context, private val multiplicand: Int, private val dimension: Int) : ImageView(context)
 {
-    private val multiplicand: Int
-    private val dimension: Int
-    private var cells: Array<CellView>
+    private var cells: Array<CellView> = (1..multiplicand).map { CellView(context) }.toTypedArray()
 
-    constructor(context: Context, multiplicand: Int, dimension: Int) : super(context)
-    {
-        this.multiplicand = multiplicand
-        this.dimension = dimension
-        this.cells = (1..multiplicand).map { CellView(context) }.toTypedArray()
+    init {
         val cellMargin = resources.getDimensionPixelSize(R.dimen.cellMargin)
-        background = LayerDrawable(cells).apply {
+        setBackgroundCompat(LayerDrawable(cells).apply {
             for (i in 0 until cells.size)
                 setLayerInset(i, i * dimension + cellMargin, cellMargin, (multiplicand - 1 - i) * dimension + cellMargin, cellMargin)
-        }
+        })
         layoutParams = ViewGroup.LayoutParams(dimension * multiplicand, dimension)
     }
 
@@ -33,7 +27,7 @@ class CellsView : ImageView
             AnimationType.HintFwd1, AnimationType.HintBack1 -> R.integer.cellsAnimationHint1Duration
             AnimationType.HintFwd2, AnimationType.HintBack2 -> R.integer.cellsAnimationHint2Duration
         }).toLong()
-        var animators = cells.map { cell -> cell.animate(toState, duration / multiplicand) }
+        val animators = cells.map { cell -> cell.animate(toState, duration / multiplicand) }
         return AnimatorSet().apply {
             when(type) {
                 AnimationType.Fast -> playTogether(animators)

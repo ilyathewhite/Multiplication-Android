@@ -1,6 +1,7 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
+import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
@@ -63,7 +64,7 @@ class FieldRowView : LinearLayout {
 
     fun animateIsMultiplierActive(value: Boolean): Animator {
         val toColor = ContextCompat.getColor(context, if (value) R.color.fieldRowViewMultiplicandActive else R.color.fieldRowViewMultiplicandInactive)
-        return ValueAnimator.ofArgb(tvMultiplier.currentTextColor, toColor).apply {
+        return ValueAnimator.ofObject(ArgbEvaluator(),  tvMultiplier.currentTextColor, toColor).apply {
             this.duration = resources.getInteger(R.integer.fieldRowViewIsMultiplierActiveAnimationDuration).toLong()
             addUpdateListener { animator ->
                 tvMultiplier.setTextColor(animator.animatedValue as Int)

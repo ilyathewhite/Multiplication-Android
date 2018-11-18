@@ -1,6 +1,7 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
 import android.content.Context
 import android.graphics.drawable.*
 import android.support.v4.content.ContextCompat
@@ -25,28 +26,32 @@ class CellView : GradientDrawable {
         setStroke(strokeWidthPixel, strokeColor)
     }
 
-    private fun state2FillColor(state: CellState) = ContextCompat.getColor(context, when(state) {
-        CellState.Empty -> R.color.cellEmpty
-        CellState.Filled -> R.color.cellFilled
-        CellState.ToBeFilled -> R.color.cellToBeFilled
-        CellState.WasEmptied -> R.color.cellWasEmptied
-    })
+    private fun state2FillColor(state: CellState) = ContextCompat.getColor(
+        context, when (state) {
+            CellState.Empty -> R.color.cellEmpty
+            CellState.Filled -> R.color.cellFilled
+            CellState.ToBeFilled -> R.color.cellToBeFilled
+            CellState.WasEmptied -> R.color.cellWasEmptied
+        }
+    )
 
-    private fun state2StrokeColor(state: CellState) = ContextCompat.getColor(context, when(state) {
-        CellState.Empty -> R.color.cellEmptyStroke
-        CellState.Filled -> R.color.cellFilledStroke
-        CellState.ToBeFilled -> R.color.cellToBeFilledStroke
-        CellState.WasEmptied -> R.color.cellWasEmptiedStroke
-    })
+    private fun state2StrokeColor(state: CellState) = ContextCompat.getColor(
+        context, when (state) {
+            CellState.Empty -> R.color.cellEmptyStroke
+            CellState.Filled -> R.color.cellFilledStroke
+            CellState.ToBeFilled -> R.color.cellToBeFilledStroke
+            CellState.WasEmptied -> R.color.cellWasEmptiedStroke
+        }
+    )
 
-    fun animate(toState: CellState, duration: Long) : AnimatorSet {
-        val fillAnimator = ValueAnimator.ofArgb(fillColor, state2FillColor(toState))
+    fun animate(toState: CellState, duration: Long): AnimatorSet {
+        val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(toState))
         fillAnimator.duration = duration
         fillAnimator.addUpdateListener { animator ->
             this.fillColor = animator.animatedValue as Int
             setColor(fillColor)
         }
-        val strokeAnimator = ValueAnimator.ofArgb(strokeColor, state2StrokeColor(toState))
+        val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(toState))
         strokeAnimator.duration = duration
         strokeAnimator.addUpdateListener { animator ->
             this.strokeColor = animator.animatedValue as Int

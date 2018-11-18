@@ -296,7 +296,7 @@ class TrainingActivity : Activity() {
 
     private fun animateAnswer(correct: Boolean, onEnd: () -> Unit) {
         findViewById<ImageView>(R.id.iv_mark).apply {
-            background = ContextCompat.getDrawable(this@TrainingActivity, if (correct) R.drawable.checkmark else R.drawable.xmark)
+            setBackgroundCompat(ContextCompat.getDrawable(this@TrainingActivity, if (correct) R.drawable.checkmark else R.drawable.xmark))
             alpha = 0f
             visibility = View.VISIBLE
             animate().alpha(1f).setStartDelay(0).setDuration(100).setListener(object : AnimatorListenerAdapter() {
