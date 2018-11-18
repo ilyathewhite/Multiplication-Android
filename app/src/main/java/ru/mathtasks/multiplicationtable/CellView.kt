@@ -2,10 +2,10 @@ package ru.mathtasks.multiplicationtable
 
 import android.animation.AnimatorSet
 import android.animation.ArgbEvaluator
-import android.content.Context
-import android.graphics.drawable.*
-import android.support.v4.content.ContextCompat
 import android.animation.ValueAnimator
+import android.content.Context
+import android.graphics.drawable.GradientDrawable
+import android.support.v4.content.ContextCompat
 
 enum class CellState { Empty, Filled, ToBeFilled, WasEmptied }
 

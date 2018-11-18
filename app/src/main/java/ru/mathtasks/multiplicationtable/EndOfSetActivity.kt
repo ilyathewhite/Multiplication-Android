@@ -1,16 +1,19 @@
 package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
-import android.media.Image
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
-import android.support.transition.*
+import android.support.constraint.ConstraintSet
+import android.support.transition.ChangeBounds
+import android.support.transition.Transition
+import android.support.transition.TransitionListenerAdapter
+import android.support.transition.TransitionManager
+import android.support.v7.app.AppCompatActivity
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
-import android.support.constraint.ConstraintSet
 
 
-class EndOfSetActivity : Activity() {
+class EndOfSetActivity : AppCompatActivity() {
     companion object {
         const val INPUT_Q_ERRORS = "ru.mathtasks.multiplicationtable.end_of_set_activity.q_errors"
     }
@@ -28,28 +31,25 @@ class EndOfSetActivity : Activity() {
             setResult(Activity.RESULT_CANCELED, null)
             finish()
         }
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        if (!hasFocus)
-            return;
 
         val badge = findViewById<ConstraintLayout>(R.id.cl_badge)
-        TransitionManager.beginDelayedTransition(badge, ChangeBounds().apply {
-            interpolator = AccelerateInterpolator(1.0f)
-            duration = resources.getInteger(R.integer.endOfSetCheckMarkAnimationDuration).toLong()
-            addListener(object : TransitionListenerAdapter() {
-                override fun onTransitionEnd(transition: Transition) {
-                    animateOuter()
-                }
+        badge.post {
+            TransitionManager.beginDelayedTransition(badge, ChangeBounds().apply {
+                interpolator = AccelerateInterpolator(1.0f)
+                duration = resources.getInteger(R.integer.endOfSetCheckMarkAnimationDuration).toLong()
+                addListener(object : TransitionListenerAdapter() {
+                    override fun onTransitionEnd(transition: Transition) {
+                        animateOuter()
+                    }
+                })
             })
-        })
 
-        ConstraintSet().apply {
-            clone(badge)
-            setHorizontalBias(R.id.iv_mark_cover, 0.8f)
-            constrainPercentWidth(R.id.iv_mark_cover, 0f)
-            applyTo(badge)
+            ConstraintSet().apply {
+                clone(badge)
+                setHorizontalBias(R.id.iv_mark_cover, 0.8f)
+                constrainPercentWidth(R.id.iv_mark_cover, 0f)
+                applyTo(badge)
+            }
         }
     }
 

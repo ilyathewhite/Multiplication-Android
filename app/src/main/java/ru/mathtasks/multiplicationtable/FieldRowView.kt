@@ -8,12 +8,11 @@ import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextSwitcher
 import android.widget.TextView
-import android.view.animation.AnimationUtils
-import android.view.animation.Animation
-import android.widget.FrameLayout
 
 
 enum class ProductShowType { None, Question, Number }
