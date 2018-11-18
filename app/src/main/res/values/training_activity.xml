@@ -2,6 +2,7 @@
 <resources>
     <dimen name="trainingActivityNextMultiplierFontSize">8dp</dimen>
     <dimen name="trainingActivityNextMultiplierInterval">20dp</dimen>
+    <integer name="trainingActivityMultiplierFadeOutDuration">1000</integer>
     <integer name="trainingActivityNextMultiplierCrossFadeDuration">1000</integer>
     <integer name="trainingActivityNextMultiplierTransformDuration">2000</integer>
 </resources>
