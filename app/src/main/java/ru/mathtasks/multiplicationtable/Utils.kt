@@ -1,7 +1,9 @@
 package ru.mathtasks.multiplicationtable
 
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.TypedValue
 import android.view.View
 
 fun View.setBackgroundCompat(value: Drawable?) {
@@ -9,4 +11,10 @@ fun View.setBackgroundCompat(value: Drawable?) {
         this.background = value
     else
         this.setBackgroundDrawable(value)
+}
+
+fun Resources.getFloat(resourceId: Int): Float {
+    val typedValue = TypedValue();
+    getValue(resourceId, typedValue, true);
+    return typedValue.float;
 }

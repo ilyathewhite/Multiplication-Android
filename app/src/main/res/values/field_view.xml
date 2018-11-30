@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fieldViewLeftOffset">1</dimen>
+    <dimen name="fieldViewRightOffset">1</dimen>
+    <dimen name="fieldViewTopOffset">1</dimen>
+    <dimen name="fieldViewBottomOffset">1</dimen>
+
+    <dimen name="fieldViewMultiplierSpaceRatio">1.5</dimen>
+
+    <dimen name="fieldViewProductSpaceRatio">1.5</dimen>
+    <dimen name="fieldViewSpacingRatio">0.1612903225806452</dimen>
+
+    <dimen name="fieldViewTextSizeRatio">0.75</dimen>
+
+    <color name="fieldViewMultiplicand">@color/appDarkGray</color>
+    <integer name="fieldViewMultiplicandActiveAnimationDuration">300</integer>
+
+    <color name="rowViewProduct">@color/appDarkGray</color>
+    <integer name="rowViewHideProductAnimationDuration">100</integer>
+    <integer name="rowViewShowProductAnimationDuration">200</integer>
+</resources>

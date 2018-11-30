@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="unitViewCounted">@color/appOrange</color>
+    <color name="unitViewCountedStroke">@color/appDarkRed</color>
+    <color name="unitViewToBeCounted">@color/white</color>
+    <color name="unitViewToBoCountedStroke">@color/appDarkRed</color>
+    <color name="unitViewWasCounted">@color/appVeryLightGray</color>
+    <color name="unitViewWasCountedStroke">@color/appLightGray</color>
+    <color name="unitViewDisabled">@color/white</color>
+    <color name="unitViewDisabledStroke">@color/appLightGray</color>
+
+    <dimen name="unitViewStrokeWidth">1dp</dimen>
+    <dimen name="unitViewCornerRadiusRatio">0.1935483870967742</dimen>
+</resources>

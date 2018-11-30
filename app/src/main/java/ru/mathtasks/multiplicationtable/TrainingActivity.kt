@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +23,7 @@ class TrainingActivity : AppCompatActivity() {
     }
 
     private lateinit var taskProvider: TaskProvider
-    private lateinit var fieldRows: List<FieldRowView>
+    private lateinit var fieldRows: List<RowView>
     private var nextMultipliers = mutableListOf<TextView>()
     private var answer: Int? = null
     private var qErrors = 0
@@ -60,7 +59,7 @@ class TrainingActivity : AppCompatActivity() {
         val outField = findViewById<FrameLayout>(R.id.fl_outField)
         outField.post {
             val dimension = min(outField.width / (taskProvider.multiplicand + 2), outField.height / 10)
-            this.fieldRows = (1..10).map { m -> FieldRowView(this, taskProvider.multiplicand, m, dimension) }.toList()
+            this.fieldRows = (1..10).map { m -> RowView(this, taskProvider.multiplicand, m, dimension) }.toList()
             val field = findViewById<LinearLayout>(R.id.ll_field)
             for (row in fieldRows)
                 field.addView(row)
@@ -122,19 +121,19 @@ class TrainingActivity : AppCompatActivity() {
                     }
                 )
                 if (r.multiplier > max(taskProvider.hintFrom, taskProvider.multiplier))
-                    prepareFieldAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.Disabled, AnimationType.Fast))
                 else if (r.multiplier <= min(taskProvider.hintFrom, taskProvider.multiplier))
-                    prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.Counted, AnimationType.Fast))
                 else if (attemptIdx == 1 && taskProvider.hintFrom < taskProvider.multiplier)
-                    prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.Counted, AnimationType.Fast))
                 else if (attemptIdx == 1 && taskProvider.hintFrom > taskProvider.multiplier)
-                    prepareFieldAnimators.add(r.animateCells(CellState.Empty, AnimationType.Fast))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.Disabled, AnimationType.Fast))
                 else if (taskProvider.hintFrom < taskProvider.multiplier) {
-                    prepareFieldAnimators.add(r.animateCells(CellState.ToBeFilled, AnimationType.Fast))
-                    transitFieldAnimators.add(r.animateCells(CellState.Filled, if (attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.ToBeCounted, AnimationType.Fast))
+                    transitFieldAnimators.add(r.animateCells(UnitState.Counted, if (attemptIdx == 2) AnimationType.HintFwd1 else AnimationType.HintFwd2))
                 } else if (taskProvider.hintFrom > taskProvider.multiplier) {
-                    prepareFieldAnimators.add(r.animateCells(CellState.Filled, AnimationType.Fast))
-                    transitFieldAnimators.add(0, r.animateCells(CellState.WasEmptied, if (attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
+                    prepareFieldAnimators.add(r.animateCells(UnitState.Counted, AnimationType.Fast))
+                    transitFieldAnimators.add(0, r.animateCells(UnitState.WasCounted, if (attemptIdx == 2) AnimationType.HintBack1 else AnimationType.HintBack2))
                 }
             }
             taskAnimator = AnimatorSet().apply {

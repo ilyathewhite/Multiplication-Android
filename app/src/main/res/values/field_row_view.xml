@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="fieldRowViewMultiplicandActive">@color/appDarkGray</color>
-    <color name="fieldRowViewMultiplicandInactive">@color/appLightGray</color>
-    <color name="fieldRowViewProduct">@color/appDarkGray</color>
-    <integer name="fieldRowViewIsMultiplierActiveAnimationDuration">300</integer>
-</resources>
