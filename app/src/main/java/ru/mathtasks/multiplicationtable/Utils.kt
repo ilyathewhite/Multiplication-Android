@@ -18,3 +18,14 @@ fun Resources.getFloat(resourceId: Int): Float {
     getValue(resourceId, typedValue, true);
     return typedValue.float;
 }
+
+class Location(val X: Int, val Y: Int)
+fun View.getLocationOnScreen() : Location {
+    val loc: IntArray = intArrayOf(0, 0)
+    this.getLocationOnScreen(loc)
+    return Location(loc[0], loc[1])
+}
+
+fun Resources.getDuration(resourceId: Int) : Long {
+    return this.getInteger(resourceId).toLong()
+}

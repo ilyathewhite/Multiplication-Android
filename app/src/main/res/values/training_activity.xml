@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="trainingActivityNextMultiplier">#000000</color>
-    <dimen name="trainingActivityNextMultiplierFontSize">8dp</dimen>
-    <dimen name="trainingActivityNextMultiplierInterval">20dp</dimen>
-    <integer name="trainingActivityMultiplierFadeOutDuration">1000</integer>
-    <integer name="trainingActivityNextMultiplierCrossFadeDuration">1000</integer>
-    <integer name="trainingActivityNextMultiplierTransformDuration">2000</integer>
+    <integer name="trainingActivityShowCorrectCheckMarkDuration">250</integer>
+    <integer name="trainingActivityWaitCorrectCheckMarkDuration">250</integer>
+    <integer name="trainingActivityPrepareMovingDuration">100</integer>
 </resources>

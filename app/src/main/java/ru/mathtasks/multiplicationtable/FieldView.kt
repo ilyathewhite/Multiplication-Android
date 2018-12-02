@@ -5,16 +5,18 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import java.lang.Math.*
 
 enum class Mark { Correct, Incorrect, None }
 
-class FieldState(
+data class FieldState(
     val mark: Mark,
     private val qActiveMultipliers: Int,
     val qCountedRows: Int,
@@ -40,17 +42,18 @@ class FieldState(
     }
 }
 
-class FieldView : RelativeLayout {
+class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
     companion object {
         const val Q_ROWS = 10
     }
 
-    private val multiplicand: Int
-    private val rows: Array<Row>
-    private val mark2iv: Map<Mark, ImageView>
-    private var state = FieldState(Mark.None, 0, 0, 0, 0, arrayOf(), null)
+    private lateinit var mark2iv: Map<Mark, ImageView>
+    var state = FieldState(Mark.None, 0, 0, 0, 0, arrayOf(), null)
+        private set
+    private var multiplicand: Int = 0
+    private lateinit var rows: Array<Row>
 
-    constructor(context: Context, multiplicand: Int, width: Int, height: Int) : super(context) {
+    fun initialize(multiplicand: Int, width: Int, height: Int) {
         this.multiplicand = multiplicand
 
         val leftOffset = resources.getDimensionPixelSize(R.dimen.fieldViewLeftOffset)
@@ -83,7 +86,7 @@ class FieldView : RelativeLayout {
                 this@FieldView.addView(this@apply)
             }
 
-            val units = (0 until Q_ROWS).map { m ->
+            val units = (0 until multiplicand).map { m ->
                 val x = Math.round(originX + unitSize * multiplierSpaceRatio + (extraSpaces / 2) * spacing + (unitSize + spacing) * m)
                 UnitView(context, unitSize).apply {
                     layoutParams = RelativeLayout.LayoutParams(unitSize, unitSize).apply { setMargins(x, y, 0, 0) }
@@ -107,8 +110,8 @@ class FieldView : RelativeLayout {
         this.mark2iv = arrayOf(Mark.Correct, Mark.Incorrect).map { mark ->
             mark to ImageView(context).apply {
                 gravity = Gravity.CENTER
-                visibility = View.GONE
-                alpha = 0f
+                //visibility = View.GONE
+                alpha = 0.2f
                 layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
                 setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
                 this@FieldView.addView(this@apply)
@@ -117,7 +120,7 @@ class FieldView : RelativeLayout {
     }
 
     private fun setMark(mark: Mark) {
-        mark2iv.map { (mark, iv) -> iv.alpha = if (mark == state.mark) 1f else 0f }
+        mark2iv.map { (mark, iv) -> iv.alpha = if (mark == state.mark) 1f else 0.2f }
     }
 
     private fun animateMark(mark: Mark, duration: Long): Animator? {
@@ -142,15 +145,25 @@ class FieldView : RelativeLayout {
         }
     }
 
-    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation, duration: Long): Animator {
+    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Animator {
         val animators = arrayListOf<Animator?>()
         animators.add(animateMark(state.mark, duration))
         rows.map { row ->
             animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
             animators.add(row.animateText(state.text(row, multiplicand), duration))
         }
-        for(idx in this.state.qCountedRows..state.qCountedRows)
-            animators.add(rows[idx].animateUnitState(state.unitState(rows[idx]),unitAnimation, false, 10, 10))
-        return AnimatorSet().apply { playTogether(animators) }
+        val ranges = arrayOf(
+            Pair(this.state.qCountedRows, state.qCountedRows),
+            Pair(this.state.qToBeCountedRows, state.qToBeCountedRows),
+            Pair(this.state.qWasCountedRows, state.qWasCountedRows)
+        )
+        if(unitAnimation!=null) {
+            for (range in ranges) {
+                for (idx in min(range.first, range.second) until max(range.first, range.second))
+                    animators.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
+            }
+        }
+        this.state = state
+        return AnimatorSet().apply { playTogether(animators.filter { a -> a != null }) }
     }
 }

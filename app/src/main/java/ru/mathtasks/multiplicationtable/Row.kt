@@ -37,15 +37,15 @@ class Row(val multiplier : Int, private val tvMultiplier: TextView, private val 
         units.map { unit -> unit.setState(state) }
     }
 
-    fun animateUnitState(state: UnitState, unitAnimation: UnitAnimation, reverse: Boolean, totalDuration: Long, switchDuration: Long): Animator {
+    fun animateUnitState(state: UnitState, unitAnimation: UnitAnimation, reverse: Boolean, totalDuration: Long): Animator {
+        val switchDuration = resources.getInteger(R.integer.rowUnitSwitchDuration).toLong()
         return AnimatorSet().apply {
             when (unitAnimation) {
                 UnitAnimation.ByRow ->
                     playTogether(units.map { unit -> unit.animateState(state, totalDuration - switchDuration, switchDuration) })
                 UnitAnimation.ByUnit -> {
                     val units = if (reverse) this@Row.units else this@Row.units.reversed().toTypedArray()
-                    val unitDuration = totalDuration / units.size
-                    playSequentially(units.mapIndexed { idx, unit -> unit.animateState(state, unitDuration * idx + unitDuration - switchDuration, switchDuration) })
+                    playSequentially(units.map { unit -> unit.animateState(state, (totalDuration / units.size) - switchDuration, switchDuration) })
                 }
             }
         }

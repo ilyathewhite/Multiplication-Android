@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="fieldViewLeftOffset">1</dimen>
-    <dimen name="fieldViewRightOffset">1</dimen>
-    <dimen name="fieldViewTopOffset">1</dimen>
-    <dimen name="fieldViewBottomOffset">1</dimen>
+    <dimen name="fieldViewLeftOffset">1dp</dimen>
+    <dimen name="fieldViewRightOffset">1dp</dimen>
+    <dimen name="fieldViewTopOffset">1dp</dimen>
+    <dimen name="fieldViewBottomOffset">1dp</dimen>
 
     <dimen name="fieldViewMultiplierSpaceRatio">1.5</dimen>
 
