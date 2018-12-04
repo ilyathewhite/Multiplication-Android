@@ -1,8 +1,5 @@
 package ru.mathtasks.multiplicationtable
 
-import android.animation.Animator
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
@@ -12,6 +9,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import io.reactivex.Completable
 import java.lang.Math.*
 
 enum class Mark { Correct, Incorrect, None }
@@ -22,7 +20,7 @@ data class FieldState(
     val qCountedRows: Int,
     val qToBeCountedRows: Int,
     val qWasCountedRows: Int,
-    private val hintMultipliers: Array<Int>,
+    private val visibleAnswers: Array<Int>,
     private val questionMultiplier: Int?
 ) {
 
@@ -36,7 +34,7 @@ data class FieldState(
     }
 
     fun text(row: Row, multiplicand: Int) = when {
-        hintMultipliers.contains(row.multiplier) -> (multiplicand * row.multiplier).toString()
+        visibleAnswers.contains(row.multiplier) -> (multiplicand * row.multiplier).toString()
         questionMultiplier == row.multiplier -> "?"
         else -> ""
     }
@@ -109,10 +107,9 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
         this.mark2iv = arrayOf(Mark.Correct, Mark.Incorrect).map { mark ->
             mark to ImageView(context).apply {
-                gravity = Gravity.CENTER
-                //visibility = View.GONE
-                alpha = 0.2f
-                layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+                visibility = View.GONE
+                alpha = 0f
+                layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
                 setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
                 this@FieldView.addView(this@apply)
             }
@@ -120,19 +117,14 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     private fun setMark(mark: Mark) {
-        mark2iv.map { (mark, iv) -> iv.alpha = if (mark == state.mark) 1f else 0.2f }
+        mark2iv.map { (ivMark, iv) -> iv.alpha = if (ivMark == mark) 1f else 0f }
     }
 
-    private fun animateMark(mark: Mark, duration: Long): Animator? {
-        val animators = mark2iv.map { (ivMark, iv) ->
-            val aim = if (ivMark == mark) 1f else 0f
-            if (iv.alpha == aim) null else ObjectAnimator.ofFloat(iv, View.ALPHA, iv.alpha, aim).apply { setDuration(duration) }
-        }.filter { a -> a != null }
-        return when {
-            animators.isEmpty() -> null
-            animators.size == 1 -> animators[0]
-            else -> AnimatorSet().apply { playTogether(animators) }
-        }
+    private fun animateMark(mark: Mark, duration: Long): Completable {
+        fun alpha(ivMark: Mark) = if (ivMark == mark) 1f else 0f
+        return Completable.merge(mark2iv
+            .filter { (ivMark, iv) -> alpha(ivMark) != iv.alpha }
+            .map { (ivMark, iv) -> iv.animate(duration) { it.alpha(alpha(ivMark)) } })
     }
 
     fun setFieldState(state: FieldState) {
@@ -145,25 +137,25 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
-    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Animator {
-        val animators = arrayListOf<Animator?>()
-        animators.add(animateMark(state.mark, duration))
+    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Completable {
+        val completables = arrayListOf<Completable?>()
+        completables.add(animateMark(state.mark, duration))
         rows.map { row ->
-            animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
-            animators.add(row.animateText(state.text(row, multiplicand), duration))
+            completables.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
+            completables.add(row.animateText(state.text(row, multiplicand), duration))
         }
-        val ranges = arrayOf(
-            Pair(this.state.qCountedRows, state.qCountedRows),
-            Pair(this.state.qToBeCountedRows, state.qToBeCountedRows),
-            Pair(this.state.qWasCountedRows, state.qWasCountedRows)
-        )
-        if(unitAnimation!=null) {
+        if (unitAnimation != null) {
+            val ranges = arrayOf(
+                Pair(this.state.qCountedRows, state.qCountedRows),
+                Pair(this.state.qToBeCountedRows, state.qToBeCountedRows),
+                Pair(this.state.qWasCountedRows, state.qWasCountedRows)
+            )
             for (range in ranges) {
                 for (idx in min(range.first, range.second) until max(range.first, range.second))
-                    animators.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
+                    completables.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
             }
         }
         this.state = state
-        return AnimatorSet().apply { playTogether(animators.filter { a -> a != null }) }
+        return Completable.merge(completables.filter { it != null })
     }
 }

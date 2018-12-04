@@ -16,7 +16,7 @@
 
         <ru.mathtasks.multiplicationtable.FieldView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" android:layout_weight="1" android:id="@+id/field_view"/>
+                android:layout_height="wrap_content" android:id="@+id/field_view" android:layout_weight="1"/>
         <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

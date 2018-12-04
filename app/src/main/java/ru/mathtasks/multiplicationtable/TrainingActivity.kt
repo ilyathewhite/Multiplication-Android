@@ -1,20 +1,13 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.view.View
 import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import java.lang.Math.max
-import java.lang.Math.min
+import io.reactivex.Completable
+import java.util.concurrent.TimeUnit
 
 const val TRAINING_ACTIVITY_MULTIPLICAND = "ru.mathtasks.multiplicationtable.trainingactivity.multiplicand"
 
@@ -27,8 +20,6 @@ class TrainingActivity : AppCompatActivity() {
     private lateinit var fieldView: FieldView
     private lateinit var taskView: TaskView
     private var answer: Int? = null
-    private var qErrors = 0
-    private var attemptIdx = 1
     private var lastAnimator: Animator? = null
     private var autoUpdateAnswer = true
 
@@ -64,7 +55,7 @@ class TrainingActivity : AppCompatActivity() {
         this.fieldView = findViewById(R.id.field_view)
         fieldView.post {
             fieldView.initialize(taskProvider.multiplicand, fieldView.width, fieldView.height)
-            fieldView.setFieldState(FieldState(Mark.None, taskProvider.multiplier, taskProvider.multiplier, 0, 0, arrayOf(), taskProvider.multiplier))
+            fieldView.setFieldState(taskProvider.fieldState)
         }
     }
 
@@ -81,27 +72,25 @@ class TrainingActivity : AppCompatActivity() {
     }
 
     private fun onOkKey() {
-        if (!autoUpdateAnswer)
+        if (!autoUpdateAnswer || answer == null)
             return
-        val correct = answer == taskProvider.multiplicand * taskProvider.multiplier
-        if (!correct)
-            qErrors++
+        val correct = taskProvider.answer2correct(answer!!)
+        if (correct) {
+            taskProvider.nextTask()
+            if (!taskProvider.endOfGame && !taskProvider.endOfSet) {
+                answer = null
+                val showMarkAnimation =
+                    fieldView.animateFieldState(fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration)
+                val movingAnimations = taskView.animateNextTask(Settings.PrepareMultiplierMovingDuration, Settings.MultiplierMovingDuration)
 
-//        if (correct) {
-//            answer = null
-//            attemptIdx = 0
-//            fieldView.animateFieldState(
-//                fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null),
-//                null,
-//                resources.getDuration(R.integer.trainingActivityShowCorrectCheckMarkDuration)
-//            ).apply {
-//                addListener(object : {_, -> {
-//                    override fun onAnimationEnd(animation: Animator?) {
-//                    }
-//                })
-//                start()
-//            }
-//        }
+                showMarkAnimation
+                    .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
+                    .andThen(movingAnimations.prepareAnimation)
+                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
+                    .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer) })
+                    .subscribe()
+            }
+        }
     }
 
 //    animateAnswer(correct)
@@ -146,29 +135,6 @@ class TrainingActivity : AppCompatActivity() {
 //                animateTask(false)
 //                updateTask()
             }
-        }
-    }
-
-    private fun animateAnswer(correct: Boolean, onEnd: () -> Unit) {
-        findViewById<ImageView>(R.id.iv_mark).apply {
-            setBackgroundCompat(ContextCompat.getDrawable(this@TrainingActivity, if (correct) R.drawable.checkmark else R.drawable.xmark))
-            alpha = 0f
-            visibility = View.VISIBLE
-            animate().alpha(1f).setStartDelay(0).setDuration(100).setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(p0: Animator?) {
-                    findViewById<ImageView>(R.id.iv_mark)
-                        .animate()
-                        .alpha(0f)
-                        .setStartDelay(500)
-                        .setDuration(500)
-                        .setListener(object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(p0: Animator?) {
-                                visibility = View.GONE
-                                onEnd()
-                            }
-                        })
-                }
-            })
         }
     }
 }

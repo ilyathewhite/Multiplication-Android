@@ -1,12 +1,12 @@
 package ru.mathtasks.multiplicationtable
 
-import android.animation.AnimatorSet
-import android.animation.ArgbEvaluator
-import android.animation.ValueAnimator
+import android.animation.*
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.support.v4.content.ContextCompat
 import android.view.View
+import io.reactivex.Completable
+import io.reactivex.subjects.CompletableSubject
 
 enum class UnitState { Disabled, Counted, ToBeCounted, WasCounted }
 
@@ -54,21 +54,32 @@ class UnitView : View {
         drawable.setStroke(strokeWidthPixel, strokeColor)
     }
 
-    fun animateState(state: UnitState, delay: Long, duration: Long): AnimatorSet {
-        val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(state))
-        fillAnimator.startDelay = delay
-        fillAnimator.duration = duration
-        fillAnimator.addUpdateListener { animator ->
-            this.fillColor = animator.animatedValue as Int
-            drawable.setColor(fillColor)
+    fun animateState(state: UnitState, delay: Long, duration: Long): Completable {
+        val animationSubject = CompletableSubject.create()
+        return animationSubject.doOnSubscribe {
+            val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(state))
+            fillAnimator.startDelay = delay
+            fillAnimator.duration = duration
+            fillAnimator.addUpdateListener { animator ->
+                this.fillColor = animator.animatedValue as Int
+                drawable.setColor(fillColor)
+            }
+            val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(state))
+            strokeAnimator.startDelay = delay
+            strokeAnimator.duration = duration
+            strokeAnimator.addUpdateListener { animator ->
+                this.strokeColor = animator.animatedValue as Int
+                drawable.setStroke(strokeWidthPixel, strokeColor)
+            }
+            AnimatorSet().apply {
+                playTogether(fillAnimator, strokeAnimator)
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        animationSubject.onComplete()
+                    }
+                })
+                start()
+            }
         }
-        val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(state))
-        strokeAnimator.startDelay = delay
-        strokeAnimator.duration = duration
-        strokeAnimator.addUpdateListener { animator ->
-            this.strokeColor = animator.animatedValue as Int
-            drawable.setStroke(strokeWidthPixel, strokeColor)
-        }
-        return AnimatorSet().apply { playTogether(fillAnimator, strokeAnimator) }
     }
 }
