@@ -10,6 +10,7 @@ enum class UnitAnimation { ByRow, ByUnit }
 
 class Row(val multiplier: Int, private val tvMultiplier: TextView, private val units: Array<UnitView>, private val tv: TextView) {
     private val resources: Resources = tvMultiplier.resources
+    private var text = ""
 
     fun setIsMultiplierActive(value: Boolean) {
         tvMultiplier.alpha = if (value) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha)
@@ -24,17 +25,17 @@ class Row(val multiplier: Int, private val tvMultiplier: TextView, private val u
     }
 
     fun setText(text: String) {
+        this.text = text
         tv.text = text
     }
 
-    fun animateText(text: String, duration: Long): Animator {
-        return tv.alphaAnimator(duration, 0f, 1f).apply {
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animation: Animator?) {
-                    tv.alpha = 0f
-                    tv.text = text
-                }
-            })
+    fun animateText(text: String, duration: Long): Animator? {
+        if(this.text == text)
+            return null
+        this.text = text
+        return tv.alphaAnimator(duration, 0f, 1f).onStart {
+            tv.alpha = 0f
+            tv.text = text
         }
     }
 

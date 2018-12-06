@@ -14,7 +14,6 @@ import java.lang.Math.*
 enum class Mark { Correct, Incorrect, None }
 
 data class FieldState(
-    val mark: Mark,
     private val qActiveMultipliers: Int,
     val qCountedRows: Int,
     val qToBeCountedRows: Int,
@@ -45,10 +44,11 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     private lateinit var mark2iv: Map<Mark, ImageView>
-    var state = FieldState(Mark.None, 0, 0, 0, 0, arrayOf(), null)
+    var state = FieldState(0, 0, 0, 0, arrayOf(), null)
         private set
     private var multiplicand: Int = 0
     private lateinit var rows: Array<Row>
+    private var mark = Mark.None
 
     fun initialize(multiplicand: Int, width: Int, height: Int) {
         this.multiplicand = multiplicand
@@ -114,16 +114,17 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }.toMap()
     }
 
-    private fun setMark(mark: Mark) =
-        mark2iv.map { (ivMark, iv) -> iv.alpha = if (ivMark == mark) 1f else 0f }
-
-    private fun animateMark(fromMark: Mark, toMark: Mark, duration: Long): List<Animator> {
-        return mark2iv.map  { (ivMark, iv) -> iv.alphaAnimator(duration, if (ivMark == fromMark) 1f else 0f, if (ivMark == toMark) 1f else 0f) }
+    fun animateMark(mark: Mark, duration: Long): List<Animator> {
+        if (this.mark == mark)
+            return listOf()
+        val fromMark = this.mark
+        this.mark = mark
+        val toMark = mark
+        return mark2iv.map { (ivMark, iv) -> iv.alphaAnimator(duration, if (ivMark == fromMark) 1f else 0f, if (ivMark == toMark) 1f else 0f) }
     }
 
     fun setFieldState(state: FieldState) {
         this.state = state
-        setMark(state.mark)
         rows.map { row ->
             row.setIsMultiplierActive(state.isMultiplierActive(row))
             row.setUnitState(state.unitState(row))
@@ -132,8 +133,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): List<Animator> {
-        val animators = arrayListOf<Animator>()
-        animators.addAll(animateMark(this.state.mark, state.mark, duration))
+        val animators = arrayListOf<Animator?>()
         rows.map { row ->
             animators.add(row.animateIsMultiplierActive(this.state.isMultiplierActive(row), state.isMultiplierActive(row), duration))
             animators.add(row.animateText(state.text(row, multiplicand), duration))
@@ -150,6 +150,6 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             }
         }
         this.state = state
-        return animators
+        return animators.filterNotNull()
     }
 }

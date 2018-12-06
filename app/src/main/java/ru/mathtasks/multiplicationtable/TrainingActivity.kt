@@ -83,18 +83,22 @@ class TrainingActivity : AppCompatActivity() {
             taskProvider.nextTask()
             if (!taskProvider.endOfGame && !taskProvider.endOfSet) {
                 answer = null
-                val showMark = fieldView.animateFieldState(fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration)
+                val showMark = listOf(
+                    fieldView.animateFieldState(fieldView.state.copy(questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration),
+                    fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
+                ).flatten()
                 val moving = taskView.animateNextTask(Settings.PrepareMultiplierMovingDuration, Settings.MultiplierMovingDuration)
 
                 showMark.toCompletable()
                     .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
                     .andThen(moving.prepareAnimators.toCompletable())
-                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
+                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.fieldState) })
                     .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer); taskView.setMultiplier(taskProvider.multiplier) })
                     .andThen(
                         arrayListOf(
                             moving.movingAnimators,
-                            fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MultiplierMovingDuration)
+                            fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MultiplierMovingDuration),
+                            fieldView.animateMark(Mark.None, Settings.MultiplierMovingDuration)
                         ).flatten().toCompletable()
                     )
                     .subscribe()

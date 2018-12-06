@@ -42,13 +42,13 @@ class TaskProvider(val multiplicand: Int) {
                 attempt != 0 -> arrayOf(hintFrom())
                 else -> arrayOf()
             }
-            return FieldState(Mark.None, multiplier, multiplier, 0, 0, prevAnswers, multiplier)
+            return FieldState(multiplier, multiplier, 0, 0, prevAnswers, multiplier)
         }
 
     val hintFromFieldState : FieldState
         get() {
             val hintFrom = hintFrom()
-            return FieldState(Mark.None, multiplier, min(hintFrom, multiplier), max(multiplier - hintFrom, 0), max(hintFrom - multiplier, 0), arrayOf(hintFrom), multiplier)
+            return FieldState(multiplier, min(hintFrom, multiplier), max(multiplier - hintFrom, 0), max(hintFrom - multiplier, 0), arrayOf(hintFrom), multiplier)
         }
 
     private fun hintFrom(): Int {

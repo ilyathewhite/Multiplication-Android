@@ -2,10 +2,12 @@ package ru.mathtasks.multiplicationtable
 
 import android.animation.*
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
+import android.widget.TextView
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -40,6 +42,10 @@ fun View.alphaAnimator(duration: Long, fromAlpha: Float, toAlpha: Float): Animat
     return ObjectAnimator.ofFloat(this, View.ALPHA, fromAlpha, toAlpha).setDuration(duration)
 }
 
+fun TextView.textColorAnimator(duration: Long, fromColor: Int, toColor: Int): Animator {
+    return ObjectAnimator.ofObject(this, "textColor", ArgbEvaluator(), fromColor, toColor).setDuration(duration)
+}
+
 fun List<Animator>.toCompletable(): Completable {
     if (isEmpty())
         return Completable.fromSingle(Single.just(0))
@@ -59,4 +65,22 @@ fun Animator?.toCompletable(): Completable {
         .doOnSubscribe { start() }
         .subscribeOn(AndroidSchedulers.mainThread())
         .observeOn(AndroidSchedulers.mainThread())
+}
+
+fun Animator.onStart(action: () -> Unit): Animator {
+    this.addListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationStart(animation: Animator?) {
+            action()
+        }
+    })
+    return this
+}
+
+fun Animator.onEnd(action: () -> Unit): Animator {
+    this.addListener(object : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator?) {
+            action()
+        }
+    })
+    return this
 }

@@ -21,12 +21,12 @@ class TaskView : LinearLayout {
     private lateinit var llNextMultipliers: LinearLayout
     private lateinit var tvMovingNextMultiplier: TextView
     private var nextTvMultipliers = mutableListOf<TextView>()
+    private var nextMultiplierIdx = 0
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         inflater.inflate(R.layout.task_view, this)
     }
-
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -38,6 +38,7 @@ class TaskView : LinearLayout {
         this.llNextMultipliers = findViewById(R.id.ll_nextMultipliers)
         this.tvMovingNextMultiplier = TextView(context).apply {
             setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
+            setTextColor(ContextCompat.getColor(context, R.color.taskViewTask))
             alpha = 0f
             setTypeface(null, Typeface.ITALIC)
             rlOuter.addView(this)
@@ -45,6 +46,7 @@ class TaskView : LinearLayout {
     }
 
     fun createNextMultipliers(nextMultipliers: Array<Int>) {
+        nextMultiplierIdx = 0
         llNextMultipliers.removeAllViews()
         this.nextTvMultipliers = nextMultipliers.map { nextMultiplier ->
             TextView(context).apply {
@@ -52,25 +54,18 @@ class TaskView : LinearLayout {
                 setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
-                alpha = resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)
                 maxLines = 1
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                     setMargins(0, 0, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval), 0)
                 }
-                llNextMultipliers.addView(this)
+                llNextMultipliers.addView(this@apply)
             }
         }.toMutableList()
         llNextMultipliers.post {
             llNextMultipliers.layoutParams = RelativeLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 setMargins(tvMultiplier.left + tvMultiplier.width / 2 - nextTvMultipliers[0].width / 2, 0, 0, 0)
             }
-            updateNextMultipliersVisibility()
         }
-    }
-
-    private fun updateNextMultipliersVisibility() {
-        for (tv in nextTvMultipliers)
-            tv.alpha = if (tv.right > llNextMultipliers.width) 0f else 1f
     }
 
     fun setMultiplier(multiplier: Int) {
@@ -88,27 +83,12 @@ class TaskView : LinearLayout {
     class NextTaskAnimations(val prepareAnimators: List<Animator>, val movingAnimators: List<Animator>)
 
     fun animateNextTask(prepareDuration: Long, movingDuration: Long): NextTaskAnimations {
-        val tvNextMultiplier = nextTvMultipliers[0]
+        val tvNextMultiplier = nextTvMultipliers[nextMultiplierIdx]
+        nextMultiplierIdx++
         val tvNextMultiplierLoc = tvNextMultiplier.getLocationOnScreen()
         val rlOuterLoc = rlOuter.getLocationOnScreen()
         val tvMovingNextMultiplierStartY = tvNextMultiplierLoc.Y - rlOuterLoc.Y
         val tvMovingNextMultiplierStartRight = rlOuter.width - (tvNextMultiplierLoc.X - rlOuterLoc.X) - tvNextMultiplier.width
-
-        tvMovingNextMultiplier.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
-            text = tvNextMultiplier.text
-            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                setMargins(0, tvMovingNextMultiplierStartY, tvMovingNextMultiplierStartRight, 0)
-            }
-        }
-
-        val prepareAnimators = listOf(
-            tvNextMultiplier.alphaAnimator(prepareDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha), 0f),
-            tvMovingNextMultiplier.alphaAnimator(prepareDuration, 0f, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)),
-            tvMultiplier.alphaAnimator(prepareDuration, 1f, 0f),
-            tvAnswer.alphaAnimator(prepareDuration, 1f, 0f)
-        )
 
         val tvMovingNextMultiplierStartTextSize = tvNextMultiplier.textSize
         val tvMovingNextMultiplierEndTextSize = tvMultiplier.textSize
@@ -116,12 +96,41 @@ class TaskView : LinearLayout {
         val tvMovingNextMultiplierEndY = tvMultiplierLoc.Y - rlOuterLoc.Y
         val tvMovingNextMultiplierEndRight = rlOuter.width - (tvMultiplierLoc.X - rlOuterLoc.X) - tvMultiplier.width
 
-        val tvNextNextMultiplier = if (nextTvMultipliers.size > 1) nextTvMultipliers[1] else null
-        val tvNextNextMultiplierStartX = (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).leftMargin
-        val tvNextNextMultiplierEndX = if (tvNextNextMultiplier != null) tvNextNextMultiplierStartX + tvNextMultiplierLoc.X - tvNextNextMultiplier.getLocationOnScreen().X else null
+        val tvNextNextMultiplier = if (nextMultiplierIdx < nextTvMultipliers.size) nextTvMultipliers[nextMultiplierIdx] else null
+        val tvNextMultiplier0StartLeftMargin = (nextTvMultipliers[0].layoutParams as LinearLayout.LayoutParams).leftMargin
+        var tvNextMultiplier0LeftMarginShift = 0
+
+        val prepareAnimators = listOf(
+            tvMultiplier.alphaAnimator(prepareDuration, 1f, 0f).onEnd {
+                tvMultiplier.text = tvNextMultiplier.text
+                if (tvNextNextMultiplier != null) {
+                    tvMultiplier.post {
+                        tvNextMultiplier0LeftMarginShift =
+                                (tvNextNextMultiplier.getLocationOnScreen().X + tvNextNextMultiplier.width / 2) -
+                                (tvNextMultiplier.getLocationOnScreen().X + tvNextMultiplier.width / 2)
+                    }
+                }
+            },
+            tvAnswer.alphaAnimator(prepareDuration, 1f, 0f),
+            tvNextMultiplier.alphaAnimator(prepareDuration, 1f, 0f),
+            tvMovingNextMultiplier.alphaAnimator(prepareDuration, 0f, 1f).onStart {
+                tvMovingNextMultiplier.apply {
+                    setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
+                    setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
+                    text = tvNextMultiplier.text
+                    layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+                        setMargins(0, tvMovingNextMultiplierStartY, tvMovingNextMultiplierStartRight, 0)
+                    }
+                }
+            }
+        )
 
         val movingAnimators = listOf(
-            tvMovingNextMultiplier.alphaAnimator(movingDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha), 1f),
+            tvMovingNextMultiplier.textColorAnimator(
+                movingDuration,
+                ContextCompat.getColor(context, R.color.taskViewNextMultiplier), ContextCompat.getColor(context, R.color.taskViewTask)
+            ),
             ValueAnimator.ofFloat(0f, 1f).apply {
                 duration = movingDuration
 
@@ -141,28 +150,20 @@ class TaskView : LinearLayout {
                         )
                     }
                     if (tvNextNextMultiplier != null) {
-                        tvNextMultiplier.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        nextTvMultipliers[0].layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                             setMargins(
-                                (tvNextNextMultiplierStartX + (tvNextNextMultiplierEndX!! - tvNextNextMultiplierStartX) * progress).toInt(), 0,
-                                (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).rightMargin, 0
+                                (tvNextMultiplier0StartLeftMargin - tvNextMultiplier0LeftMarginShift * progress).toInt(), 0,
+                                (nextTvMultipliers[0].layoutParams as LinearLayout.LayoutParams).rightMargin, 0
                             )
                         }
                     }
                 }
 
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        tvMovingNextMultiplier.alpha = 0f
-                        if (nextTvMultipliers.size > 1)  // don't remove last as it will shut ll_nextMultipliers
-                            findViewById<LinearLayout>(R.id.ll_nextMultipliers).removeView(tvNextMultiplier)
-                        else
-                            findViewById<LinearLayout>(R.id.ll_nextMultipliers).alpha = 0f
-                        nextTvMultipliers.removeAt(0)
-                        tvMultiplier.alpha = 1f
-                        tvAnswer.alpha = 1f
-                        updateNextMultipliersVisibility()
-                    }
-                })
+                onEnd {
+                    tvMovingNextMultiplier.alpha = 0f
+                    tvMultiplier.alpha = 1f
+                    tvAnswer.alpha = 1f
+                }
             }
         )
 

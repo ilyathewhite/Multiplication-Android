@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="taskViewNextMultiplier">#000000</color>
+    <color name="taskViewTask">#000000</color>
+    <color name="taskViewNextMultiplier">#666666</color>
     <dimen name="taskViewNextMultiplierFontSize">8dp</dimen>
     <dimen name="taskViewNextMultiplierInterval">20dp</dimen>
-    <dimen name="taskViewNextMultiplierAlpha">0.6</dimen>
-
 </resources>
