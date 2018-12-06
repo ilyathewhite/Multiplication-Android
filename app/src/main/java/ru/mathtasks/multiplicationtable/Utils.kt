@@ -4,12 +4,11 @@ import android.animation.*
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.v4.view.ViewCompat
-import android.support.v4.view.ViewPropertyAnimatorCompat
 import android.util.TypedValue
 import android.view.View
 import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.CompletableSubject
 
 fun View.setBackgroundCompat(value: Drawable?) {
@@ -37,10 +36,14 @@ fun Resources.getDuration(resourceId: Int): Long {
     return this.getInteger(resourceId).toLong()
 }
 
-fun View.alphaAnimation(duration: Long, toAlpha: Float): Animator? {
-    if (this.alpha == toAlpha)
-        return null
-    return ObjectAnimator.ofFloat(this, View.ALPHA, this.alpha, toAlpha).setDuration(duration)
+fun View.alphaAnimator(duration: Long, fromAlpha: Float, toAlpha: Float): Animator {
+    return ObjectAnimator.ofFloat(this, View.ALPHA, fromAlpha, toAlpha).setDuration(duration)
+}
+
+fun List<Animator>.toCompletable(): Completable {
+    if (isEmpty())
+        return Completable.fromSingle(Single.just(0))
+    return AnimatorSet().apply { playTogether(this@toCompletable) }.toCompletable()
 }
 
 fun Animator?.toCompletable(): Completable {
@@ -52,14 +55,8 @@ fun Animator?.toCompletable(): Completable {
             animationSubject.onComplete()
         }
     })
-    return animationSubject.doOnSubscribe { this.start() }
+    return animationSubject
+        .doOnSubscribe { start() }
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .observeOn(AndroidSchedulers.mainThread())
 }
-
-//fun List<Animator>.merge(): Animator? = when (this.size) {
-//    0 -> null
-//    1 -> this[0]
-//    else -> AnimatorSet().apply { playTogether(this) }
-//}
-//
-//@JvmName("merge_nullables")
-//fun List<Animator?>.merge(): Animator? = (this.filter { it != null } as ArrayList<Animator>).merge()

@@ -1,12 +1,10 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.res.Resources
-import android.view.View
 import android.widget.TextView
-import io.reactivex.Completable
 
 enum class UnitAnimation { ByRow, ByUnit }
 
@@ -17,19 +15,27 @@ class Row(val multiplier: Int, private val tvMultiplier: TextView, private val u
         tvMultiplier.alpha = if (value) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha)
     }
 
-    fun animateIsMultiplierActive(value: Boolean, duration: Long): Animator? =
-        tvMultiplier.alphaAnimation(duration, if (value) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha))
+    fun animateIsMultiplierActive(fromValue: Boolean, toValue: Boolean, duration: Long): Animator {
+        return tvMultiplier.alphaAnimator(
+            duration,
+            if (fromValue) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha),
+            if (toValue) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha)
+        )
+    }
 
     fun setText(text: String) {
         tv.text = text
     }
 
-    fun animateText(text: String, duration: Long): Animator? {
-        if (text == tv.text)
-            return null
-        tv.alpha = 0f
-        tv.text = text
-        return tv.alphaAnimation(duration, 1f)
+    fun animateText(text: String, duration: Long): Animator {
+        return tv.alphaAnimator(duration, 0f, 1f).apply {
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?) {
+                    tv.alpha = 0f
+                    tv.text = text
+                }
+            })
+        }
     }
 
     fun setUnitState(state: UnitState) {

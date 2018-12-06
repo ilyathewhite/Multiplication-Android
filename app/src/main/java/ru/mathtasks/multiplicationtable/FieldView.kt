@@ -1,14 +1,11 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -109,7 +106,6 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
         this.mark2iv = arrayOf(Mark.Correct, Mark.Incorrect).map { mark ->
             mark to ImageView(context).apply {
-                visibility = View.GONE
                 alpha = 0f
                 layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
                 setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
@@ -121,8 +117,9 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private fun setMark(mark: Mark) =
         mark2iv.map { (ivMark, iv) -> iv.alpha = if (ivMark == mark) 1f else 0f }
 
-    private fun animateMark(mark: Mark, duration: Long): Animator? =
-        mark2iv.map { (ivMark, iv) -> iv.alphaAnimation(duration, if (ivMark == mark) 1f else 0f) }.merge()
+    private fun animateMark(fromMark: Mark, toMark: Mark, duration: Long): List<Animator> {
+        return mark2iv.map  { (ivMark, iv) -> iv.alphaAnimator(duration, if (ivMark == fromMark) 1f else 0f, if (ivMark == toMark) 1f else 0f) }
+    }
 
     fun setFieldState(state: FieldState) {
         this.state = state
@@ -134,11 +131,11 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
-    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Animator? {
-        val animators = arrayListOf<Animator?>()
-        animators.add(animateMark(state.mark, duration))
+    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): List<Animator> {
+        val animators = arrayListOf<Animator>()
+        animators.addAll(animateMark(this.state.mark, state.mark, duration))
         rows.map { row ->
-            animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
+            animators.add(row.animateIsMultiplierActive(this.state.isMultiplierActive(row), state.isMultiplierActive(row), duration))
             animators.add(row.animateText(state.text(row, multiplicand), duration))
         }
         if (unitAnimation != null) {
@@ -153,6 +150,6 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             }
         }
         this.state = state
-        return animators.merge()
+        return animators
     }
 }

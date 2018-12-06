@@ -83,24 +83,22 @@ class TrainingActivity : AppCompatActivity() {
             taskProvider.nextTask()
             if (!taskProvider.endOfGame && !taskProvider.endOfSet) {
                 answer = null
-                val showMarkAnimator =
-                    fieldView.animateFieldState(fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration)
-                val movingAnimations = taskView.animateNextTask(Settings.PrepareMultiplierMovingDuration, Settings.MultiplierMovingDuration)
+                val showMark = fieldView.animateFieldState(fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration)
+                val moving = taskView.animateNextTask(Settings.PrepareMultiplierMovingDuration, Settings.MultiplierMovingDuration)
 
-                showMarkAnimator!!.start()
-//                .toCompletable()
-//                    .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
-//                    .andThen(movingAnimations.prepareAnimation.toCompletable())
-//                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
-//                    .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer); taskView.setMultiplier(taskProvider.multiplier) })
-//                    .andThen(
-//                        arrayListOf(
-//                            movingAnimations.movingAnimation,
-//                            fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MultiplierMovingDuration)
-//                        ).merge().toCompletable()
-//                    )
-//                    .subscribe()
-//                    .addTo(compositeDisposable)
+                showMark.toCompletable()
+                    .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
+                    .andThen(moving.prepareAnimators.toCompletable())
+                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
+                    .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer); taskView.setMultiplier(taskProvider.multiplier) })
+                    .andThen(
+                        arrayListOf(
+                            moving.movingAnimators,
+                            fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MultiplierMovingDuration)
+                        ).flatten().toCompletable()
+                    )
+                    .subscribe()
+                    .addTo(compositeDisposable)
             }
         }
     }

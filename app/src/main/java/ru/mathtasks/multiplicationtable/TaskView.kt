@@ -27,6 +27,7 @@ class TaskView : LinearLayout {
         inflater.inflate(R.layout.task_view, this)
     }
 
+
     override fun onFinishInflate() {
         super.onFinishInflate()
 
@@ -60,13 +61,16 @@ class TaskView : LinearLayout {
             }
         }.toMutableList()
         llNextMultipliers.post {
-            val leftMargin = tvMultiplier.left + tvMultiplier.width / 2 - nextTvMultipliers[0].width / 2
             llNextMultipliers.layoutParams = RelativeLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                setMargins(leftMargin, 0, 0, 0)
+                setMargins(tvMultiplier.left + tvMultiplier.width / 2 - nextTvMultipliers[0].width / 2, 0, 0, 0)
             }
-            for (tv in nextTvMultipliers)
-                tv.alpha = if (tv.right + leftMargin > llNextMultipliers.width) 0f else 1f
+            updateNextMultipliersVisibility()
         }
+    }
+
+    private fun updateNextMultipliersVisibility() {
+        for (tv in nextTvMultipliers)
+            tv.alpha = if (tv.right > llNextMultipliers.width) 0f else 1f
     }
 
     fun setMultiplier(multiplier: Int) {
@@ -81,7 +85,7 @@ class TaskView : LinearLayout {
         tvAnswer.text = answer?.toString() ?: ""
     }
 
-    class NextTaskAnimations(val prepareAnimation: Animator?, val movingAnimation: Animator?)
+    class NextTaskAnimations(val prepareAnimators: List<Animator>, val movingAnimators: List<Animator>)
 
     fun animateNextTask(prepareDuration: Long, movingDuration: Long): NextTaskAnimations {
         val tvNextMultiplier = nextTvMultipliers[0]
@@ -91,6 +95,7 @@ class TaskView : LinearLayout {
         val tvMovingNextMultiplierStartRight = rlOuter.width - (tvNextMultiplierLoc.X - rlOuterLoc.X) - tvNextMultiplier.width
 
         tvMovingNextMultiplier.apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
             text = tvNextMultiplier.text
             layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
@@ -98,12 +103,12 @@ class TaskView : LinearLayout {
             }
         }
 
-        val prepareAnimation = arrayListOf(
-            tvNextMultiplier.alphaAnimation(prepareDuration, 0f),
-            tvMovingNextMultiplier.alphaAnimation(prepareDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)),
-            tvMultiplier.alphaAnimation(prepareDuration, 0f),
-            tvAnswer.alphaAnimation(prepareDuration, 0f)
-        ).merge()
+        val prepareAnimators = listOf(
+            tvNextMultiplier.alphaAnimator(prepareDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha), 0f),
+            tvMovingNextMultiplier.alphaAnimator(prepareDuration, 0f, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)),
+            tvMultiplier.alphaAnimator(prepareDuration, 1f, 0f),
+            tvAnswer.alphaAnimator(prepareDuration, 1f, 0f)
+        )
 
         val tvMovingNextMultiplierStartTextSize = tvNextMultiplier.textSize
         val tvMovingNextMultiplierEndTextSize = tvMultiplier.textSize
@@ -115,48 +120,52 @@ class TaskView : LinearLayout {
         val tvNextNextMultiplierStartX = (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).leftMargin
         val tvNextNextMultiplierEndX = if (tvNextNextMultiplier != null) tvNextNextMultiplierStartX + tvNextMultiplierLoc.X - tvNextNextMultiplier.getLocationOnScreen().X else null
 
-        val movingAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = movingDuration
+        val movingAnimators = listOf(
+            tvMovingNextMultiplier.alphaAnimator(movingDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha), 1f),
+            ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = movingDuration
 
-            addUpdateListener { animator ->
-                val progress = animator.animatedValue as Float
-                tvMovingNextMultiplier.setTextSize(
-                    TypedValue.COMPLEX_UNIT_PX,
-                    tvMovingNextMultiplierStartTextSize + (tvMovingNextMultiplierEndTextSize - tvMovingNextMultiplierStartTextSize) * progress
-                )
-                tvMovingNextMultiplier.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-                    setMargins(
-                        0,
-                        (tvMovingNextMultiplierStartY + (tvMovingNextMultiplierEndY - tvMovingNextMultiplierStartY) * progress).toInt(),
-                        (tvMovingNextMultiplierStartRight + (tvMovingNextMultiplierEndRight - tvMovingNextMultiplierStartRight) * progress).toInt(),
-                        0
+                addUpdateListener { animator ->
+                    val progress = animator.animatedValue as Float
+                    tvMovingNextMultiplier.setTextSize(
+                        TypedValue.COMPLEX_UNIT_PX,
+                        tvMovingNextMultiplierStartTextSize + (tvMovingNextMultiplierEndTextSize - tvMovingNextMultiplierStartTextSize) * progress
                     )
-                }
-                if (tvNextNextMultiplier != null) {
-                    tvNextMultiplier.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    tvMovingNextMultiplier.layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
                         setMargins(
-                            (tvNextNextMultiplierStartX + (tvNextNextMultiplierEndX!! - tvNextNextMultiplierStartX) * progress).toInt(), 0,
-                            (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).rightMargin, 0
+                            0,
+                            (tvMovingNextMultiplierStartY + (tvMovingNextMultiplierEndY - tvMovingNextMultiplierStartY) * progress).toInt(),
+                            (tvMovingNextMultiplierStartRight + (tvMovingNextMultiplierEndRight - tvMovingNextMultiplierStartRight) * progress).toInt(),
+                            0
                         )
                     }
+                    if (tvNextNextMultiplier != null) {
+                        tvNextMultiplier.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                            setMargins(
+                                (tvNextNextMultiplierStartX + (tvNextNextMultiplierEndX!! - tvNextNextMultiplierStartX) * progress).toInt(), 0,
+                                (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).rightMargin, 0
+                            )
+                        }
+                    }
                 }
+
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        tvMovingNextMultiplier.alpha = 0f
+                        if (nextTvMultipliers.size > 1)  // don't remove last as it will shut ll_nextMultipliers
+                            findViewById<LinearLayout>(R.id.ll_nextMultipliers).removeView(tvNextMultiplier)
+                        else
+                            findViewById<LinearLayout>(R.id.ll_nextMultipliers).alpha = 0f
+                        nextTvMultipliers.removeAt(0)
+                        tvMultiplier.alpha = 1f
+                        tvAnswer.alpha = 1f
+                        updateNextMultipliersVisibility()
+                    }
+                })
             }
+        )
 
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
-                    tvMovingNextMultiplier.alpha = 0f
-                    if (nextTvMultipliers.size > 1)  // don't remove last as it will shut ll_nextMultipliers
-                        findViewById<LinearLayout>(R.id.ll_nextMultipliers).removeView(tvNextMultiplier)
-                    else
-                        findViewById<LinearLayout>(R.id.ll_nextMultipliers).alpha = 0f
-                    nextTvMultipliers.removeAt(0)
-                    tvMultiplier.alpha = 1f
-                    tvAnswer.alpha = 1f
-                }
-            })
-        }
-
-        return NextTaskAnimations(prepareAnimation, movingAnimator)
+        return NextTaskAnimations(prepareAnimators, movingAnimators)
     }
 }
