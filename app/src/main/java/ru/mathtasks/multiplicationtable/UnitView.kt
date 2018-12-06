@@ -54,32 +54,21 @@ class UnitView : View {
         drawable.setStroke(strokeWidthPixel, strokeColor)
     }
 
-    fun animateState(state: UnitState, delay: Long, duration: Long): Completable {
-        val animationSubject = CompletableSubject.create()
-        return animationSubject.doOnSubscribe {
-            val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(state))
-            fillAnimator.startDelay = delay
-            fillAnimator.duration = duration
-            fillAnimator.addUpdateListener { animator ->
-                this.fillColor = animator.animatedValue as Int
-                drawable.setColor(fillColor)
-            }
-            val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(state))
-            strokeAnimator.startDelay = delay
-            strokeAnimator.duration = duration
-            strokeAnimator.addUpdateListener { animator ->
-                this.strokeColor = animator.animatedValue as Int
-                drawable.setStroke(strokeWidthPixel, strokeColor)
-            }
-            AnimatorSet().apply {
-                playTogether(fillAnimator, strokeAnimator)
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        animationSubject.onComplete()
-                    }
-                })
-                start()
-            }
+    fun animateState(state: UnitState, delay: Long, duration: Long): Animator {
+        val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(state))
+        fillAnimator.startDelay = delay
+        fillAnimator.duration = duration
+        fillAnimator.addUpdateListener { animator ->
+            this.fillColor = animator.animatedValue as Int
+            drawable.setColor(fillColor)
         }
+        val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(state))
+        strokeAnimator.startDelay = delay
+        strokeAnimator.duration = duration
+        strokeAnimator.addUpdateListener { animator ->
+            this.strokeColor = animator.animatedValue as Int
+            drawable.setStroke(strokeWidthPixel, strokeColor)
+        }
+        return AnimatorSet().apply { playTogether(fillAnimator, strokeAnimator) }
     }
 }

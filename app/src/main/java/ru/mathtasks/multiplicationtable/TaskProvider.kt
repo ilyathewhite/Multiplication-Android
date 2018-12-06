@@ -33,6 +33,7 @@ class TaskProvider(val multiplicand: Int) {
     val endOfSet get() = stages[0].multipliers.size == 0
     val multiplier get() = stages[0].multipliers[0]
     val nextMultipliers get() = stages[0].multipliers.drop(1).toTypedArray()
+    val unitAnimation get() = when(attempt) { 0 -> null; 1 -> UnitAnimation.ByRow; else -> UnitAnimation.ByUnit }
 
     val fieldState: FieldState
         get() {

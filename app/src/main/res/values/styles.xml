@@ -21,8 +21,9 @@
     </style>
 
     <style name="ButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
-        <item name="android:layout_width">50dp</item>
-        <item name="android:layout_height">50dp</item>
+        <item name="layout_constraintDimensionRatio">H,1:1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
         <item name="android:layout_margin">3dp</item>
         <item name="android:background">@drawable/number_button</item>
         <item name="android:textSize">20dp</item>

@@ -1,5 +1,8 @@
 package ru.mathtasks.multiplicationtable
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
@@ -9,7 +12,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import io.reactivex.Completable
 import java.lang.Math.*
 
 enum class Mark { Correct, Incorrect, None }
@@ -116,16 +118,11 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }.toMap()
     }
 
-    private fun setMark(mark: Mark) {
+    private fun setMark(mark: Mark) =
         mark2iv.map { (ivMark, iv) -> iv.alpha = if (ivMark == mark) 1f else 0f }
-    }
 
-    private fun animateMark(mark: Mark, duration: Long): Completable {
-        fun alpha(ivMark: Mark) = if (ivMark == mark) 1f else 0f
-        return Completable.merge(mark2iv
-            .filter { (ivMark, iv) -> alpha(ivMark) != iv.alpha }
-            .map { (ivMark, iv) -> iv.animate(duration) { it.alpha(alpha(ivMark)) } })
-    }
+    private fun animateMark(mark: Mark, duration: Long): Animator? =
+        mark2iv.map { (ivMark, iv) -> iv.alphaAnimation(duration, if (ivMark == mark) 1f else 0f) }.merge()
 
     fun setFieldState(state: FieldState) {
         this.state = state
@@ -137,12 +134,12 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
-    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Completable {
-        val completables = arrayListOf<Completable?>()
-        completables.add(animateMark(state.mark, duration))
+    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): Animator? {
+        val animators = arrayListOf<Animator?>()
+        animators.add(animateMark(state.mark, duration))
         rows.map { row ->
-            completables.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
-            completables.add(row.animateText(state.text(row, multiplicand), duration))
+            animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
+            animators.add(row.animateText(state.text(row, multiplicand), duration))
         }
         if (unitAnimation != null) {
             val ranges = arrayOf(
@@ -152,10 +149,10 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             )
             for (range in ranges) {
                 for (idx in min(range.first, range.second) until max(range.first, range.second))
-                    completables.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
+                    animators.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
             }
         }
         this.state = state
-        return Completable.merge(completables.filter { it != null })
+        return animators.merge()
     }
 }

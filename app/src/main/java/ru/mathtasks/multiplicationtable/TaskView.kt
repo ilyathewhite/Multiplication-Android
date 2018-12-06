@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
-import io.reactivex.Completable
 
 
 class TaskView : LinearLayout {
@@ -82,7 +81,8 @@ class TaskView : LinearLayout {
         tvAnswer.text = answer?.toString() ?: ""
     }
 
-    class NextTaskAnimations(val prepareAnimation: Completable, val movingAnimation: Completable);
+    class NextTaskAnimations(val prepareAnimation: Animator?, val movingAnimation: Animator?)
+
     fun animateNextTask(prepareDuration: Long, movingDuration: Long): NextTaskAnimations {
         val tvNextMultiplier = nextTvMultipliers[0]
         val tvNextMultiplierLoc = tvNextMultiplier.getLocationOnScreen()
@@ -98,11 +98,12 @@ class TaskView : LinearLayout {
             }
         }
 
-        val prepareAnimation = Completable.mergeArray(
-            tvNextMultiplier.animate(prepareDuration) { it.alpha(0f) },
-            tvMovingNextMultiplier.animate(prepareDuration) { it.alpha(resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)) },
-            tvMultiplier.animate(prepareDuration) { it.alpha(0f) },
-            tvAnswer.animate(prepareDuration) { it.alpha(0f) })
+        val prepareAnimation = arrayListOf(
+            tvNextMultiplier.alphaAnimation(prepareDuration, 0f),
+            tvMovingNextMultiplier.alphaAnimation(prepareDuration, resources.getFloat(R.dimen.taskViewNextMultiplierAlpha)),
+            tvMultiplier.alphaAnimation(prepareDuration, 0f),
+            tvAnswer.alphaAnimation(prepareDuration, 0f)
+        ).merge()
 
         val tvMovingNextMultiplierStartTextSize = tvNextMultiplier.textSize
         val tvMovingNextMultiplierEndTextSize = tvMultiplier.textSize
@@ -114,7 +115,7 @@ class TaskView : LinearLayout {
         val tvNextNextMultiplierStartX = (tvNextMultiplier.layoutParams as LinearLayout.LayoutParams).leftMargin
         val tvNextNextMultiplierEndX = if (tvNextNextMultiplier != null) tvNextNextMultiplierStartX + tvNextMultiplierLoc.X - tvNextNextMultiplier.getLocationOnScreen().X else null
 
-        val movingAnimation = ValueAnimator.ofFloat(0f, 1f).apply {
+        val movingAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = movingDuration
 
             addUpdateListener { animator ->
@@ -151,13 +152,11 @@ class TaskView : LinearLayout {
                         findViewById<LinearLayout>(R.id.ll_nextMultipliers).alpha = 0f
                     nextTvMultipliers.removeAt(0)
                     tvMultiplier.alpha = 1f
-                    tvMultiplier.text = tvNextMultiplier.text
-                    tvAnswer.text = ""
                     tvAnswer.alpha = 1f
                 }
             })
-        }.toCompletable()
+        }
 
-        return NextTaskAnimations(prepareAnimation, movingAnimation)
+        return NextTaskAnimations(prepareAnimation, movingAnimator)
     }
 }

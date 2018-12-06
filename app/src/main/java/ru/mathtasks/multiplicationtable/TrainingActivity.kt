@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import io.reactivex.Completable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import java.util.concurrent.TimeUnit
 
 const val TRAINING_ACTIVITY_MULTIPLICAND = "ru.mathtasks.multiplicationtable.trainingactivity.multiplicand"
@@ -16,6 +18,7 @@ class TrainingActivity : AppCompatActivity() {
         private const val END_OF_SET_ACTIVITY_REQUEST_CODE = 1
     }
 
+    private lateinit var compositeDisposable: CompositeDisposable
     private lateinit var taskProvider: TaskProvider
     private lateinit var fieldView: FieldView
     private lateinit var taskView: TaskView
@@ -24,6 +27,7 @@ class TrainingActivity : AppCompatActivity() {
     private var autoUpdateAnswer = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        compositeDisposable = CompositeDisposable()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
 
@@ -79,16 +83,24 @@ class TrainingActivity : AppCompatActivity() {
             taskProvider.nextTask()
             if (!taskProvider.endOfGame && !taskProvider.endOfSet) {
                 answer = null
-                val showMarkAnimation =
+                val showMarkAnimator =
                     fieldView.animateFieldState(fieldView.state.copy(mark = Mark.Correct, questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration)
                 val movingAnimations = taskView.animateNextTask(Settings.PrepareMultiplierMovingDuration, Settings.MultiplierMovingDuration)
 
-                showMarkAnimation
-                    .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
-                    .andThen(movingAnimations.prepareAnimation)
-                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
-                    .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer) })
-                    .subscribe()
+                showMarkAnimator!!.start()
+//                .toCompletable()
+//                    .andThen(Completable.timer(Settings.PauseAfterCorrectCheckMarkDuration, TimeUnit.MILLISECONDS))
+//                    .andThen(movingAnimations.prepareAnimation.toCompletable())
+//                    .andThen(Completable.fromRunnable { fieldView.setFieldState(taskProvider.hintFromFieldState) })
+//                    .andThen(Completable.fromRunnable { autoUpdateAnswer = true; taskView.setAnswer(answer); taskView.setMultiplier(taskProvider.multiplier) })
+//                    .andThen(
+//                        arrayListOf(
+//                            movingAnimations.movingAnimation,
+//                            fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MultiplierMovingDuration)
+//                        ).merge().toCompletable()
+//                    )
+//                    .subscribe()
+//                    .addTo(compositeDisposable)
             }
         }
     }
@@ -136,5 +148,10 @@ class TrainingActivity : AppCompatActivity() {
 //                updateTask()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
     }
 }
