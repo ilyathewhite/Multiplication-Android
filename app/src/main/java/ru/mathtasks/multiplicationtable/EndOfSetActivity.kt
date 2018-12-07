@@ -2,7 +2,6 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
 import android.support.transition.Transition
@@ -10,7 +9,7 @@ import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
 import android.support.v7.app.AppCompatActivity
 import android.view.animation.AccelerateInterpolator
-import android.widget.Button
+import kotlinx.android.synthetic.main.activity_end_of_set.*
 
 
 class EndOfSetActivity : AppCompatActivity() {
@@ -22,21 +21,20 @@ class EndOfSetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_of_set)
 
-        findViewById<Button>(R.id.btn_next_drill).setOnClickListener {
+        btnNextDrill.setOnClickListener {
             setResult(Activity.RESULT_OK, null)
             finish()
         }
 
-        findViewById<Button>(R.id.btn_end_practice).setOnClickListener {
+        btnEndPractice.setOnClickListener {
             setResult(Activity.RESULT_CANCELED, null)
             finish()
         }
 
-        val badge = findViewById<ConstraintLayout>(R.id.cl_badge)
-        badge.post {
-            TransitionManager.beginDelayedTransition(badge, ChangeBounds().apply {
+        clBadge.post {
+            TransitionManager.beginDelayedTransition(clBadge, ChangeBounds().apply {
                 interpolator = AccelerateInterpolator(1.0f)
-                duration = resources.getInteger(R.integer.endOfSetCheckMarkAnimationDuration).toLong()
+                duration = Settings.EndOfSetCheckMarkAnimationDuration
                 addListener(object : TransitionListenerAdapter() {
                     override fun onTransitionEnd(transition: Transition) {
                         animateOuter()
@@ -45,26 +43,25 @@ class EndOfSetActivity : AppCompatActivity() {
             })
 
             ConstraintSet().apply {
-                clone(badge)
-                setHorizontalBias(R.id.iv_mark_cover, 0.8f)
-                constrainPercentWidth(R.id.iv_mark_cover, 0f)
-                applyTo(badge)
+                clone(clBadge)
+                setHorizontalBias(R.id.ivMarkCover, 0.8f)
+                constrainPercentWidth(R.id.ivMarkCover, 0f)
+                applyTo(clBadge)
             }
         }
     }
 
     private fun animateOuter() {
-        val outer = findViewById<ConstraintLayout>(R.id.cl_outer)
-        TransitionManager.beginDelayedTransition(outer, ChangeBounds().apply {
+        TransitionManager.beginDelayedTransition(clOuter, ChangeBounds().apply {
             interpolator = AccelerateInterpolator(1.0f)
-            duration = resources.getInteger(R.integer.endOfSetSuccessBadgeAnimationDuration).toLong()
+            duration = Settings.EndOfSetSuccessBadgeAnimationDuration
         })
 
         ConstraintSet().apply {
-            clone(outer)
-            setVerticalBias(R.id.cl_badge, 0.1f)
-            setVerticalBias(R.id.ll_buttons, 0.9f)
-            applyTo(outer)
+            clone(clOuter)
+            setVerticalBias(R.id.clBadge, 0.1f)
+            setVerticalBias(R.id.llButtons, 0.9f)
+            applyTo(clOuter)
         }
     }
 

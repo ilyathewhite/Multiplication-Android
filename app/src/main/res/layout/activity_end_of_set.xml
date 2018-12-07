@@ -5,10 +5,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".EndOfSetActivity" android:id="@+id/cl_outer">
+        tools:context=".EndOfSetActivity" android:id="@+id/clOuter">
 
     <LinearLayout
-            android:id="@+id/ll_buttons"
+            android:id="@+id/llButtons"
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,14 +20,14 @@
                 android:text="Next Drill"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" tools:layout_editor_absoluteY="107dp"
-                tools:layout_editor_absoluteX="148dp" android:id="@+id/btn_next_drill"
+                tools:layout_editor_absoluteX="148dp" android:id="@+id/btnNextDrill"
                 android:gravity="center_horizontal"
                 android:paddingLeft="30dp" android:paddingRight="30dp" android:paddingBottom="15dp"
                 android:paddingTop="15dp" android:textSize="20dp" android:layout_marginBottom="20dp"/>
         <Button
                 android:text="End Practice"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/btn_end_practice" android:paddingBottom="15dp"
+                android:layout_height="wrap_content" android:id="@+id/btnEndPractice" android:paddingBottom="15dp"
                 android:paddingTop="15dp" android:paddingLeft="30dp" android:paddingRight="30dp"
                 android:textSize="20dp" style="@style/Widget.AppCompat.Button.Borderless"/>
     </LinearLayout>
@@ -37,7 +37,7 @@
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintWidth_default="percent" app:layout_constraintWidth_percent="0.8"
-            android:id="@+id/cl_badge">
+            android:id="@+id/clBadge">
 
         <ImageView
                 android:id="@+id/iv_success_badge" android:src="@drawable/success_badge"
@@ -58,7 +58,7 @@
         <ImageView
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:id="@+id/iv_mark_cover"
+                android:id="@+id/ivMarkCover"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" android:background="@color/successBadge"
                 app:layout_constraintHeight_default="percent" app:layout_constraintHeight_percent="0.4"

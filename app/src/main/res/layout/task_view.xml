@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:app="http://schemas.android.com/apk/res-auto">
-    <RelativeLayout android:id="@+id/rl_outer" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:id="@+id/rlOuter" android:layout_width="match_parent" android:layout_height="match_parent">
 
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/ll_nextMultipliers">
+                android:layout_height="wrap_content" android:id="@+id/llNextMultipliers">
         </LinearLayout>
 
         <android.support.constraint.ConstraintLayout
@@ -15,7 +15,7 @@
             <TextView
                     android:text="5"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/tv_multiplier" android:textSize="40dp"
+                    android:layout_height="wrap_content" android:id="@+id/tvMultiplier" android:textSize="40dp"
                     android:textColor="@android:color/black"
                     android:textStyle="italic"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tv_multiplication"
@@ -30,7 +30,7 @@
             <TextView
                     android:text="7"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/tv_multiplicand" android:textSize="40dp"
+                    android:layout_height="wrap_content" android:id="@+id/tvMultiplicand" android:textSize="40dp"
                     android:textColor="@android:color/black" android:textStyle="italic"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tv_multiplication" app:layout_constraintStart_toEndOf="@+id/tv_multiplication"/>
             <TextView
@@ -38,10 +38,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/tv_equals" android:textSize="40dp"
                     android:textColor="@android:color/black" android:textStyle="italic"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/tv_multiplicand" app:layout_constraintStart_toEndOf="@+id/tv_multiplicand"/>
+                    app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplicand" app:layout_constraintStart_toEndOf="@+id/tvMultiplicand"/>
             <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/tv_answer" android:textSize="40dp"
+                    android:layout_height="wrap_content" android:id="@+id/tvAnswer" android:textSize="40dp"
                     android:textColor="@android:color/black" android:textStyle="italic"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tv_equals" app:layout_constraintStart_toEndOf="@+id/tv_equals"
             />

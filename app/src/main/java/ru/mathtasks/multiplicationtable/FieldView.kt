@@ -48,7 +48,6 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         private set
     private var multiplicand: Int = 0
     private lateinit var rows: Array<Row>
-    private var mark = Mark.None
 
     fun initialize(multiplicand: Int, width: Int, height: Int) {
         this.multiplicand = multiplicand
@@ -97,7 +96,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
                 layoutParams = RelativeLayout.LayoutParams(productWidth.toInt(), unitSize).apply { setMargins(productX.toInt(), y, 0, 0) }
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
-                setTextColor(ContextCompat.getColor(context, R.color.rowViewProduct))
+                setTextColor(ContextCompat.getColor(context, R.color.fieldViewProduct))
                 this@FieldView.addView(this@apply)
             }
 
@@ -115,17 +114,14 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     fun animateMark(mark: Mark, duration: Long): List<Animator> {
-        if (this.mark == mark)
-            return listOf()
-        val fromMark = this.mark
-        this.mark = mark
-        val toMark = mark
-        return mark2iv.map { (ivMark, iv) -> iv.alphaAnimator(duration, if (ivMark == fromMark) 1f else 0f, if (ivMark == toMark) 1f else 0f) }
+        return mark2iv
+            .filter { (ivMark, iv) -> iv.alpha != if (ivMark == mark) 1f else 0f }
+            .map { (ivMark, iv) -> iv.alphaAnimator(if (ivMark == mark) 1f else 0f, duration) }
     }
 
     fun setFieldState(state: FieldState) {
         this.state = state
-        rows.map { row ->
+        rows.forEach { row ->
             row.setIsMultiplierActive(state.isMultiplierActive(row))
             row.setUnitState(state.unitState(row))
             row.setText(state.text(row, multiplicand))
@@ -134,8 +130,8 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): List<Animator> {
         val animators = arrayListOf<Animator?>()
-        rows.map { row ->
-            animators.add(row.animateIsMultiplierActive(this.state.isMultiplierActive(row), state.isMultiplierActive(row), duration))
+        rows.forEach { row ->
+            animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
             animators.add(row.animateText(state.text(row, multiplicand), duration))
         }
         if (unitAnimation != null) {

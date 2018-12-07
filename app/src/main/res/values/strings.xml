@@ -1,7 +1,4 @@
 <resources>
     <string name="app_name">MultiplicationTable</string>
-
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMYaa\nCONTENT</string>
     <string name="title_activity_training">TrainingActivity</string>
 </resources>

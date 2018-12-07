@@ -10,48 +10,40 @@ enum class UnitAnimation { ByRow, ByUnit }
 
 class Row(val multiplier: Int, private val tvMultiplier: TextView, private val units: Array<UnitView>, private val tv: TextView) {
     private val resources: Resources = tvMultiplier.resources
-    private var text = ""
 
     fun setIsMultiplierActive(value: Boolean) {
-        tvMultiplier.alpha = if (value) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha)
+        tvMultiplier.alpha = if (value) 1f else Settings.RowMultiplicandInactiveAlpha
     }
 
-    fun animateIsMultiplierActive(fromValue: Boolean, toValue: Boolean, duration: Long): Animator {
-        return tvMultiplier.alphaAnimator(
-            duration,
-            if (fromValue) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha),
-            if (toValue) 1f else resources.getFloat(R.dimen.rowMultiplicandInactiveAlpha)
-        )
+    fun animateIsMultiplierActive(value: Boolean, duration: Long): Animator {
+        return tvMultiplier.alphaAnimator(if (value) 1f else Settings.RowMultiplicandInactiveAlpha, duration)
     }
 
     fun setText(text: String) {
-        this.text = text
-        tv.text = text
+         tv.text = text
     }
 
     fun animateText(text: String, duration: Long): Animator? {
-        if(this.text == text)
+        if (tv.text == text)
             return null
-        this.text = text
-        return tv.alphaAnimator(duration, 0f, 1f).onStart {
-            tv.alpha = 0f
-            tv.text = text
-        }
+        tv.alpha = 0f
+        tv.text = text
+        return tv.alphaAnimator(1f, duration)
     }
 
     fun setUnitState(state: UnitState) {
-        units.map { unit -> unit.setState(state) }
+        units.forEach { unit -> unit.setState(state) }
     }
 
     fun animateUnitState(state: UnitState, unitAnimation: UnitAnimation, reverse: Boolean, totalDuration: Long): Animator {
-        val switchDuration = resources.getInteger(R.integer.rowUnitSwitchDuration).toLong()
+        val switchDuration = Settings.RowUnitSwitchDuration
         return AnimatorSet().apply {
             when (unitAnimation) {
                 UnitAnimation.ByRow ->
-                    playTogether(units.map { unit -> unit.animateState(state, totalDuration - switchDuration, switchDuration) })
+                    playTogether(units.map { unit -> unit.animateState(state, switchDuration, totalDuration - switchDuration) })
                 UnitAnimation.ByUnit -> {
-                    val units = if (reverse) this@Row.units else this@Row.units.reversed().toTypedArray()
-                    playSequentially(units.map { unit -> unit.animateState(state, (totalDuration / units.size) - switchDuration, switchDuration) })
+                    val units = if (reverse) this@Row.units.reversed().toTypedArray() else this@Row.units
+                    playSequentially(units.map { unit -> unit.animateState(state, switchDuration, (totalDuration / units.size) - switchDuration) })
                 }
             }
         }

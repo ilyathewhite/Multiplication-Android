@@ -2,16 +2,23 @@ package ru.mathtasks.multiplicationtable
 
 import android.animation.*
 import android.content.res.Resources
-import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.util.TypedValue
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
-import io.reactivex.Completable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.subjects.CompletableSubject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 fun View.setBackgroundCompat(value: Drawable?) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
@@ -34,53 +41,50 @@ fun View.getLocationOnScreen(): Location {
     return Location(loc[0], loc[1])
 }
 
-fun Resources.getDuration(resourceId: Int): Long {
-    return this.getInteger(resourceId).toLong()
+fun View.alphaAnimator(alpha: Float, duration: Long, startDelay: Long = 0): Animator {
+    return ObjectAnimator.ofFloat(this, View.ALPHA, this.alpha, alpha).setDuration(duration).apply { setStartDelay(startDelay) }
 }
 
-fun View.alphaAnimator(duration: Long, fromAlpha: Float, toAlpha: Float): Animator {
-    return ObjectAnimator.ofFloat(this, View.ALPHA, fromAlpha, toAlpha).setDuration(duration)
+fun TextView.textColorAnimator(color: Int, duration: Long, startDelay: Long = 0): Animator {
+    return ObjectAnimator.ofObject(this, "textColor", ArgbEvaluator(), this.currentTextColor, color).setDuration(duration).apply { setStartDelay(startDelay) }
 }
 
-fun TextView.textColorAnimator(duration: Long, fromColor: Int, toColor: Int): Animator {
-    return ObjectAnimator.ofObject(this, "textColor", ArgbEvaluator(), fromColor, toColor).setDuration(duration)
-}
-
-fun List<Animator>.toCompletable(): Completable {
-    if (isEmpty())
-        return Completable.fromSingle(Single.just(0))
-    return AnimatorSet().apply { playTogether(this@toCompletable) }.toCompletable()
-}
-
-fun Animator?.toCompletable(): Completable {
-    if (this == null)
-        return Completable.fromSingle(Single.just(0))
-    val animationSubject = CompletableSubject.create()
-    addListener(object : AnimatorListenerAdapter() {
+suspend fun Animator.run(): Unit = suspendCoroutine { cont ->
+    this@run.addListener(object : AnimatorListenerAdapter() {
         override fun onAnimationEnd(animation: Animator?) {
-            animationSubject.onComplete()
+            cont.resume(Unit)
         }
     })
-    return animationSubject
-        .doOnSubscribe { start() }
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .observeOn(AndroidSchedulers.mainThread())
+    this@run.start()
 }
 
-fun Animator.onStart(action: () -> Unit): Animator {
-    this.addListener(object : AnimatorListenerAdapter() {
-        override fun onAnimationStart(animation: Animator?) {
-            action()
-        }
-    })
-    return this
+suspend fun List<Animator>.run(): Unit = this.merge().run()
+
+fun List<Animator>.merge(): Animator = AnimatorSet().apply { playTogether(this@merge) }
+
+abstract class ScopedAppActivity : AppCompatActivity(), CoroutineScope {
+    private lateinit var job: Job
+
+    override val coroutineContext: CoroutineContext
+        get() = job + Dispatchers.Main
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        job = Job()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job.cancel()
+    }
 }
 
-fun Animator.onEnd(action: () -> Unit): Animator {
-    this.addListener(object : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator?) {
-            action()
-        }
-    })
-    return this
+fun Iterable<Button>.autoSizeText(typeface: Typeface) {
+    val p = Paint().apply { textSize = 100f; this.typeface = typeface }
+    val needHeight = this.map { button -> val bounds = Rect(); p.getTextBounds(button.text.toString(), 0, button.text.length, bounds); bounds.height() }.max()
+    val needWidth = this.map { button -> p.measureText(button.text.toString()) }.max()
+    val haveWidth = this.map { button -> button.width - button.paddingLeft - button.paddingRight }.min()
+    val haveHeight = this.map { button -> button.height - button.paddingTop - button.paddingBottom }.min()
+    val textSize = Math.min(100f * haveHeight!! / needHeight!!, 100f * haveWidth!! / needWidth!!) * 1 / 2
+    this.forEach { it.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize); it.typeface = typeface }
 }

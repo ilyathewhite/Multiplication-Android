@@ -13,9 +13,5 @@
     <dimen name="fieldViewTextSizeRatio">0.75</dimen>
 
     <color name="fieldViewMultiplicand">@color/appDarkGray</color>
-    <integer name="fieldViewMultiplicandActiveAnimationDuration">300</integer>
-
-    <color name="rowViewProduct">@color/appDarkGray</color>
-    <integer name="rowViewHideProductAnimationDuration">100</integer>
-    <integer name="rowViewShowProductAnimationDuration">200</integer>
+    <color name="fieldViewProduct">@color/appDarkGray</color>
 </resources>

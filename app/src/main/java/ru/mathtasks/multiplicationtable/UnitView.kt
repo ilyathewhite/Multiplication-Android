@@ -5,8 +5,6 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.support.v4.content.ContextCompat
 import android.view.View
-import io.reactivex.Completable
-import io.reactivex.subjects.CompletableSubject
 
 enum class UnitState { Disabled, Counted, ToBeCounted, WasCounted }
 
@@ -54,21 +52,21 @@ class UnitView : View {
         drawable.setStroke(strokeWidthPixel, strokeColor)
     }
 
-    fun animateState(state: UnitState, delay: Long, duration: Long): Animator {
+    fun animateState(state: UnitState, duration: Long, startDelay: Long): Animator {
         val fillAnimator = ValueAnimator.ofObject(ArgbEvaluator(), fillColor, state2FillColor(state))
-        fillAnimator.startDelay = delay
+        fillAnimator.startDelay = startDelay
         fillAnimator.duration = duration
         fillAnimator.addUpdateListener { animator ->
             this.fillColor = animator.animatedValue as Int
             drawable.setColor(fillColor)
         }
         val strokeAnimator = ValueAnimator.ofObject(ArgbEvaluator(), strokeColor, state2StrokeColor(state))
-        strokeAnimator.startDelay = delay
+        strokeAnimator.startDelay = startDelay
         strokeAnimator.duration = duration
         strokeAnimator.addUpdateListener { animator ->
             this.strokeColor = animator.animatedValue as Int
             drawable.setStroke(strokeWidthPixel, strokeColor)
         }
-        return AnimatorSet().apply { playTogether(fillAnimator, strokeAnimator) }
+        return listOf(fillAnimator, strokeAnimator).merge()
     }
 }
