@@ -99,7 +99,11 @@ class TrainingActivity : ScopedAppActivity() {
                 taskView.setAnswer(answer)
 
                 listOf(
-                    fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MoveNextTaskDuration),
+                    fieldView.animateFieldState(
+                        taskProvider.fieldState,
+                        taskProvider.unitAnimation,
+                        if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
+                    ),
                     fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration)
                 ).flatten().run()
             }
@@ -126,8 +130,7 @@ class TrainingActivity : ScopedAppActivity() {
 
                         delay(Settings.PauseAfterCorrectCheckMarkDuration)
 
-                        val nextTask = taskView.animateNextTask(Settings.PrepareNextTaskDuration, Settings.MoveNextTaskDuration)
-                        nextTask.prepare()
+                        taskView.prepareNextTask(Settings.PrepareNextTaskDuration)
 
                         fieldView.setFieldState(taskProvider.fieldState)
                         autoUpdateAnswer = true
@@ -135,7 +138,7 @@ class TrainingActivity : ScopedAppActivity() {
                         taskView.setMultiplier(taskProvider.multiplier)
 
                         listOf(
-                            async { nextTask.move() },
+                            async { taskView.moveNextTask(this, Settings.MoveNextTaskDuration) },
                             async {
                                 listOf(
                                     fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MoveNextTaskDuration),
