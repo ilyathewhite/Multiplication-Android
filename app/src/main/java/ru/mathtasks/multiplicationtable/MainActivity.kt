@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         allButtons.forEach { b ->
             b.button.setOnClickListener {
                 startActivity(Intent(this, TrainingActivity::class.java).apply {
-                    putExtra(TRAINING_ACTIVITY_MULTIPLICAND, b.multiplicand)
+                    putExtra(TRAINING_ACTIVITY_TASK_PROVIDER, TaskProvider.FromPractice(b.multiplicand))
                 })
             }
         }

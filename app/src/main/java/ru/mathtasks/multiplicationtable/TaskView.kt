@@ -36,7 +36,7 @@ class TaskView : LinearLayout {
             TextView(context).apply {
                 text = nextMultiplier.toString()
                 setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
-                setTypeface(null, Typeface.BOLD)
+                typeface = this@TaskView.tvAnswer.typeface
                 setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
                 maxLines = 1
                 id = ViewCompat.generateViewId()
@@ -104,10 +104,7 @@ class TaskView : LinearLayout {
 
         listOf(
             scope.async {
-                listOf(
-                    tvMovingNextMultiplier.textColorAnimator(ContextCompat.getColor(context, R.color.taskViewTask), duration),
-                    tvMovingNextMultiplier.textSizeAnimator(nextTvMultipliers[0].textSize, duration)
-                ).merge().run()
+                tvMovingNextMultiplier.textColorAnimator(ContextCompat.getColor(context, R.color.taskViewTask), duration).run()
             },
             scope.async {
                 clTask.transition(duration, TransitionSet().apply {

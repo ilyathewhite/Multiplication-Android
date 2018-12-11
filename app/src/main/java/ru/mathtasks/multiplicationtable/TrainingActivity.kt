@@ -5,21 +5,26 @@ import android.content.Intent
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.View
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_training.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Math.abs
 import java.lang.Math.min
 
-const val TRAINING_ACTIVITY_MULTIPLICAND = "ru.mathtasks.multiplicationtable.trainingactivity.multiplicand"
+const val TRAINING_ACTIVITY_TASK_PROVIDER = "ru.mathTasks.multiplicationTable.trainingActivity.taskProvider"
 
 class TrainingActivity : ScopedAppActivity() {
     companion object {
         private const val END_OF_SET_ACTIVITY_REQUEST_CODE = 1
         private const val END_OF_GAME_ACTIVITY_REQUEST_CODE = 2
+        private const val STATE_TASK_PROVIDER = "taskProvider"
+        private const val STATE_ANSWER = "answer"
     }
 
     private lateinit var taskProvider: TaskProvider
@@ -30,7 +35,12 @@ class TrainingActivity : ScopedAppActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
 
-        this.taskProvider = TaskProvider(intent.getIntExtra(TRAINING_ACTIVITY_MULTIPLICAND, 0))
+        window.decorView.systemUiVisibility = (SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_STABLE, 0)
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, 0)
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN, 0)
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
+                or SDK(Build.VERSION_CODES.KITKAT, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
 
         class B(val button: Button, val value: Int)
 
@@ -55,6 +65,20 @@ class TrainingActivity : ScopedAppActivity() {
             startSet()
             (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(Typeface.DEFAULT)
         }
+
+        if (savedInstanceState == null)
+            taskProvider = intent.getParcelableExtra(TRAINING_ACTIVITY_TASK_PROVIDER)
+        else {
+            taskProvider = savedInstanceState.getParcelable(STATE_TASK_PROVIDER)!!
+            answer = if (savedInstanceState.containsKey(STATE_ANSWER)) savedInstanceState.getInt(STATE_ANSWER) else null
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putParcelable(STATE_TASK_PROVIDER, taskProvider)
+        if (answer != null)
+            outState?.putInt(STATE_ANSWER, answer!!)
     }
 
     private fun startSet() {
@@ -102,7 +126,8 @@ class TrainingActivity : ScopedAppActivity() {
                     fieldView.animateFieldState(
                         taskProvider.fieldState,
                         taskProvider.unitAnimation,
-                        if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
+                        abs(taskProvider.hintFrom() - taskProvider.multiplier) *
+                                if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
                     ),
                     fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration)
                 ).flatten().run()

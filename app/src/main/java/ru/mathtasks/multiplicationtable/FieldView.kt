@@ -3,6 +3,7 @@ package ru.mathtasks.multiplicationtable
 import android.animation.Animator
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -77,6 +78,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
                 text = multiplier.toString()
                 setTextColor(ContextCompat.getColor(context, R.color.fieldViewMultiplicand))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
                 layoutParams = RelativeLayout.LayoutParams((multiplierSpaceRatio * unitSize).toInt(), unitSize).apply { setMargins(originX + leftOffset, y, 0, 0) }
                 this@FieldView.addView(this@apply)
@@ -94,9 +96,10 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             val productX = originX + totalContentWidth - productWidth
             val tvProduct = TextView(context).apply {
                 gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
-                layoutParams = RelativeLayout.LayoutParams(productWidth.toInt(), unitSize).apply { setMargins(productX.toInt(), y, 0, 0) }
-                setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
                 setTextColor(ContextCompat.getColor(context, R.color.fieldViewProduct))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
+                layoutParams = RelativeLayout.LayoutParams(productWidth.toInt(), unitSize).apply { setMargins(productX.toInt(), y, 0, 0) }
                 this@FieldView.addView(this@apply)
             }
 
