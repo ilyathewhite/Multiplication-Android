@@ -24,7 +24,7 @@ class TaskView : LinearLayout {
     private var nextMultiplierIdx = 0
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        (context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.task_view, this)
+        inflate(context, R.layout.task_view, this)
     }
 
     fun createNextMultipliers(nextMultipliers: Array<Int>) {

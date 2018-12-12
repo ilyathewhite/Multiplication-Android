@@ -8,4 +8,9 @@
         <attr name="metaButtonBarStyle" format="reference" />
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="TaskTypeView">
+        <attr name="caption" format="string"/>
+        <attr name="description" format="string"/>
+    </declare-styleable>
 </resources>

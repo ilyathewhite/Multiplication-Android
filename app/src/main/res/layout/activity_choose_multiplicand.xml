@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:layout_height="match_parent"
+              android:background="#FFFFFF"
+              tools:context=".MainActivity" android:layout_width="match_parent" android:visibility="visible"
+              android:orientation="vertical">
+    <TextView
+            android:text="5  \u00D7  7  =  35"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/textView2" android:textSize="40dp"
+            android:gravity="center_horizontal" android:layout_marginTop="50dp"
+            android:textColor="@android:color/black" android:textStyle="italic"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <TextView
+                android:text="multiplier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/textView3" android:layout_marginLeft="85dp"
+                android:textColor="@android:color/black"/>
+        <TextView
+                android:text="multiplicand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/textView4" android:layout_weight="1"
+                android:layout_marginLeft="20dp" android:textColor="@android:color/black"/>
+    </LinearLayout>
+    <TextView
+            android:text="Pick Multiplicand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/textView"
+            android:layout_gravity="center_horizontal" android:textSize="30dp"
+            android:textColor="@android:color/black" android:maxLines="1"
+            android:layout_marginBottom="30dp" android:layout_marginTop="30dp"/>
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" android:layout_margin="3dp">
+
+        <Button
+                android:text="1"
+                android:id="@+id/btn1"
+                style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn2"/>
+        <Button
+                android:text="2"
+                android:id="@+id/btn2"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn1" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn3"/>
+        <Button
+                android:text="3"
+                android:id="@+id/btn3"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn2" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn4"/>
+        <Button
+                android:text="4"
+                android:id="@+id/btn4"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn3" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn5"/>
+        <Button
+                android:text="5"
+                android:id="@+id/btn5"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn4" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
+    <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" android:layout_margin="3dp">
+        <Button
+                android:text="6"
+                android:id="@+id/btn6"
+                style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn7"/>
+        <Button
+                android:text="7"
+                android:id="@+id/btn7"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn6" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn8"/>
+        <Button
+                android:text="8"
+                android:id="@+id/btn8"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn7" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn9"/>
+        <Button
+                android:text="9"
+                android:id="@+id/btn9"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn8" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn10"/>
+        <Button
+                android:text="10"
+                android:id="@+id/btn10"
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn9" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
+    </android.support.constraint.ConstraintLayout>
+</LinearLayout>
