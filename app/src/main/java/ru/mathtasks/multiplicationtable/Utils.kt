@@ -7,6 +7,8 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.constraint.ConstraintLayout
 import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
@@ -26,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-fun <T> SDK(sdk: Int, value: T, default: T) : T  = if (Build.VERSION.SDK_INT >= sdk) value else default
+fun <T> SDK(sdk: Int, value: T, default: T): T = if (Build.VERSION.SDK_INT >= sdk) value else default
 
 fun View.setBackgroundCompat(value: Drawable?) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
@@ -122,18 +124,18 @@ suspend fun List<Animator>.run(): Unit = this.merge().run()
 fun List<Animator>.merge(): Animator = AnimatorSet().apply { playTogether(this@merge) }
 
 abstract class ScopedAppActivity : AppCompatActivity(), CoroutineScope {
-    private lateinit var job: Job
+    private var superviserJob: Job? = null
     override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
-
-    override fun onResume() {
-        super.onResume()
-        job = SupervisorJob()
-    }
+        get() {
+            if (superviserJob == null)
+                superviserJob = SupervisorJob()
+            return superviserJob!! + Dispatchers.Main
+        }
 
     override fun onPause() {
         super.onPause()
-        job.cancel()
+        superviserJob?.cancel()
+        superviserJob = null
     }
 }
 

@@ -12,5 +12,6 @@ class TaskTypeView(context: Context, attrs: AttributeSet) : ConstraintLayout(con
         tvCaption.text = attributes.getString(R.styleable.TaskTypeView_caption)
         tvDescription.text = attributes.getString(R.styleable.TaskTypeView_description)
         attributes.recycle()
+        isClickable = true
     }
 }

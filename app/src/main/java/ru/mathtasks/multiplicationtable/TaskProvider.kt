@@ -22,26 +22,25 @@ class TaskProvider(
 
     companion object {
         private const val MAX_LAST_MULTIPLIERS = 3
+    }
 
-        fun FromTraining(multiplicand: Int) = TaskProvider(
-            multiplicand, 0, 0, 0, mutableListOf(), 0,
-            listOf(
-//              Stage(true, mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf(0)),
-//              Stage(false, mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf(0)),
-//              Stage(true, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
-//              Stage(false, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
+    constructor(type: TaskType, multiplicand: Int) : this(
+        multiplicand, 0, 0, 0, mutableListOf(), 0,
+        when (type) {
+            TaskType.Learn -> listOf(
+                //Stage(true, mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf(0)),
+                //Stage(false, mutableListOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf(0)),
+                //Stage(true, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
+                //Stage(false, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
                 Stage(true, arrayOf(1, 3, 5, 7, 9), arrayOf(0)),
                 Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf(10)),
                 Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf(0)),
                 Stage(true, arrayOf(10, 8, 6, 4, 2), arrayOf(0))
             )
-        )
-
-        fun FromPractice(multiplicand: Int) = TaskProvider(
-            multiplicand, 0, 0, 0, mutableListOf(), 0,
-            listOf(Stage(false, (1..30).map { Random().nextInt(9) + 1 }.toTypedArray(), arrayOf(0, 5, 10)))
-        )
-    }
+            TaskType.Practice -> listOf(Stage(false, (1..30).map { Random().nextInt(9) + 1 }.toTypedArray(), arrayOf(0, 5, 10)))
+            else -> listOf()
+        }
+    )
 
     val endOfGame get() = stages.size == stageIdx
 

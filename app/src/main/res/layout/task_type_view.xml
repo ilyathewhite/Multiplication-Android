@@ -4,7 +4,7 @@
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/clTaskType"
-            android:clickable="true"
+            android:clickable="false"
             android:background="?android:attr/selectableItemBackground">
         <TextView
                 tools:text="Caption"

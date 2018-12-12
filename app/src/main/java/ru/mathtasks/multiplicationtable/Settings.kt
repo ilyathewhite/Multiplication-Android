@@ -20,5 +20,6 @@ class Settings {
 
         const val RowMultiplicandInactiveAlpha = 0.6f
         const val RowUnitSwitchDuration = 10L
+        const val ChooseMultiplicandDelay = 1000L
     }
 }

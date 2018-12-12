@@ -22,7 +22,7 @@
         <ru.mathtasks.multiplicationtable.TaskTypeView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" app:caption="Learn" android:layout_margin="10dp"
-                app:description="Pick a multiplicand and do the drills. You will get a visual hint for every question and any wrong answer." android:id="@+id/ttvLearn">
+                app:description="Pick a multiplicand and do the drills. You will get a visual hint for every question and any wrong answer." android:id="@+id/ttvLearn" android:clickable="true" android:focusable="true">
         </ru.mathtasks.multiplicationtable.TaskTypeView>
         <View
                 android:layout_width="match_parent"
