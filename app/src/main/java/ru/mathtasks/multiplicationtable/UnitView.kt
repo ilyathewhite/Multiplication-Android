@@ -14,17 +14,20 @@ class UnitView : View {
     private var strokeColor: Int
     private val drawable: GradientDrawable
 
-    constructor(context: Context, unitSize: Int) : super(context) {
+    constructor(context: Context) : super(context) {
         this.fillColor = state2FillColor(UnitState.Disabled)
         this.strokeColor = state2StrokeColor(UnitState.Disabled)
         this.strokeWidthPixel = context.resources.getDimensionPixelSize(R.dimen.unitViewStrokeWidth)
         this.drawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            cornerRadius = unitSize * context.resources.getFloat(R.dimen.unitViewCornerRadiusRatio)
             setColor(fillColor)
             setStroke(strokeWidthPixel, strokeColor)
         }
         setBackgroundCompat(drawable)
+    }
+
+    fun onResize(unitSize: Int) {
+        this.drawable.cornerRadius = unitSize * context.resources.getFloat(R.dimen.unitViewCornerRadiusRatio)
     }
 
     private fun state2FillColor(state: UnitState) = ContextCompat.getColor(

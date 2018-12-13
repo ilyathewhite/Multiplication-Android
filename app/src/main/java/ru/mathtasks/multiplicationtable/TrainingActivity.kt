@@ -2,12 +2,9 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.View
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_training.*
@@ -15,12 +12,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Math.abs
-import java.lang.Math.min
-
-const val TRAINING_ACTIVITY_TASK_PROVIDER = "ru.mathTasks.multiplicationTable.trainingActivity.taskProvider"
 
 class TrainingActivity : ScopedAppActivity() {
     companion object {
+        const val PARAM_MULTIPLICAND = "multiplicand"
+        const val PARAM_TASK_TYPE = "taskType"
         private const val END_OF_SET_ACTIVITY_REQUEST_CODE = 1
         private const val END_OF_GAME_ACTIVITY_REQUEST_CODE = 2
         private const val STATE_TASK_PROVIDER = "taskProvider"
@@ -34,13 +30,25 @@ class TrainingActivity : ScopedAppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
+        setSystemUiVisibility()
 
-        window.decorView.systemUiVisibility = (SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_STABLE, 0)
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, 0)
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN, 0)
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
-                or SDK(Build.VERSION_CODES.KITKAT, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
+        val taskType = intent.getSerializableExtra(PARAM_TASK_TYPE) as TaskType
+        val multiplicand = intent.getIntExtra(PARAM_MULTIPLICAND, 1)
+        hHeader.caption = (if (taskType == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 $multiplicand"
+
+        if (savedInstanceState == null)
+            taskProvider = TaskProvider(taskType, multiplicand)
+        else {
+            taskProvider = savedInstanceState.getParcelable(STATE_TASK_PROVIDER)!!
+            if (taskProvider.endOfGame) {
+                finish()
+                return
+            }
+            answer = if (savedInstanceState.containsKey(STATE_ANSWER)) savedInstanceState.getInt(STATE_ANSWER) else null
+        }
+        pvProgress.progress = taskProvider.taskProgress
+        fieldView.initialize(taskProvider.multiplicand)
+        applyState()
 
         class B(val button: Button, val value: Int)
 
@@ -60,17 +68,10 @@ class TrainingActivity : ScopedAppActivity() {
         btnBs.setOnClickListener { onBsKey() }
         btnOk.setOnClickListener { onOkKey() }
 
-        fieldView.post {
-            fieldView.initialize(taskProvider.multiplicand, fieldView.width, fieldView.height)
-            startSet()
-            (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(Typeface.DEFAULT)
-        }
 
-        if (savedInstanceState == null)
-            taskProvider = intent.getParcelableExtra(TRAINING_ACTIVITY_TASK_PROVIDER)
-        else {
-            taskProvider = savedInstanceState.getParcelable(STATE_TASK_PROVIDER)!!
-            answer = if (savedInstanceState.containsKey(STATE_ANSWER)) savedInstanceState.getInt(STATE_ANSWER) else null
+        llOuter.viewTreeObserver.addOnGlobalLayoutListener {
+            fieldView.layout(fieldView.width, fieldView.height)
+            (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(Typeface.DEFAULT)
         }
     }
 
@@ -81,8 +82,8 @@ class TrainingActivity : ScopedAppActivity() {
             outState?.putInt(STATE_ANSWER, answer!!)
     }
 
-    private fun startSet() {
-        answer = null
+    private fun applyState() {
+        pvProgress.progress = taskProvider.taskProgress
         taskView.apply {
             createNextMultipliers(taskProvider.nextMultipliers)
             setMultiplier(taskProvider.multiplier)
@@ -124,34 +125,44 @@ class TrainingActivity : ScopedAppActivity() {
 
                 listOf(
                     fieldView.animateFieldState(
-                        taskProvider.fieldState,
+                        taskProvider.fieldState.copy(visibleAnswers = arrayOf(taskProvider.hintFrom())),
                         taskProvider.unitAnimation,
                         abs(taskProvider.hintFrom() - taskProvider.multiplier) *
                                 if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
                     ),
                     fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration)
                 ).flatten().run()
+
+                fieldView.animateFieldState(taskProvider.fieldState, null, Settings.ShowVisibleAnswersDuration).run()
             }
         } else {
             taskProvider.nextTask()
             when {
-                taskProvider.endOfSet -> {
-                    startActivityForResult(Intent(this, EndOfSetActivity::class.java).apply {
-                        putExtra(EndOfSetActivity.INPUT_Q_ERRORS, taskProvider.qErrors)
-                    }, END_OF_SET_ACTIVITY_REQUEST_CODE)
-                }
                 taskProvider.endOfGame -> {
-                    startActivityForResult(Intent(this, EndOfSetActivity::class.java).apply {
-                        putExtra(EndOfSetActivity.INPUT_Q_ERRORS, taskProvider.qErrors)
+                    pvProgress.progress = taskProvider.taskProgress
+                    startActivityForResult(Intent(this, EndOfStageActivity::class.java).apply {
+                        putExtra(EndOfStageActivity.PARAM_Q_ERRORS, taskProvider.qErrors)
+                        putExtra(EndOfStageActivity.PARAM_PROGRESS, taskProvider.stageProgress)
                     }, END_OF_GAME_ACTIVITY_REQUEST_CODE)
+                }
+                taskProvider.endOfStage -> {
+                    pvProgress.progress = taskProvider.taskProgress
+                    startActivityForResult(Intent(this, EndOfStageActivity::class.java).apply {
+                        putExtra(EndOfStageActivity.PARAM_Q_ERRORS, taskProvider.qErrors)
+                        putExtra(EndOfStageActivity.PARAM_PROGRESS, taskProvider.stageProgress)
+                    }, END_OF_SET_ACTIVITY_REQUEST_CODE)
                 }
                 else -> {
                     answer = null
                     launch {
                         listOf(
-                            fieldView.animateFieldState(fieldView.state.copy(questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration),
-                            fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
-                        ).flatten().run()
+                            async { pvProgress.animateProgress(taskProvider.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
+                            async {
+                                listOf(
+                                    fieldView.animateFieldState(fieldView.state.copy(questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration),
+                                    fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
+                                ).flatten().run()
+                            }).map { it.await() }
 
                         delay(Settings.PauseAfterCorrectCheckMarkDuration)
 
@@ -164,12 +175,7 @@ class TrainingActivity : ScopedAppActivity() {
 
                         listOf(
                             async { taskView.moveNextTask(this, Settings.MoveNextTaskDuration) },
-                            async {
-                                listOf(
-                                    fieldView.animateFieldState(taskProvider.fieldState, taskProvider.unitAnimation, Settings.MoveNextTaskDuration),
-                                    fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration)
-                                ).flatten().run()
-                            }
+                            async { fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration).run() }
                         ).map { it.await() }
                     }
                 }
@@ -185,10 +191,21 @@ class TrainingActivity : ScopedAppActivity() {
                     finish()
                 else {
                     taskProvider.nextTask()
-                    startSet()
+                    answer = null
+                    applyState()
+                    setSystemUiVisibility()
                 }
             }
             END_OF_GAME_ACTIVITY_REQUEST_CODE -> finish()
         }
+    }
+
+    private fun setSystemUiVisibility() {
+        window.decorView.systemUiVisibility = (SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_STABLE, 0)
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, 0)
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN, 0)
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
+                or SDK(Build.VERSION_CODES.KITKAT, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
     }
 }

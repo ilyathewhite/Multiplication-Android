@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
@@ -153,4 +154,16 @@ fun Iterable<Button>.autoSizeText(typeface: Typeface) {
         button.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         button.typeface = typeface
     }
+}
+
+fun View.onLayoutOnce(action: () -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+            else
+                viewTreeObserver.removeGlobalOnLayoutListener(this)
+            action()
+        }
+    })
 }

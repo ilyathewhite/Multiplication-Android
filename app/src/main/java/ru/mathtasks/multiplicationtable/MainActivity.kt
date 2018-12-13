@@ -15,12 +15,12 @@ class MainActivity : AppCompatActivity() {
 
         ttvLearn.setOnClickListener {
             startActivity(Intent(this, ChooseMultiplicandActivity::class.java).apply {
-                putExtra(CHOOSE_MULTIPLICAND_ACTIVITY_TASK_TYPE, TaskType.Learn)
+                putExtra(ChooseMultiplicandActivity.PARAM_TASK_TYPE, TaskType.Learn)
             })
         }
         ttvPractice.setOnClickListener {
             startActivity(Intent(this, ChooseMultiplicandActivity::class.java).apply {
-                putExtra(CHOOSE_MULTIPLICAND_ACTIVITY_TASK_TYPE, TaskType.Practice)
+                putExtra(ChooseMultiplicandActivity.PARAM_TASK_TYPE, TaskType.Practice)
             })
         }
         ttvTest.setOnClickListener { }

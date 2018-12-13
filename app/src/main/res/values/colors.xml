@@ -18,4 +18,6 @@
     <color name="appDarkGray">#646464</color>
 
     <color name="successBadge">#ffa100</color>
+
+    <color name="progressBar">#4a90e2</color>
 </resources>

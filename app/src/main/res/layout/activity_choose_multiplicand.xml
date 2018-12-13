@@ -5,10 +5,9 @@
               android:background="#FFFFFF"
               tools:context=".MainActivity" android:layout_width="match_parent" android:visibility="visible"
               android:orientation="vertical" android:id="@+id/llFrame">
-    <TextView
+    <ru.mathtasks.multiplicationtable.HeaderView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/tvTaskType" tools:text="Practice" android:textSize="20dp"
-            android:textColor="@android:color/black" android:gravity="center" android:padding="8dp"/>
+            android:layout_height="wrap_content" android:id="@+id/hTaskType" />
     <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

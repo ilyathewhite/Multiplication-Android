@@ -3,8 +3,15 @@
               xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
               android:layout_height="match_parent"
               android:background="#FFFFFF"
-              tools:context=".TrainingActivity" android:layout_width="match_parent" android:visibility="visible" android:orientation="vertical">
+              tools:context=".TrainingActivity" android:layout_width="match_parent" android:visibility="visible" android:orientation="vertical" android:id="@+id/llOuter">
 
+    <ru.mathtasks.multiplicationtable.HeaderView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/hHeader">
+    </ru.mathtasks.multiplicationtable.HeaderView>
+    <ru.mathtasks.multiplicationtable.ProgressView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/pvProgress"/>
     <app:ru.mathtasks.multiplicationtable.TaskView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/taskView"/>
 
     <app:ru.mathtasks.multiplicationtable.FieldView

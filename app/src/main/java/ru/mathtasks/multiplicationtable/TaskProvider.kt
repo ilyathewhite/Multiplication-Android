@@ -33,22 +33,26 @@ class TaskProvider(
                 //Stage(true, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
                 //Stage(false, mutableListOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf(0)),
                 Stage(true, arrayOf(1, 3, 5, 7, 9), arrayOf(0)),
-                Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf(10)),
-                Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf(0)),
+                //Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf(10)),
+                //Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf(0)),
                 Stage(true, arrayOf(10, 8, 6, 4, 2), arrayOf(0))
             )
-            TaskType.Practice -> listOf(Stage(false, (1..30).map { Random().nextInt(9) + 1 }.toTypedArray(), arrayOf(0, 5, 10)))
+            TaskType.Practice -> listOf(Stage(false, (1..2).shuffled().toTypedArray(), arrayOf(0, 5, 10)))
             else -> listOf()
         }
     )
 
     val endOfGame get() = stages.size == stageIdx
 
-    val endOfSet get() = stages[stageIdx].multipliers.size == multiplierIdx
+    val endOfStage get() = stages[stageIdx].multipliers.size == multiplierIdx
 
     val multiplier get() = stages[stageIdx].multipliers[multiplierIdx]
 
     val nextMultipliers get() = stages[stageIdx].multipliers.drop(multiplierIdx + 1).toTypedArray()
+
+    val taskProgress get() = if(endOfGame) 1f else multiplierIdx.toFloat() / stages[stageIdx].multipliers.size
+
+    val stageProgress get() = if(endOfGame) 1f else (stageIdx + if (endOfStage) 1 else 0).toFloat() / stages.size
 
     val unitAnimation
         get() = when (attempt) {
@@ -95,15 +99,16 @@ class TaskProvider(
     fun nextTask() {
         if (endOfGame)
             throw IllegalStateException()
-        else if (endOfSet)
+        else if (endOfStage) {
             stageIdx++
-        else {
+            multiplierIdx = 0
+        } else {
             attempt = 0
             prevMultipliers.add(multiplier)
             if (prevMultipliers.size > MAX_LAST_MULTIPLIERS)
                 prevMultipliers.removeAt(0)
             multiplierIdx++
-            if (endOfSet) {
+            if (endOfStage) {
                 prevMultipliers.clear()
                 if (stageIdx == stages.size - 1)   // promote end of last set to end of game
                     stageIdx++

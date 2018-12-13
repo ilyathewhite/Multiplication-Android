@@ -5,8 +5,11 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".EndOfSetActivity" android:id="@+id/clOuter">
+        tools:context=".EndOfStageActivity" android:id="@+id/clOuter">
 
+    <ru.mathtasks.multiplicationtable.ProgressView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/pvProgress"/>
     <LinearLayout
             android:id="@+id/llButtons"
             android:orientation="vertical"
@@ -40,13 +43,13 @@
             android:id="@+id/clBadge">
 
         <ImageView
-                android:id="@+id/iv_success_badge" android:src="@drawable/success_badge"
+                android:id="@+id/iv_success_badge" app:srcCompat="@drawable/success_badge"
                 android:layout_height="0dp" android:layout_width="0dp"
                 app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
         />
         <ImageView
-                android:src="@drawable/success_badge_mark"
+                app:srcCompat="@drawable/success_badge_mark"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:id="@+id/iv_mark"

@@ -9,10 +9,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-const val CHOOSE_MULTIPLICAND_ACTIVITY_TASK_TYPE = "ru.mathTasks.multiplicationTable.chooseMultiplicandActivity.taskType"
-
 class ChooseMultiplicandActivity : ScopedAppActivity() {
     companion object {
+        const val PARAM_TASK_TYPE = "taskType"
         private const val STATE_SELECTED_MULTIPLICAND = "selectedMultiplicand"
     }
 
@@ -38,8 +37,8 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
             10 to btn10
         )
 
-        taskType = intent!!.extras!![CHOOSE_MULTIPLICAND_ACTIVITY_TASK_TYPE] as TaskType
-        tvTaskType.text = if (taskType == TaskType.Learn) "Learn" else "Practice"
+        taskType = intent!!.extras!![PARAM_TASK_TYPE] as TaskType
+        hTaskType.caption = if (taskType == TaskType.Learn) "Learn" else "Practice"
 
         multiplicand2button.forEach { (multiplicand, button) ->
             button.setOnClickListener {
@@ -53,7 +52,8 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
 
         btnStart.setOnClickListener {
             startActivity(Intent(this, TrainingActivity::class.java).apply {
-                putExtra(TRAINING_ACTIVITY_TASK_PROVIDER, TaskProvider(taskType, selectedMultiplicand))
+                putExtra(TrainingActivity.PARAM_TASK_TYPE, taskType)
+                putExtra(TrainingActivity.PARAM_MULTIPLICAND, selectedMultiplicand)
             })
         }
 

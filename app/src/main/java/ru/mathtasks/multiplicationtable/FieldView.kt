@@ -1,6 +1,7 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
+import android.animation.AnimatorSet
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
@@ -10,7 +11,8 @@ import android.view.Gravity
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import java.lang.Math.*
+import java.lang.Math.abs
+
 
 enum class Mark { Correct, Incorrect, None }
 
@@ -50,9 +52,45 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private var multiplicand: Int = 0
     private lateinit var rows: Array<Row>
 
-    fun initialize(multiplicand: Int, width: Int, height: Int) {
+    fun initialize(multiplicand: Int) {
         this.multiplicand = multiplicand
 
+        this.rows = (1..Q_ROWS).map { multiplier ->
+            val tvMultiplier = TextView(context).apply {
+                gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
+                text = multiplier.toString()
+                setTextColor(ContextCompat.getColor(context, R.color.fieldViewMultiplicand))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+                this@FieldView.addView(this@apply)
+            }
+
+            val units = (0 until multiplicand).map {
+                UnitView(context).apply {
+                    this@FieldView.addView(this@apply)
+                }
+            }.toTypedArray()
+
+            val tvProduct = TextView(context).apply {
+                gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
+                setTextColor(ContextCompat.getColor(context, R.color.fieldViewProduct))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+                this@FieldView.addView(this@apply)
+            }
+
+            return@map Row(multiplier, tvMultiplier, units, tvProduct)
+        }.toTypedArray()
+
+        this.mark2iv = arrayOf(Mark.Correct, Mark.Incorrect).map { mark ->
+            mark to ImageView(context).apply {
+                alpha = 0f
+                layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
+                setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
+                this@FieldView.addView(this@apply)
+            }
+        }.toMap()
+    }
+
+    fun layout(width: Int, height: Int) {
         val leftOffset = resources.getDimensionPixelSize(R.dimen.fieldViewLeftOffset)
         val rightOffset = resources.getDimensionPixelSize(R.dimen.fieldViewRightOffset)
         val topOffset = resources.getDimensionPixelSize(R.dimen.fieldViewTopOffset)
@@ -71,49 +109,30 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val totalContentWidth = totalColumnsSpaceRatio * unitSize + (multiplicand - 1 + extraSpaces) * spacing
         val originX = Math.round((width - totalContentWidth) / 2.0).toInt()
 
-        this.rows = (1..Q_ROWS).map { multiplier ->
-            val y = topOffset + (unitSize + spacing) * (multiplier - 1)
+        for (row in rows) {
+            val y = topOffset + (unitSize + spacing) * (row.multiplier - 1)
 
-            val tvMultiplier = TextView(context).apply {
-                gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
-                text = multiplier.toString()
-                setTextColor(ContextCompat.getColor(context, R.color.fieldViewMultiplicand))
-                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+            row.tvMultiplier.apply {
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
                 layoutParams = RelativeLayout.LayoutParams((multiplierSpaceRatio * unitSize).toInt(), unitSize).apply { setMargins(originX + leftOffset, y, 0, 0) }
-                this@FieldView.addView(this@apply)
             }
 
-            val units = (0 until multiplicand).map { m ->
+            row.units.forEachIndexed { m, unit ->
                 val x = Math.round(originX + unitSize * multiplierSpaceRatio + (extraSpaces / 2) * spacing + (unitSize + spacing) * m)
-                UnitView(context, unitSize).apply {
+                unit.apply {
                     layoutParams = RelativeLayout.LayoutParams(unitSize, unitSize).apply { setMargins(x, y, 0, 0) }
-                    this@FieldView.addView(this@apply)
+                    onResize(unitSize)
                 }
-            }.toTypedArray()
+
+            }
 
             val productWidth = productSpaceRatio * unitSize
             val productX = originX + totalContentWidth - productWidth
-            val tvProduct = TextView(context).apply {
-                gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
-                setTextColor(ContextCompat.getColor(context, R.color.fieldViewProduct))
-                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+            row.tvProduct.apply {
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
                 layoutParams = RelativeLayout.LayoutParams(productWidth.toInt(), unitSize).apply { setMargins(productX.toInt(), y, 0, 0) }
-                this@FieldView.addView(this@apply)
             }
-
-            return@map Row(multiplier, tvMultiplier, units, tvProduct)
-        }.toTypedArray()
-
-        this.mark2iv = arrayOf(Mark.Correct, Mark.Incorrect).map { mark ->
-            mark to ImageView(context).apply {
-                alpha = 0f
-                layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
-                setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
-                this@FieldView.addView(this@apply)
-            }
-        }.toMap()
+        }
     }
 
     fun animateMark(mark: Mark, duration: Long): List<Animator> {
@@ -137,16 +156,16 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
             animators.add(row.animateText(state.text(row, multiplicand), duration))
         }
-        if (unitAnimation != null) {
-            val ranges = arrayOf(
-                Pair(this.state.qCountedRows, state.qCountedRows),
-                Pair(this.state.qToBeCountedRows, state.qToBeCountedRows),
-                Pair(this.state.qWasCountedRows, state.qWasCountedRows)
-            )
-            for (range in ranges) {
-                for (idx in min(range.first, range.second) until max(range.first, range.second))
-                    animators.add(rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, range.first > range.second, duration / abs(range.second - range.first)))
-            }
+        if (unitAnimation != null && this.state.qCountedRows != state.qCountedRows) {
+            val from = this.state.qCountedRows
+            val to = state.qCountedRows
+            animators.add(AnimatorSet().apply {
+                playSequentially(
+                    IntProgression.fromClosedRange(from, to, if (from < to) 1 else -1).map { idx ->
+                        rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, to < from, duration / abs(to - from))
+                    }
+                )
+            })
         }
         this.state = state
         return animators.filterNotNull()

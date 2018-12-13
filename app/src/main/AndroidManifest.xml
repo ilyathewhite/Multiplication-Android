@@ -26,7 +26,7 @@
                 android:name=".TrainingActivity"
                 android:theme="@style/AppTheme">
         </activity>
-        <activity android:name=".EndOfSetActivity"
+        <activity android:name=".EndOfStageActivity"
                   android:theme="@style/AppTheme">
         </activity>
     </application>
