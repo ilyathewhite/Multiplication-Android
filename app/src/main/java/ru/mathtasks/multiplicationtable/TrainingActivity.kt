@@ -90,7 +90,9 @@ class TrainingActivity : ScopedAppActivity() {
             setMultiplicand(taskProvider.multiplicand)
             setAnswer(answer)
         }
-        fieldView.setFieldState(taskProvider.fieldState)
+        fieldView.setRowText(taskProvider.prevAnswers, taskProvider.multiplier)
+        fieldView.setLastActiveMultiplier(taskProvider.multiplier)
+        fieldView.setRowState(taskProvider.rowsState)
     }
 
     private fun onBsKey() {
@@ -113,27 +115,24 @@ class TrainingActivity : ScopedAppActivity() {
             answer = null
             launch {
                 listOf(
-                    fieldView.animateFieldState(fieldView.state.copy(questionMultiplier = null), null, Settings.ShowIncorrectCheckMarkDuration),
+                    fieldView.animateRowText(listOf(), null, Settings.ShowIncorrectCheckMarkDuration),
                     fieldView.animateMark(Mark.Incorrect, Settings.ShowIncorrectCheckMarkDuration)
                 ).flatten().run()
 
                 delay(Settings.PauseAfterIncorrectCheckMarkDuration)
 
-                fieldView.setFieldState(taskProvider.hintFromFieldState)
+                fieldView.setRowText(listOf(taskProvider.hintFrom()), taskProvider.multiplier)
+                fieldView.setRowState(taskProvider.hintRowsState)
                 autoUpdateAnswer = true
-                taskView.setAnswer(answer)
+                taskView.setAnswer(null)
 
-                listOf(
-                    fieldView.animateFieldState(
-                        taskProvider.fieldState.copy(visibleAnswers = arrayOf(taskProvider.hintFrom())),
-                        taskProvider.unitAnimation,
-                        abs(taskProvider.hintFrom() - taskProvider.multiplier) *
-                                if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
-                    ),
-                    fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration)
-                ).flatten().run()
+                fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration).run()
 
-                fieldView.animateFieldState(taskProvider.fieldState, null, Settings.ShowVisibleAnswersDuration).run()
+                val duration = abs(taskProvider.hintFrom() - taskProvider.multiplier) *
+                        if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
+                fieldView.animateCountedRows(taskProvider.hintRowsState, taskProvider.rowsState, taskProvider.unitAnimation!!, duration).run()
+
+                fieldView.animateRowText(taskProvider.prevAnswers, taskProvider.multiplier, Settings.ShowVisibleAnswersDuration).run()
             }
         } else {
             taskProvider.nextTask()
@@ -159,16 +158,18 @@ class TrainingActivity : ScopedAppActivity() {
                             async { pvProgress.animateProgress(taskProvider.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
                             async {
                                 listOf(
-                                    fieldView.animateFieldState(fieldView.state.copy(questionMultiplier = null), null, Settings.ShowCorrectCheckMarkDuration),
+                                    fieldView.animateRowText(taskProvider.prevAnswers, null, Settings.ShowCorrectCheckMarkDuration),
                                     fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
                                 ).flatten().run()
-                            }).map { it.await() }
+                            }
+                        ).map { it.await() }
 
                         delay(Settings.PauseAfterCorrectCheckMarkDuration)
 
                         taskView.prepareNextTask(Settings.PrepareNextTaskDuration)
 
-                        fieldView.setFieldState(taskProvider.fieldState)
+                        fieldView.setRowText(taskProvider.prevAnswers, taskProvider.multiplier)
+                        fieldView.setRowState(taskProvider.rowsState)
                         autoUpdateAnswer = true
                         taskView.setAnswer(answer)
                         taskView.setMultiplier(taskProvider.multiplier)

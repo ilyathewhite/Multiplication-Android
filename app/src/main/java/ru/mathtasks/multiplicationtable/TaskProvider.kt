@@ -4,7 +4,6 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import java.lang.Math.max
 import java.lang.Math.min
-import java.util.*
 
 @Parcelize
 class Stage(val showPrevAnswers: Boolean, val multipliers: Array<Int>, val hintFrom: Array<Int>) : Parcelable
@@ -50,29 +49,29 @@ class TaskProvider(
 
     val nextMultipliers get() = stages[stageIdx].multipliers.drop(multiplierIdx + 1).toTypedArray()
 
-    val taskProgress get() = if(endOfGame) 1f else multiplierIdx.toFloat() / stages[stageIdx].multipliers.size
+    val taskProgress get() = if (endOfGame) 1f else multiplierIdx.toFloat() / stages[stageIdx].multipliers.size
 
-    val stageProgress get() = if(endOfGame) 1f else (stageIdx + if (endOfStage) 1 else 0).toFloat() / stages.size
+    val stageProgress get() = if (endOfGame) 1f else (stageIdx + if (endOfStage) 1 else 0).toFloat() / stages.size
 
     val unitAnimation
         get() = when (attempt) {
             0 -> null; 1 -> UnitAnimation.ByRow; else -> UnitAnimation.ByUnit
         }
 
-    val fieldState: FieldState
-        get() {
-            val prevAnswers = when {
-                stages[0].showPrevAnswers -> prevMultipliers.toTypedArray()
-                attempt != 0 -> arrayOf(hintFrom())
-                else -> arrayOf()
-            }
-            return FieldState(multiplier, multiplier, 0, 0, prevAnswers, multiplier)
-        }
+    val rowsState: RowsState
+        get() = RowsState(multiplier, 0, 0)
 
-    val hintFromFieldState: FieldState
+    val hintRowsState: RowsState
         get() {
             val hintFrom = hintFrom()
-            return FieldState(multiplier, min(hintFrom, multiplier), max(multiplier - hintFrom, 0), max(hintFrom - multiplier, 0), arrayOf(hintFrom), multiplier)
+            return RowsState(min(hintFrom, multiplier), max(multiplier - hintFrom, 0), max(hintFrom - multiplier, 0))
+        }
+
+    val prevAnswers
+        get() = when {
+            stages[0].showPrevAnswers -> prevMultipliers.toList()
+            attempt != 0 -> listOf(hintFrom())
+            else -> listOf()
         }
 
     fun hintFrom(): Int {

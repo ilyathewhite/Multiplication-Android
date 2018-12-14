@@ -70,6 +70,6 @@ class UnitView : View {
             this.strokeColor = animator.animatedValue as Int
             drawable.setStroke(strokeWidthPixel, strokeColor)
         }
-        return listOf(fillAnimator, strokeAnimator).merge()
+        return listOf(fillAnimator, strokeAnimator).playTogether()
     }
 }

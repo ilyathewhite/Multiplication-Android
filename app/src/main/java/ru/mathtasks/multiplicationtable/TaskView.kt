@@ -1,7 +1,6 @@
 package ru.mathtasks.multiplicationtable
 
 import android.content.Context
-import android.graphics.Typeface
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
@@ -10,7 +9,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.LayoutInflater
 import android.view.animation.AccelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -94,7 +92,7 @@ class TaskView : LinearLayout {
             tvAnswer.alphaAnimator(0f, duration),
             tvNextMultiplier.alphaAnimator(0f, duration),
             tvMovingNextMultiplier.alphaAnimator(1f, duration)
-        ).merge().run()
+        ).playTogether().run()
 
         tvMultiplier.text = tvNextMultiplier.text
     }

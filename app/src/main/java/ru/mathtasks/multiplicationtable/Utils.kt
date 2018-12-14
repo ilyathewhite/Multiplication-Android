@@ -7,8 +7,6 @@ import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.constraint.ConstraintLayout
 import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
@@ -120,9 +118,10 @@ class ScaleTransition : Transition() {
     }
 }
 
-suspend fun List<Animator>.run(): Unit = this.merge().run()
+suspend fun List<Animator>.run(): Unit = this.playTogether().run()
 
-fun List<Animator>.merge(): Animator = AnimatorSet().apply { playTogether(this@merge) }
+fun List<Animator>.playTogether(): Animator = AnimatorSet().apply { playTogether(this@playTogether) }
+fun List<Animator>.playSequentially(): Animator = AnimatorSet().apply { playSequentially(this@playSequentially) }
 
 abstract class ScopedAppActivity : AppCompatActivity(), CoroutineScope {
     private var superviserJob: Job? = null

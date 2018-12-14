@@ -1,7 +1,6 @@
 package ru.mathtasks.multiplicationtable
 
 import android.animation.Animator
-import android.animation.AnimatorSet
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.res.ResourcesCompat
@@ -16,28 +15,12 @@ import java.lang.Math.abs
 
 enum class Mark { Correct, Incorrect, None }
 
-data class FieldState(
-    private val qActiveMultipliers: Int,
-    val qCountedRows: Int,
-    val qToBeCountedRows: Int,
-    val qWasCountedRows: Int,
-    private val visibleAnswers: Array<Int>,
-    private val questionMultiplier: Int?
-) {
-
-    fun isMultiplierActive(row: Row) = row.multiplier <= qActiveMultipliers
-
+data class RowsState(val qCountedRows: Int, val qToBeCountedRows: Int, val qWasCountedRows: Int) {
     fun unitState(row: Row) = when {
         row.multiplier <= qCountedRows -> UnitState.Counted
         row.multiplier <= qCountedRows + qToBeCountedRows -> UnitState.ToBeCounted
         row.multiplier <= qCountedRows + qWasCountedRows -> UnitState.WasCounted
         else -> UnitState.Disabled
-    }
-
-    fun text(row: Row, multiplicand: Int) = when {
-        visibleAnswers.contains(row.multiplier) -> (multiplicand * row.multiplier).toString()
-        questionMultiplier == row.multiplier -> "?"
-        else -> ""
     }
 }
 
@@ -47,8 +30,6 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     private lateinit var mark2iv: Map<Mark, ImageView>
-    var state = FieldState(0, 0, 0, 0, arrayOf(), null)
-        private set
     private var multiplicand: Int = 0
     private lateinit var rows: Array<Row>
 
@@ -141,33 +122,38 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             .map { (ivMark, iv) -> iv.alphaAnimator(if (ivMark == mark) 1f else 0f, duration) }
     }
 
-    fun setFieldState(state: FieldState) {
-        this.state = state
-        rows.forEach { row ->
-            row.setIsMultiplierActive(state.isMultiplierActive(row))
-            row.setUnitState(state.unitState(row))
-            row.setText(state.text(row, multiplicand))
-        }
+    fun setLastActiveMultiplier(lastActiveMultiplier: Int) {
+        rows.forEach { row -> row.setIsMultiplierActive(row.multiplier <= lastActiveMultiplier) }
     }
 
-    fun animateFieldState(state: FieldState, unitAnimation: UnitAnimation?, duration: Long): List<Animator> {
-        val animators = arrayListOf<Animator?>()
-        rows.forEach { row ->
-            animators.add(row.animateIsMultiplierActive(state.isMultiplierActive(row), duration))
-            animators.add(row.animateText(state.text(row, multiplicand), duration))
-        }
-        if (unitAnimation != null && this.state.qCountedRows != state.qCountedRows) {
-            val from = this.state.qCountedRows
-            val to = state.qCountedRows
-            animators.add(AnimatorSet().apply {
-                playSequentially(
-                    IntProgression.fromClosedRange(from, to, if (from < to) 1 else -1).map { idx ->
-                        rows[idx].animateUnitState(state.unitState(rows[idx]), unitAnimation, to < from, duration / abs(to - from))
-                    }
-                )
-            })
-        }
-        this.state = state
-        return animators.filterNotNull()
+    fun animateIsMultiplierActive(lastActiveMultiplier: Int, duration: Long): List<Animator> {
+        return rows.mapNotNull { row -> row.animateIsMultiplierActive(row.multiplier <= lastActiveMultiplier, duration) }
+    }
+
+    private fun rowText(row: Row, visibleAnswers: Iterable<Int>, questionMultiplier: Int?) = when {
+        visibleAnswers.contains(row.multiplier) -> (multiplicand * row.multiplier).toString()
+        questionMultiplier == row.multiplier -> "?"
+        else -> ""
+    }
+
+    fun setRowText(visibleAnswers: Iterable<Int>, questionMultiplier: Int?) {
+        rows.forEach { row -> row.setText(rowText(row, visibleAnswers, questionMultiplier)) }
+    }
+
+    fun animateRowText(visibleAnswers: Iterable<Int>, questionMultiplier: Int?, duration: Long): List<Animator> {
+        return rows.mapNotNull { row -> row.animateText(rowText(row, visibleAnswers, questionMultiplier), duration) }
+    }
+
+    fun setRowState(rowsState: RowsState) {
+        rows.forEach { row -> row.setUnitState(rowsState.unitState(row)) }
+    }
+
+    fun animateCountedRows(fromState: RowsState, toState: RowsState, unitAnimation: UnitAnimation, duration: Long): Animator {
+        val from = fromState.qCountedRows
+        val to = toState.qCountedRows
+        return IntProgression.fromClosedRange(from, to, if (from < to) 1 else -1).map { idx ->
+            rows[idx].animateUnitState(toState.unitState(rows[idx]), unitAnimation, to < from, duration / abs(to - from))
+        }.playSequentially()
     }
 }
+

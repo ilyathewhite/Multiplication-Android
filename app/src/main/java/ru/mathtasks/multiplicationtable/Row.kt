@@ -14,12 +14,13 @@ class Row(val multiplier: Int, val tvMultiplier: TextView, val units: Array<Unit
         tvMultiplier.alpha = if (value) 1f else Settings.RowMultiplicandInactiveAlpha
     }
 
-    fun animateIsMultiplierActive(value: Boolean, duration: Long): Animator {
-        return tvMultiplier.alphaAnimator(if (value) 1f else Settings.RowMultiplicandInactiveAlpha, duration)
+    fun animateIsMultiplierActive(value: Boolean, duration: Long): Animator? {
+        val alpha = if (value) 1f else Settings.RowMultiplicandInactiveAlpha
+        return if (tvMultiplier.alpha == alpha) null else tvMultiplier.alphaAnimator(alpha, duration)
     }
 
     fun setText(text: String) {
-         tvProduct.text = text
+        tvProduct.text = text
     }
 
     fun animateText(text: String, duration: Long): Animator? {
