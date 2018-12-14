@@ -13,35 +13,43 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/textView"
                 android:layout_gravity="center_horizontal" android:textSize="30dp"
-                android:textColor="@android:color/black" android:maxLines="1"
-                android:layout_marginBottom="20dp" android:layout_marginTop="20dp"/>
+                android:textColor="@color/appDarkBlue" android:maxLines="1"
+                android:layout_marginBottom="20dp" android:layout_marginTop="20dp" app:fontFamily="@font/lato_bold" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/darker_gray" android:id="@+id/view3"/>
+                android:background="@color/appLightGray" android:id="@+id/view3"/>
         <ru.mathtasks.multiplicationtable.TaskTypeView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" app:caption="Learn" android:layout_margin="10dp"
-                app:description="Pick a multiplicand and do the drills. You will get a visual hint for every question and any wrong answer." android:id="@+id/ttvLearn" android:clickable="true" android:focusable="true">
+                android:layout_height="wrap_content" app:caption="Learn"
+                app:description="Pick a multiplicand and do the drills. You will get a visual hint for every question and any wrong answer." android:id="@+id/ttvLearn"
+                android:clickable="true" android:focusable="true" android:layout_marginBottom="15dp" android:layout_marginLeft="20dp" android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp">
         </ru.mathtasks.multiplicationtable.TaskTypeView>
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/darker_gray" android:id="@+id/view"/>
+                android:background="@color/appLightGray" android:id="@+id/view" android:layout_marginLeft="20dp"/>
         <ru.mathtasks.multiplicationtable.TaskTypeView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" app:caption="Practice" android:layout_margin="10dp"
+                android:layout_height="wrap_content" app:caption="Practice"
                 app:description="Pick a multiplicand and multiply it by random multipliers from 1 to 10.  You will still get a visual hint for every question and any wrong answer."
-                android:id="@+id/ttvPractice">
+                android:id="@+id/ttvPractice" android:layout_marginBottom="15dp" android:layout_marginLeft="20dp" android:layout_marginRight="10dp" android:layout_marginTop="10dp">
         </ru.mathtasks.multiplicationtable.TaskTypeView>
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/darker_gray" android:id="@+id/view2"/>
+                android:background="@color/appLightGray" android:id="@+id/view2" android:layout_marginLeft="20dp"/>
         <ru.mathtasks.multiplicationtable.TaskTypeView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" app:caption="Test" android:layout_margin="10dp"
+                android:layout_height="wrap_content" app:caption="Test"
                 app:description="Pick any multiplicands and multiply them by random multipliers from 1 to 10. No hints this time and the time will be limited."
-                android:id="@+id/ttvTest"/>
+                android:id="@+id/ttvTest" android:layout_marginBottom="15dp" android:layout_marginLeft="20dp" android:layout_marginRight="10dp" android:layout_marginTop="10dp">
+        </ru.mathtasks.multiplicationtable.TaskTypeView>
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/appLightGray" android:id="@+id/view4" android:layout_marginLeft="20dp"/>
     </LinearLayout>
 </ScrollView>

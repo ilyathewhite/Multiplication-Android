@@ -139,7 +139,7 @@ abstract class ScopedAppActivity : AppCompatActivity(), CoroutineScope {
     }
 }
 
-fun Iterable<Button>.autoSizeText(typeface: Typeface) {
+fun Iterable<Button>.autoSizeText(typeface: Typeface, part: Float) {
     val p = Paint().apply {
         textSize = 100f
         this.typeface = typeface
@@ -148,7 +148,7 @@ fun Iterable<Button>.autoSizeText(typeface: Typeface) {
     val needWidth = this.map { button -> p.measureText(button.text.toString()) }.max()
     val haveWidth = this.map { button -> button.width - button.paddingLeft - button.paddingRight }.min()
     val haveHeight = this.map { button -> button.height - button.paddingTop - button.paddingBottom }.min()
-    val textSize = Math.min(100f * haveHeight!! / needHeight!!, 100f * haveWidth!! / needWidth!!) * 1 / 2
+    val textSize = Math.min(100f * haveHeight!! / needHeight!!, 100f * haveWidth!! / needWidth!!) * part
     for (button in this) {
         button.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
         button.typeface = typeface

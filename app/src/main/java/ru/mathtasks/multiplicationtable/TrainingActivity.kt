@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_training.*
@@ -71,7 +72,7 @@ class TrainingActivity : ScopedAppActivity() {
 
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout(fieldView.width, fieldView.height)
-            (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(Typeface.DEFAULT)
+            (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
         }
     }
 

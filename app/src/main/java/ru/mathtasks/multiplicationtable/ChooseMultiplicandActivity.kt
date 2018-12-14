@@ -1,8 +1,9 @@
 package ru.mathtasks.multiplicationtable
 
 import android.content.Intent
-import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.res.ResourcesCompat
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_choose_multiplicand.*
 import kotlinx.coroutines.Job
@@ -47,7 +48,7 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
         }
 
         llFrame.viewTreeObserver.addOnGlobalLayoutListener {
-            multiplicand2button.map { (_, button) -> button }.autoSizeText(Typeface.DEFAULT)
+            multiplicand2button.map { (_, button) -> button }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
         }
 
         btnStart.setOnClickListener {

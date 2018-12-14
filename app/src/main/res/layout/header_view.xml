@@ -8,10 +8,10 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:id="@+id/tvCaption" tools:text="Practice" android:textSize="20dp"
-                android:textColor="@android:color/black" android:gravity="center" android:padding="8dp"/>
+                android:gravity="center" android:padding="8dp" app:fontFamily="@font/lato_regular" android:textColor="@color/appDarkBlue"/>
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@android:color/darker_gray" android:id="@+id/view3"/>
+                android:background="@color/appLightGray" android:id="@+id/view3"/>
     </LinearLayout>
 </merge>
