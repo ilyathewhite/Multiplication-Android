@@ -2,7 +2,6 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
@@ -72,7 +71,10 @@ class TrainingActivity : ScopedAppActivity() {
 
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout(fieldView.width, fieldView.height)
-            (buttons.map { it.button } + listOf(btnBs, btnOk)).autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
+            val allButtons = buttons.map { it.button } + listOf(btnBs, btnOk)
+            allButtons.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
+                allButtons.forEach { it.elevation = 10f }
         }
     }
 
@@ -170,6 +172,7 @@ class TrainingActivity : ScopedAppActivity() {
                         taskView.prepareNextTask(Settings.PrepareNextTaskDuration)
 
                         fieldView.setRowText(taskProvider.prevAnswers, taskProvider.multiplier)
+                        fieldView.setLastActiveMultiplier(taskProvider.multiplier)
                         fieldView.setRowState(taskProvider.rowsState)
                         autoUpdateAnswer = true
                         taskView.setAnswer(answer)

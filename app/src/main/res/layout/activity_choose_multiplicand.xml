@@ -8,75 +8,82 @@
     <ru.mathtasks.multiplicationtable.HeaderView
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/hTaskType" />
-    <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" android:id="@+id/view3"/>
     <TextView
             android:text="Pick Multiplicand"
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:id="@+id/textView"
-            android:textColor="@android:color/black" android:maxLines="1"
-            app:autoSizeTextType="uniform" android:layout_weight="1" android:gravity="center" android:layout_gravity="center"
-            android:layout_margin="20dp" android:textStyle="italic"/>
+            android:textColor="@color/appDarkBlue" android:maxLines="1"
+            android:layout_weight="1" android:gravity="center" android:layout_gravity="center"
+            android:layout_margin="20dp" app:fontFamily="@font/lato_regular" android:textSize="35dp"/>
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" android:layout_marginLeft="10dp" android:layout_marginRight="10dp" android:layout_marginTop="10dp">
+            android:layout_gravity="center" android:layout_marginLeft="30dp" android:layout_marginRight="30dp" android:layout_marginTop="10dp">
 
         <Button
                 android:text="1"
                 android:id="@+id/btn1"
-                style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn2"/>
+                style="@style/ButtonStyle"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn2" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="H, 1:1"/>
         <Button
                 android:text="2"
                 android:id="@+id/btn2"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn1" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn3"/>
+                style="@style/ButtonStyle"
+                app:layout_constraintStart_toEndOf="@+id/btn1" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn3" app:layout_constraintDimensionRatio="H, 1:1" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
         <Button
                 android:text="3"
                 android:id="@+id/btn3"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn2" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn4"/>
+                style="@style/ButtonStyle"
+                app:layout_constraintStart_toEndOf="@+id/btn2" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn4" app:layout_constraintDimensionRatio="H, 1:1" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="4"
                 android:id="@+id/btn4"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn3" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn5"/>
+                style="@style/ButtonStyle"
+                app:layout_constraintStart_toEndOf="@+id/btn3" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn5" app:layout_constraintDimensionRatio="H, 1:1" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
         <Button
                 android:text="5"
                 android:id="@+id/btn5"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn4" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn4" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintDimensionRatio="H, 1:1" app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
     </android.support.constraint.ConstraintLayout>
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" android:layout_margin="10dp">
+            android:layout_gravity="center" android:layout_marginLeft="30dp" android:layout_marginRight="30dp">
         <Button
                 android:text="6"
                 android:id="@+id/btn6"
                 style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn7"/>
+                app:layout_constraintEnd_toStartOf="@+id/btn7" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
         <Button
                 android:text="7"
                 android:id="@+id/btn7"
                 style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn6" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn8"/>
+                app:layout_constraintEnd_toStartOf="@+id/btn8" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="8"
                 android:id="@+id/btn8"
                 style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn7" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn9"/>
+                app:layout_constraintEnd_toStartOf="@+id/btn9" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="9"
                 android:id="@+id/btn9"
                 style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn8" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn10"/>
+                app:layout_constraintEnd_toStartOf="@+id/btn10" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent"/>
         <Button
                 android:text="10"
                 android:id="@+id/btn10"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn9" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
+                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn9" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent"/>
     </android.support.constraint.ConstraintLayout>
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -91,47 +98,42 @@
                 android:text="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" android:id="@+id/tvMultiplier"
-                app:fontFamily="@font/lato_italic" android:textSize="30dp" android:textColor="@android:color/black"
-                android:gravity="center"
+                app:fontFamily="@font/lato_bolditalic" android:textSize="35dp"
                 app:layout_constraintStart_toEndOf="@+id/spStart" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toStartOf="@+id/tvMultiply"
-                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="V,1:1"/>
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="V,1:1"
+                android:textColor="@color/appDarkBlue" android:gravity="right"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" android:id="@+id/tvMultiply"
-                android:text="\u00D7" app:fontFamily="@font/lato_italic" android:textSize="30dp"
-                android:textColor="@android:color/black"
+                android:text="\u00D7" app:fontFamily="@font/lato_bold" android:textSize="35dp"
                 android:gravity="center"
                 app:layout_constraintStart_toEndOf="@+id/tvMultiplier" app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toStartOf="@+id/tvMultiplicand" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="V,1:1"/>
+                app:layout_constraintDimensionRatio="V,1:1" android:textColor="@color/appDarkBlue"/>
         <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/tvMultiplicand"
-                android:text="3" app:fontFamily="@font/lato_italic" android:textSize="30dp"
-                android:textColor="@android:color/black"
+                app:fontFamily="@font/lato_bolditalic" android:textSize="35dp"
                 android:background="@drawable/multiplicand_border"
-                android:gravity="center"
                 app:layout_constraintStart_toEndOf="@+id/tvMultiply" app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toStartOf="@+id/tvEquals" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="V,1:1" android:padding="5dp"/>
+                android:textColor="@color/appDarkBlue" android:gravity="center"
+                android:text="10" android:paddingBottom="10dp" android:paddingLeft="20dp" android:paddingRight="20dp" android:paddingTop="10dp"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" android:id="@+id/tvEquals"
-                android:text="=" app:fontFamily="@font/lato_italic" android:textSize="30dp"
-                android:textColor="@android:color/black"
+                android:text="=" app:fontFamily="@font/lato_bold" android:textSize="35dp"
                 android:gravity="center"
                 app:layout_constraintStart_toEndOf="@+id/tvMultiplicand" app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toStartOf="@+id/tvProduct" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="V,1:1"/>
+                app:layout_constraintDimensionRatio="V,1:1" android:textColor="@color/appDarkBlue"/>
         <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" android:id="@+id/tvProduct"
-                android:text="3" app:fontFamily="@font/lato_italic" android:textSize="30dp"
-                android:textColor="@android:color/black"
-                android:gravity="center"
+                android:text="3" app:fontFamily="@font/lato_bolditalic" android:textSize="35dp"
                 app:layout_constraintStart_toEndOf="@+id/tvEquals" app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintEnd_toStartOf="@+id/spEnd" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="V,1:1"/>
+                app:layout_constraintDimensionRatio="V,1:1" android:textColor="@color/appDarkBlue" android:gravity="left"/>
         <Space
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" android:id="@+id/spEnd"
@@ -142,7 +144,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/tvMultiplicandHint"
                 app:layout_constraintTop_toBottomOf="@+id/tvMultiplicand" app:layout_constraintLeft_toLeftOf="@+id/tvMultiplicand"
-                app:layout_constraintRight_toRightOf="@+id/tvMultiplicand" android:layout_marginTop="10dp" android:textStyle="italic"/>
+                app:layout_constraintRight_toRightOf="@+id/tvMultiplicand" android:layout_marginTop="7dp" android:textColor="@color/appDarkBlue"
+                app:fontFamily="@font/lato_regular"/>
     </android.support.constraint.ConstraintLayout>
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"

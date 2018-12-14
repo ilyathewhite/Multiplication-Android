@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
+import android.view.Gravity
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_choose_multiplicand.*
 import kotlinx.coroutines.Job
@@ -42,13 +43,18 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
         hTaskType.caption = if (taskType == TaskType.Learn) "Learn" else "Practice"
 
         multiplicand2button.forEach { (multiplicand, button) ->
+            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
+                button.elevation = 10f
+//            button.setBackgroundCompat(
+//                generateBackgroundWithShadow(button, resources.getColor(R.color.white), 5f, resources.getColor(R.color.appDarkBlue), 10, Gravity.BOTTOM)
+//            )
             button.setOnClickListener {
                 btnClick(multiplicand)
             }
         }
 
         llFrame.viewTreeObserver.addOnGlobalLayoutListener {
-            multiplicand2button.map { (_, button) -> button }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
+            multiplicand2button.map { (_, button) -> button }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
         }
 
         btnStart.setOnClickListener {
