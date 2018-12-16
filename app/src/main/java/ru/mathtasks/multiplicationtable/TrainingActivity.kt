@@ -68,11 +68,10 @@ class TrainingActivity : ScopedAppActivity() {
         btnBs.setOnClickListener { onBsKey() }
         btnOk.setOnClickListener { onOkKey() }
 
-
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout(fieldView.width, fieldView.height)
             val allButtons = buttons.map { it.button } + listOf(btnBs, btnOk)
-            allButtons.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
+            allButtons.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
                 allButtons.forEach { it.elevation = 10f }
         }
