@@ -7,19 +7,14 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.support.constraint.ConstraintLayout
 import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionValues
-import android.support.v4.view.ViewCompat.LAYER_TYPE_SOFTWARE
 import android.support.v7.app.AppCompatActivity
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -35,17 +30,19 @@ import kotlin.coroutines.suspendCoroutine
 
 fun <T> SDK(sdk: Int, value: T, default: T): T = if (Build.VERSION.SDK_INT >= sdk) value else default
 
-fun View.setBackgroundCompat(value: Drawable?) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-        this.background = value
-    else
-        this.setBackgroundDrawable(value)
-}
+var View.backgroundCompat: Drawable?
+    get() = this.background
+    set(value) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            this.background = value
+        else
+            this.setBackgroundDrawable(value)
+    }
 
 fun Resources.getFloat(resourceId: Int): Float {
-    val typedValue = TypedValue();
-    getValue(resourceId, typedValue, true);
-    return typedValue.float;
+    val typedValue = TypedValue()
+    getValue(resourceId, typedValue, true)
+    return typedValue.float
 }
 
 fun View.alphaAnimator(alpha: Float, duration: Long, startDelay: Long = 0): Animator {
@@ -171,51 +168,4 @@ fun View.onLayoutOnce(action: () -> Unit) {
             action()
         }
     })
-}
-
-fun generateBackgroundWithShadow(view: View, backgroundColor: Int, cornerRadius: Float, shadowColor: Int, elevation: Int, shadowGravity: Int): Drawable {
-    val outerRadius = floatArrayOf(cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius)
-
-    val backgroundPaint = Paint().apply {
-        style = Paint.Style.FILL
-        setShadowLayer(cornerRadius, 0f, 0f, 0)
-    }
-
-    val shapeDrawablePadding = Rect().apply { left = elevation; right = elevation }
-
-    val dy: Int
-    when (shadowGravity) {
-        Gravity.CENTER -> {
-            shapeDrawablePadding.top = elevation
-            shapeDrawablePadding.bottom = elevation
-            dy = 0
-        }
-        Gravity.TOP -> {
-            shapeDrawablePadding.top = elevation * 2
-            shapeDrawablePadding.bottom = elevation
-            dy = -1 * elevation / 3
-        }
-        Gravity.BOTTOM -> {
-            shapeDrawablePadding.top = elevation
-            shapeDrawablePadding.bottom = elevation * 2
-            dy = elevation / 3
-        }
-        else -> {
-            shapeDrawablePadding.top = elevation
-            shapeDrawablePadding.bottom = elevation * 2
-            dy = elevation / 3
-        }
-    }
-
-    val shapeDrawable = ShapeDrawable().apply {
-        setPadding(shapeDrawablePadding)
-        paint.color = backgroundColor
-        paint.setShadowLayer(cornerRadius / 3, 0f, dy.toFloat(), shadowColor)
-    }
-
-    view.setLayerType(LAYER_TYPE_SOFTWARE, shapeDrawable.paint)
-    shapeDrawable.shape = RoundRectShape(outerRadius, null, null)
-    return LayerDrawable(arrayOf<Drawable>(shapeDrawable)).apply {
-        setLayerInset(0, elevation, elevation * 2, elevation, elevation * 2)
-    }
 }

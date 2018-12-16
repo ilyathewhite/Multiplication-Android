@@ -50,7 +50,7 @@ class TrainingActivity : ScopedAppActivity() {
         fieldView.initialize(taskProvider.multiplicand)
         applyState()
 
-        class B(val button: Button, val value: Int)
+        class B(val button: CustomButton, val value: Int)
 
         val buttons = arrayOf(
             B(btn1, 1),
@@ -72,7 +72,7 @@ class TrainingActivity : ScopedAppActivity() {
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout(fieldView.width, fieldView.height)
             val allButtons = buttons.map { it.button } + listOf(btnBs, btnOk)
-            allButtons.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
+            allButtons.map { it.innerButton }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
                 allButtons.forEach { it.elevation = 10f }
         }

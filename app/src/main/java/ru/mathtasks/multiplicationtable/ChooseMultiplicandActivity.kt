@@ -1,11 +1,8 @@
 package ru.mathtasks.multiplicationtable
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
-import android.view.Gravity
-import android.widget.Button
 import kotlinx.android.synthetic.main.activity_choose_multiplicand.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +16,7 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
 
     private lateinit var taskType: TaskType
     private var selectedMultiplicand: Int = 2
-    private lateinit var multiplicand2button: Map<Int, Button>
+    private lateinit var multiplicand2button: Map<Int, CustomButton>
     private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,18 +40,13 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
         hTaskType.caption = if (taskType == TaskType.Learn) "Learn" else "Practice"
 
         multiplicand2button.forEach { (multiplicand, button) ->
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
-                button.elevation = 10f
-//            button.setBackgroundCompat(
-//                generateBackgroundWithShadow(button, resources.getColor(R.color.white), 5f, resources.getColor(R.color.appDarkBlue), 10, Gravity.BOTTOM)
-//            )
             button.setOnClickListener {
                 btnClick(multiplicand)
             }
         }
 
         llFrame.viewTreeObserver.addOnGlobalLayoutListener {
-            multiplicand2button.map { (_, button) -> button }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
+            multiplicand2button.map { (_, button) -> button.innerButton }.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.8f)
         }
 
         btnStart.setOnClickListener {

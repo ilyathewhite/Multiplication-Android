@@ -65,7 +65,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             mark to ImageView(context).apply {
                 alpha = 0f
                 layoutParams = RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
-                setBackgroundCompat(ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark))
+                backgroundCompat = ContextCompat.getDrawable(context, if (mark == Mark.Correct) R.drawable.checkmark else R.drawable.xmark)
                 this@FieldView.addView(this@apply)
             }
         }.toMap()

@@ -21,68 +21,80 @@
 
 
     <android.support.constraint.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/appVeryLightGray">
-        <Button
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="1"
                 android:id="@+id/btn1"
-                style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn2" app:layout_constraintHorizontal_chainStyle="spread" app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn2" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="2"
                 android:id="@+id/btn2"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn1" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn3" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn1" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn3" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="3"
                 android:id="@+id/btn3"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn2" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn4" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn2" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn4" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="4"
                 android:id="@+id/btn4"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn3" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn5" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn3" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn5" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="5"
                 android:id="@+id/btn5"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn4" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btnBs" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn4" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btnBs" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="\u232B"
                 android:id="@+id/btnBs"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn5" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintStart_toEndOf="@+id/btn5" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" android:layout_margin="5dp" android:layout_width="0dp"
+                android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
     </android.support.constraint.ConstraintLayout>
     <android.support.constraint.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@color/appVeryLightGray">
-        <Button
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="6"
                 android:id="@+id/btn6"
-                style="@style/ButtonStyle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn7" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn7" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="7"
                 android:id="@+id/btn7"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn6" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn8" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn6" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn8" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="8"
                 android:id="@+id/btn8"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn7" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn9" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn7" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn9" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="9"
                 android:id="@+id/btn9"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn8" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btn0" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn8" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btn0" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="0"
                 android:id="@+id/btn0"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn9" app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintEnd_toStartOf="@+id/btnOk" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
-        <Button
+                app:layout_constraintStart_toEndOf="@+id/btn9" app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintEnd_toStartOf="@+id/btnOk" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="5dp" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
+        <ru.mathtasks.multiplicationtable.CustomButton
                 android:text="OK"
                 android:id="@+id/btnOk"
-                style="@style/ButtonStyle" app:layout_constraintStart_toEndOf="@+id/btn0" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintStart_toEndOf="@+id/btn0" app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" android:layout_margin="5dp" android:layout_width="0dp"
+                android:layout_height="0dp" app:layout_constraintDimensionRatio="H, 1:1"/>
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>

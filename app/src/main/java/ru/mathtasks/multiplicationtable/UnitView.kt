@@ -23,7 +23,7 @@ class UnitView : View {
             setColor(fillColor)
             setStroke(strokeWidthPixel, strokeColor)
         }
-        setBackgroundCompat(drawable)
+        backgroundCompat = drawable
     }
 
     fun onResize(unitSize: Int) {
