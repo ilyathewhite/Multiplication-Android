@@ -3,6 +3,7 @@ package ru.mathtasks.multiplicationtable
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
+import android.view.MenuItem
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_choose_multiplicand.*
 import kotlinx.coroutines.Job
@@ -23,6 +24,8 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_multiplicand)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false);
 
         multiplicand2button = mapOf(
             1 to btn1,
@@ -38,7 +41,8 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
         )
 
         taskType = intent!!.extras!![PARAM_TASK_TYPE] as TaskType
-        hTaskType.caption = if (taskType == TaskType.Learn) "Learn" else "Practice"
+        tbToolbarTitle.text = if (taskType == TaskType.Learn) "Learn" else "Practice"
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true);
 
         multiplicand2button.forEach { (multiplicand, button) ->
             button.setOnClickListener {
@@ -84,5 +88,13 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
                 }
             }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item!!.itemId == android.R.id.home) {
+            this.finish()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

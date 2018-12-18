@@ -95,9 +95,9 @@ class TaskProvider(
         return result
     }
 
-    fun nextTask() {
+    fun nextTask(): Boolean {
         if (endOfGame)
-            throw IllegalStateException()
+            return false
         else if (endOfStage) {
             stageIdx++
             multiplierIdx = 0
@@ -113,5 +113,6 @@ class TaskProvider(
                     stageIdx++
             }
         }
+        return true
     }
 }

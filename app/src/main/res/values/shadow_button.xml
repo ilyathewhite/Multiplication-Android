@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="shadowButtonShadowRadius">2dp</dimen>
+    <dimen name="shadowButtonShadowRadius">1.5dp</dimen>
     <dimen name="shadowButtonCornerRadius">6dp</dimen>
     <dimen name="shadowButtonPadding">5dp</dimen>
-    <dimen name="shadowButtonShadowDX">1dp</dimen>
+    <dimen name="shadowButtonShadowDX">0dp</dimen>
     <dimen name="shadowButtonShadowDY">1dp</dimen>
     <color name="shadowButtonColor">#FFFFFF</color>
-    <color name="shadowButtonShadowColor">#666666</color>
+    <color name="shadowButtonShadowColor">#707070</color>
 </resources>

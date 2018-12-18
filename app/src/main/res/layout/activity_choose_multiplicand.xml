@@ -5,9 +5,9 @@
               android:background="#FFFFFF"
               tools:context=".MainActivity" android:layout_width="match_parent" android:visibility="visible"
               android:orientation="vertical" android:id="@+id/llFrame">
-    <ru.mathtasks.multiplicationtable.HeaderView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/hTaskType" />
+    <android.support.v7.widget.Toolbar android:id="@+id/toolbar" style="@style/ToolbarStyle">
+        <TextView style="@style/ToolbarTitleStyle" android:text="Multiplication Table" android:id="@+id/tbToolbarTitle"/>
+    </android.support.v7.widget.Toolbar>
     <TextView
             android:text="Pick Multiplicand"
             android:layout_width="match_parent"

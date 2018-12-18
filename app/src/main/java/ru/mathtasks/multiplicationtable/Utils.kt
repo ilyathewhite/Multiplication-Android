@@ -7,22 +7,16 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Build
 import android.support.constraint.ConstraintLayout
 import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionValues
-import android.support.v4.view.ViewCompat.LAYER_TYPE_SOFTWARE
 import android.support.v7.app.AppCompatActivity
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
@@ -130,18 +124,18 @@ fun List<Animator>.playTogether(): Animator = AnimatorSet().apply { playTogether
 fun List<Animator>.playSequentially(): Animator = AnimatorSet().apply { playSequentially(this@playSequentially) }
 
 abstract class ScopedAppActivity : AppCompatActivity(), CoroutineScope {
-    private var superviserJob: Job? = null
+    private var supervisorJob: Job? = null
     override val coroutineContext: CoroutineContext
         get() {
-            if (superviserJob == null)
-                superviserJob = SupervisorJob()
-            return superviserJob!! + Dispatchers.Main
+            if (supervisorJob == null)
+                supervisorJob = SupervisorJob()
+            return supervisorJob!! + Dispatchers.Main
         }
 
     override fun onPause() {
         super.onPause()
-        superviserJob?.cancel()
-        superviserJob = null
+        supervisorJob?.cancel()
+        supervisorJob = null
     }
 }
 

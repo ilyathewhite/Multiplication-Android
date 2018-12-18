@@ -18,10 +18,6 @@
         <attr name="description" format="string"/>
     </declare-styleable>
 
-    <declare-styleable name="HeaderView">
-        <attr name="caption"/>
-    </declare-styleable>
-
     <declare-styleable name="ProgressView">
         <attr name="progress" format="float"/>
     </declare-styleable>

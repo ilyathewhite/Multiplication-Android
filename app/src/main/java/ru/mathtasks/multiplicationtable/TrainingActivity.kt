@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import kotlinx.android.synthetic.main.activity_training.*
@@ -30,11 +31,14 @@ class TrainingActivity : ScopedAppActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false);
         setSystemUiVisibility()
 
         val taskType = intent.getSerializableExtra(PARAM_TASK_TYPE) as TaskType
         val multiplicand = intent.getIntExtra(PARAM_MULTIPLICAND, 1)
-        hHeader.caption = (if (taskType == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 $multiplicand"
+        tbToolbarTitle.text = (if (taskType == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 $multiplicand"
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState == null)
             taskProvider = TaskProvider(taskType, multiplicand)
@@ -194,10 +198,13 @@ class TrainingActivity : ScopedAppActivity() {
                 if (resultCode != Activity.RESULT_OK)
                     finish()
                 else {
-                    taskProvider.nextTask()
-                    answer = null
-                    applyState()
-                    setSystemUiVisibility()
+                    if (!taskProvider.nextTask())
+                        finish()
+                    else {
+                        answer = null
+                        applyState()
+                        setSystemUiVisibility()
+                    }
                 }
             }
             END_OF_GAME_ACTIVITY_REQUEST_CODE -> finish()
@@ -211,5 +218,13 @@ class TrainingActivity : ScopedAppActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
                 or SDK(Build.VERSION_CODES.KITKAT, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item!!.itemId == android.R.id.home) {
+            this.finish()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
