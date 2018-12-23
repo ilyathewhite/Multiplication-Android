@@ -32,6 +32,7 @@ class ShadowButton(context: Context, attr: AttributeSet) : Button(context, attr)
             setLayerInset(0, padding, padding, padding, padding)
         })
 
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
         setBackgroundCompat(states)
     }
 }

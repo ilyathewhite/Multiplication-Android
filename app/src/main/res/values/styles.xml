@@ -24,7 +24,7 @@
         <item tools:targetApi="16" name="android:fontFamily">@font/lato_regular</item>
     </style>
 
-    <style name="ButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
+    <style name="NumberButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
         <item name="android:textColor">@color/number_button_text_color</item>
     </style>
 

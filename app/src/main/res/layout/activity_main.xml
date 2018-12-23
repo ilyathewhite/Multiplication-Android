@@ -46,6 +46,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/appLightGray" android:id="@+id/view4" android:layout_marginLeft="20dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/tvResult" android:textSize="20dp" android:textStyle="bold"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
