@@ -65,6 +65,8 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
             selectedMultiplicand = savedInstanceState.getInt(STATE_SELECTED_MULTIPLICAND)
 
         btnClick(selectedMultiplicand)
+
+        btnStart.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {

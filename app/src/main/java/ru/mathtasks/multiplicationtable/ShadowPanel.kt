@@ -1,25 +1,54 @@
 package ru.mathtasks.multiplicationtable
 
 import android.content.Context
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.PaintDrawable
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.GradientDrawable
 import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
-import android.widget.RelativeLayout
+import android.widget.Button
+import android.widget.FrameLayout
 
-class ShadowPanel(context: Context, attr: AttributeSet) : RelativeLayout(context, attr) {
+
+class ShadowPanel(context: Context, attr: AttributeSet) : FrameLayout(context, attr) {
+    private lateinit var bitmap: Bitmap
+
     init {
-        val dy = resources.getDimension(R.dimen.shadowPanelShadowDY)
-        val cd = ColorDrawable(ContextCompat.getColor(context, R.color.shadowPanelBackgroundShadowColor))
-        val pd = PaintDrawable(ContextCompat.getColor(context, R.color.shadowPanelColor)).apply {
-            this.paint.setShadowLayer(resources.getDimension(R.dimen.shadowPanelShadowRadius), 0f, dy, ContextCompat.getColor(context, R.color.shadowPanelShadowColor))
+        setWillNotDraw(false)
+        setLayerType(Button.LAYER_TYPE_SOFTWARE, null)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        val stroke = resources.getDimension(R.dimen.shadowPanelStrokeWidth)
+
+        val paint = Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            color = Color.WHITE // no matter
+            strokeWidth = stroke
+            setShadowLayer(
+                resources.getDimension(R.dimen.shadowPanelShadowRadius),
+                resources.getDimension(R.dimen.shadowPanelShadowDX),
+                resources.getDimension(R.dimen.shadowPanelShadowDY),
+                ContextCompat.getColor(context, R.color.shadowPanelShadowColor)
+            )
         }
-        val ld = LayerDrawable(arrayOf(cd, pd)).apply {
-            setLayerInset(0, 0, 0, 0, 0)
-            setLayerInset(1, 0, 0, 0, resources.getDimensionPixelSize(R.dimen.shadowPanelPadding))
+
+        val gradColors = intArrayOf(ContextCompat.getColor(context, R.color.shadowPanelTopColor), ContextCompat.getColor(context, R.color.shadowPanelBottomColor))
+        val grad = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradColors).apply { setBounds(0, 0, w, h) }
+        this.bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply { eraseColor(Color.TRANSPARENT) }
+        Canvas(bitmap).apply {
+            grad.draw(this)
+            drawRect(-stroke / 2, -stroke / 2, w + stroke / 2, h + stroke / 2, paint)
         }
-        setBackgroundCompat(ld)
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        canvas!!.drawBitmap(bitmap, 0f, 0f, null)
     }
 }
