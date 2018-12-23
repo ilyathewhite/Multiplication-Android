@@ -2,6 +2,9 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat

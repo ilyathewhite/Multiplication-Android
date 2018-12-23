@@ -41,7 +41,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
                 text = multiplier.toString()
                 setTextColor(ContextCompat.getColor(context, R.color.fieldViewMultiplicand))
-                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+                typeface = ResourcesCompat.getFont(context, R.font.lato_regular)
                 this@FieldView.addView(this@apply)
             }
 
@@ -54,7 +54,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             val tvProduct = TextView(context).apply {
                 gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
                 setTextColor(ContextCompat.getColor(context, R.color.fieldViewProduct))
-                typeface = ResourcesCompat.getFont(context, R.font.lato_italic)
+                typeface = ResourcesCompat.getFont(context, R.font.lato_regular)
                 this@FieldView.addView(this@apply)
             }
 

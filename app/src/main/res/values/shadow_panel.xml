@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="shadowPanelShadowRadius">1.5dp</dimen>
+    <dimen name="shadowPanelPadding">3dp</dimen>
+    <dimen name="shadowPanelShadowDY">1dp</dimen>
+    <color name="shadowPanelColor">#FFFFFF</color>
+    <color name="shadowPanelShadowColor">#707070</color>
+    <color name="shadowPanelBackgroundShadowColor">#F5F5F5</color>
+</resources>

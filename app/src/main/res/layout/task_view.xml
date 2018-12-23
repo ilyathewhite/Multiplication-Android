@@ -7,44 +7,40 @@
         <TextView
                 android:text="5"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvMultiplier" android:textSize="40dp"
-                android:textColor="@android:color/black"
-                android:textStyle="italic"
-                app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplication"
-                app:layout_constraintRight_toLeftOf="@+id/tvMultiplication" app:fontFamily="@font/lato_italic"/>
+                android:layout_height="wrap_content" android:id="@+id/tvMovingNextMultiplier" android:textSize="14dp"
+                app:layout_constraintBottom_toTopOf="@+id/tvMultiplier" app:layout_constraintLeft_toLeftOf="@+id/tvMultiplier"
+                app:layout_constraintRight_toRightOf="@+id/tvMultiplier" android:alpha="0" app:fontFamily="@font/lato_bolditalic" android:textColor="@color/appDarkBlue"
+        />
         <TextView
                 android:text="5"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvMovingNextMultiplier" android:textSize="16dp"
-                android:textColor="@android:color/black"
-                android:textStyle="italic"
-                app:layout_constraintBottom_toTopOf="@+id/tvMultiplier" app:layout_constraintLeft_toLeftOf="@+id/tvMultiplier"
-                app:layout_constraintRight_toRightOf="@+id/tvMultiplier" android:alpha="0" app:fontFamily="@font/lato_italic"/>
+                android:layout_height="wrap_content" android:id="@+id/tvMultiplier" android:textSize="35dp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplication"
+                app:layout_constraintRight_toLeftOf="@+id/tvMultiplication" app:fontFamily="@font/lato_bolditalic" android:textColor="@color/appDarkBlue"
+        />
         <TextView
                 android:text="  \u00D7  "
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvMultiplication" android:textSize="40dp"
-                android:textColor="@android:color/black" android:textStyle="italic"
+                android:layout_height="wrap_content" android:id="@+id/tvMultiplication" android:textSize="35dp"
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="100dp"
-                android:layout_marginStart="100dp" app:fontFamily="@font/lato_italic"/>
+                android:layout_marginStart="100dp" app:fontFamily="@font/lato_bold" android:textColor="@color/appDarkBlue"/>
         <TextView
                 android:text="7"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvMultiplicand" android:textSize="40dp"
-                android:textColor="@android:color/black" android:textStyle="italic"
-                app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplication" app:layout_constraintStart_toEndOf="@+id/tvMultiplication" app:fontFamily="@font/lato_italic"/>
+                android:layout_height="wrap_content" android:id="@+id/tvMultiplicand" android:textSize="35dp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplication" app:layout_constraintStart_toEndOf="@+id/tvMultiplication"
+                app:fontFamily="@font/lato_bolditalic"
+                android:textColor="@color/appDarkBlue"/>
         <TextView
                 android:text="  =  "
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvEquals" android:textSize="40dp"
-                android:textColor="@android:color/black" android:textStyle="italic"
+                android:layout_height="wrap_content" android:id="@+id/tvEquals" android:textSize="35dp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/tvMultiplicand" app:layout_constraintStart_toEndOf="@+id/tvMultiplicand"
-                app:fontFamily="@font/lato_italic"/>
+                app:fontFamily="@font/lato_bold" android:textColor="@color/appDarkBlue"/>
         <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvAnswer" android:textSize="40dp"
-                android:textColor="@android:color/black" android:textStyle="italic"
+                android:layout_height="wrap_content" android:id="@+id/tvAnswer" android:textSize="35dp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/tvEquals" app:layout_constraintStart_toEndOf="@+id/tvEquals"
-                app:fontFamily="@font/lato_italic"/>
+                app:fontFamily="@font/lato_bolditalic" android:textColor="@color/appDarkBlue"/>
     </android.support.constraint.ConstraintLayout>
 </merge>

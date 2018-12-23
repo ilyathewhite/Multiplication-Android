@@ -6,6 +6,7 @@ import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
 import android.support.transition.TransitionSet
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -33,16 +34,18 @@ class TaskView : LinearLayout {
         this.nextTvMultipliers = nextMultipliers.map { nextMultiplier ->
             TextView(context).apply {
                 text = nextMultiplier.toString()
-                setTextSize(TypedValue.COMPLEX_UNIT_DIP, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
-                typeface = this@TaskView.tvAnswer.typeface
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_blackitalic)
                 setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
                 maxLines = 1
                 id = ViewCompat.generateViewId()
                 constraintSet.connect(this@apply.id, ConstraintSet.BOTTOM, this@TaskView.tvMultiplier.id, ConstraintSet.TOP)
+                constraintSet.setMargin(this@apply.id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
                 constraintSet.constrainWidth(this@apply.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
                 constraintSet.constrainHeight(this@apply.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
                 if (prevTv == null) {
                     constraintSet.connect(this@apply.id, ConstraintSet.LEFT, this@TaskView.tvMultiplier.id, ConstraintSet.LEFT)
+                    constraintSet.setMargin(this@apply.id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
                     constraintSet.connect(this@apply.id, ConstraintSet.RIGHT, this@TaskView.tvMultiplier.id, ConstraintSet.RIGHT)
                 } else {
                     constraintSet.connect(this@apply.id, ConstraintSet.LEFT, prevTv!!.id, ConstraintSet.RIGHT)

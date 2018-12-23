@@ -10,7 +10,7 @@
     <dimen name="fieldViewProductSpaceRatio">1.5</dimen>
     <dimen name="fieldViewSpacingRatio">0.1612903225806452</dimen>
 
-    <dimen name="fieldViewTextSizeRatio">0.75</dimen>
+    <dimen name="fieldViewTextSizeRatio">0.66</dimen>
 
     <color name="fieldViewMultiplicand">@color/appDarkGray</color>
     <color name="fieldViewProduct">@color/appDarkGray</color>
