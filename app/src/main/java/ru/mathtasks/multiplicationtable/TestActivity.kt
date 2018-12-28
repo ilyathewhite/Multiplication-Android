@@ -2,7 +2,14 @@ package ru.mathtasks.multiplicationtable
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
+import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
+import android.support.v4.view.ViewCompat
+import android.util.TypedValue
 import android.view.MenuItem
+import android.widget.TextView
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_test.*
 import java.util.*
@@ -14,6 +21,10 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
         private const val STATE_TASKS_LEFT = "tasksLeft"
         private const val Q_TASKS_PER_MULTIPLICAND = 10
     }
+
+    private var nextTvMultipliers = listOf<TextView>()
+    private var nextTvMultiplicands = listOf<TextView>()
+    private var nextIdx = 0
 
     @Parcelize
     class Task(val multiplicand: Int, val multiplier: Int) : Parcelable
@@ -50,7 +61,41 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
             }
         }
 
+
+        val constraintSet = ConstraintSet().apply { clone(clMain) }
+        var prevTv: TextView? = null
+        this.nextTvMultipliers = tasksLeft.tasks.map { task ->
+            TextView(this).apply {
+                text = task.multiplier.toString()
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_blackitalic)
+                setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
+                maxLines = 1
+                id = ViewCompat.generateViewId()
+                layoutNextMultiplier(constraintSet, this@apply.id, prevTv?.id)
+                this@TestActivity.clMain.addView(this@apply)
+                prevTv = this@apply
+            }
+        }.toList()
+        constraintSet.applyTo(clMain)
+
         applyState()
+    }
+
+    private fun layoutNextMultiplier(constraintSet: ConstraintSet, id: Int, prevId: Int?) {
+        constraintSet.clear(id)
+        constraintSet.connect(id, ConstraintSet.BOTTOM, this.tvMultiplier.id, ConstraintSet.TOP)
+        constraintSet.setMargin(id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
+        constraintSet.constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+        constraintSet.constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+        if (prevId == null) {
+            constraintSet.connect(id, ConstraintSet.LEFT, this.tvMultiplier.id, ConstraintSet.LEFT)
+            constraintSet.setMargin(id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
+            constraintSet.connect(id, ConstraintSet.RIGHT, this.tvMultiplier.id, ConstraintSet.RIGHT)
+        } else {
+            constraintSet.connect(id, ConstraintSet.LEFT, prevId, ConstraintSet.RIGHT)
+            constraintSet.setMargin(id, ConstraintSet.LEFT, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval))
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -64,7 +109,6 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     }
 
     override fun onAnswerChanged(answer: Int?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onOkPressed(answer: Int) {

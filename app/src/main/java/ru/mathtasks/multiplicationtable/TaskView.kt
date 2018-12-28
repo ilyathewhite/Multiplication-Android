@@ -49,14 +49,14 @@ class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, at
 
     private fun layoutNextMultiplier(constraintSet: ConstraintSet, id: Int, prevId: Int?) {
         constraintSet.clear(id)
-        constraintSet.connect(id, ConstraintSet.BOTTOM, this@TaskView.tvMultiplier.id, ConstraintSet.TOP)
+        constraintSet.connect(id, ConstraintSet.BOTTOM, this.tvMultiplier.id, ConstraintSet.TOP)
         constraintSet.setMargin(id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
         constraintSet.constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
         constraintSet.constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
         if (prevId == null) {
-            constraintSet.connect(id, ConstraintSet.LEFT, this@TaskView.tvMultiplier.id, ConstraintSet.LEFT)
+            constraintSet.connect(id, ConstraintSet.LEFT, this.tvMultiplier.id, ConstraintSet.LEFT)
             constraintSet.setMargin(id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
-            constraintSet.connect(id, ConstraintSet.RIGHT, this@TaskView.tvMultiplier.id, ConstraintSet.RIGHT)
+            constraintSet.connect(id, ConstraintSet.RIGHT, this.tvMultiplier.id, ConstraintSet.RIGHT)
         } else {
             constraintSet.connect(id, ConstraintSet.LEFT, prevId, ConstraintSet.RIGHT)
             constraintSet.setMargin(id, ConstraintSet.LEFT, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval))
