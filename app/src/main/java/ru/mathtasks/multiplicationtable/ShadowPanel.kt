@@ -12,7 +12,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 
 
-class ShadowPanel(context: Context, attr: AttributeSet) : FrameLayout(context, attr) {
+open class ShadowPanel(context: Context, attr: AttributeSet) : FrameLayout(context, attr) {
     private lateinit var bitmap: Bitmap
 
     init {

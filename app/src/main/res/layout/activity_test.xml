@@ -5,18 +5,16 @@
               android:background="#FFFFFF"
               tools:context=".TrainingActivity" android:layout_width="match_parent" android:visibility="visible" android:orientation="vertical" android:id="@+id/llOuter">
     <android.support.v7.widget.Toolbar android:id="@+id/toolbar" style="@style/ToolbarStyle">
-        <TextView style="@style/ToolbarTitleStyle" android:text="Multiplication Table" android:id="@+id/tbToolbarTitle"/>
+        <TextView style="@style/ToolbarTitleStyle" android:text="Test" android:id="@+id/tbToolbarTitle"/>
     </android.support.v7.widget.Toolbar>
     <ru.mathtasks.multiplicationtable.ProgressView
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/pvProgress"/>
-    <app:ru.mathtasks.multiplicationtable.TaskView android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/taskView"
-                                                   android:layout_marginTop="3dp"/>
 
-    <app:ru.mathtasks.multiplicationtable.FieldView
+    <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/fieldView" android:layout_weight="1" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="22dp" android:layout_marginTop="22dp"/>
+            android:layout_height="match_parent" android:id="@+id/clMain" android:layout_weight="1"/>
+
     <fragment
             android:name="ru.mathtasks.multiplicationtable.InputFragment"
             android:layout_width="match_parent"

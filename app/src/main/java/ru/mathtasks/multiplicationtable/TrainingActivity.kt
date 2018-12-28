@@ -2,46 +2,41 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.content.res.ResourcesCompat
 import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import kotlinx.android.synthetic.main.activity_training.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Math.abs
 
-class TrainingActivity : ScopedAppActivity() {
+class TrainingActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     companion object {
         const val PARAM_MULTIPLICAND = "multiplicand"
         const val PARAM_TASK_TYPE = "taskType"
         private const val END_OF_SET_ACTIVITY_REQUEST_CODE = 1
         private const val END_OF_GAME_ACTIVITY_REQUEST_CODE = 2
         private const val STATE_TASK_PROVIDER = "taskProvider"
-        private const val STATE_ANSWER = "answer"
     }
 
     private lateinit var taskProvider: TaskProvider
-    private var answer: Int? = null
     private var autoUpdateAnswer = true
+    private val input
+        get() = fInput as InputFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_training)
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayShowTitleEnabled(false);
-        setSystemUiVisibility()
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        fullScreen()
 
         val taskType = intent.getSerializableExtra(PARAM_TASK_TYPE) as TaskType
         val multiplicand = intent.getIntExtra(PARAM_MULTIPLICAND, 1)
         tbToolbarTitle.text = (if (taskType == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 $multiplicand"
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true);
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState == null)
             taskProvider = TaskProvider(taskType, multiplicand)
@@ -51,44 +46,19 @@ class TrainingActivity : ScopedAppActivity() {
                 finish()
                 return
             }
-            answer = if (savedInstanceState.containsKey(STATE_ANSWER)) savedInstanceState.getInt(STATE_ANSWER) else null
         }
         pvProgress.progress = taskProvider.taskProgress
         fieldView.initialize(taskProvider.multiplicand)
         applyState()
 
-        class B(val button: Button, val value: Int)
-
-        val buttons = arrayOf(
-            B(btn1, 1),
-            B(btn2, 2),
-            B(btn3, 3),
-            B(btn4, 4),
-            B(btn5, 5),
-            B(btn6, 6),
-            B(btn7, 7),
-            B(btn8, 8),
-            B(btn9, 9),
-            B(btn0, 0)
-        )
-        buttons.forEach { b -> b.button.setOnClickListener { onNumKey(b.value) } }
-        btnBs.setOnClickListener { onBsKey() }
-        btnOk.setOnClickListener { onOkKey() }
-
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout(fieldView.width, fieldView.height)
-            val allButtons = buttons.map { it.button } + listOf(btnBs, btnOk)
-            allButtons.autoSizeText(ResourcesCompat.getFont(this, R.font.lato_bold)!!, 0.4f)
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
-                allButtons.forEach { it.elevation = 10f }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.putParcelable(STATE_TASK_PROVIDER, taskProvider)
-        if (answer != null)
-            outState?.putInt(STATE_ANSWER, answer!!)
     }
 
     private fun applyState() {
@@ -97,31 +67,24 @@ class TrainingActivity : ScopedAppActivity() {
             createNextMultipliers(taskProvider.nextMultipliers)
             setMultiplier(taskProvider.multiplier)
             setMultiplicand(taskProvider.multiplicand)
-            setAnswer(answer)
+            setAnswer(input.answer)
         }
         fieldView.setRowText(taskProvider.prevAnswers, taskProvider.multiplier)
         fieldView.setLastActiveMultiplier(taskProvider.multiplier)
         fieldView.setRowState(taskProvider.rowsState)
     }
 
-    private fun onBsKey() {
-        answer = if (answer == null || answer!! < 10) null else answer!! / 10
+    override fun onAnswerChanged(answer: Int?) {
         if (autoUpdateAnswer)
             taskView.setAnswer(answer)
     }
 
-    private fun onNumKey(value: Int) {
-        answer = if (answer == null || answer == 0) value else if (answer!! >= 100) answer!! else 10 * answer!! + value
-        if (autoUpdateAnswer)
-            taskView.setAnswer(answer)
-    }
-
-    private fun onOkKey() {
-        if (!autoUpdateAnswer || answer == null)
+    override fun onOkPressed(answer: Int) {
+        if (!autoUpdateAnswer)
             return
-        val correct = taskProvider.answer2correct(answer!!)
+        val correct = taskProvider.answer2correct(answer)
         if (!correct) {
-            answer = null
+            input.resetAnswer()
             launch {
                 listOf(
                     fieldView.animateRowText(listOf(), null, Settings.ShowIncorrectCheckMarkDuration),
@@ -133,7 +96,7 @@ class TrainingActivity : ScopedAppActivity() {
                 fieldView.setRowText(listOf(taskProvider.hintFrom()), taskProvider.multiplier)
                 fieldView.setRowState(taskProvider.hintRowsState)
                 autoUpdateAnswer = true
-                taskView.setAnswer(null)
+                taskView.setAnswer(input.answer)
 
                 fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration).run()
 
@@ -161,7 +124,7 @@ class TrainingActivity : ScopedAppActivity() {
                     }, END_OF_SET_ACTIVITY_REQUEST_CODE)
                 }
                 else -> {
-                    answer = null
+                    input.resetAnswer()
                     launch {
                         listOf(
                             async { pvProgress.animateProgress(taskProvider.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
@@ -181,7 +144,7 @@ class TrainingActivity : ScopedAppActivity() {
                         fieldView.setLastActiveMultiplier(taskProvider.multiplier)
                         fieldView.setRowState(taskProvider.rowsState)
                         autoUpdateAnswer = true
-                        taskView.setAnswer(answer)
+                        taskView.setAnswer(input.answer)
                         taskView.setMultiplier(taskProvider.multiplier)
 
                         listOf(
@@ -204,23 +167,14 @@ class TrainingActivity : ScopedAppActivity() {
                     if (!taskProvider.nextTask())
                         finish()
                     else {
-                        answer = null
+                        input.resetAnswer()
                         applyState()
-                        setSystemUiVisibility()
+                        fullScreen()
                     }
                 }
             }
             END_OF_GAME_ACTIVITY_REQUEST_CODE -> finish()
         }
-    }
-
-    private fun setSystemUiVisibility() {
-        window.decorView.systemUiVisibility = (SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_STABLE, 0)
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, 0)
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN, 0)
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or SDK(Build.VERSION_CODES.JELLY_BEAN, View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
-                or SDK(Build.VERSION_CODES.KITKAT, View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

@@ -5,32 +5,26 @@ import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
 import android.view.MenuItem
 import android.widget.Button
-import kotlinx.android.synthetic.main.activity_choose_multiplicand.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.android.synthetic.main.activity_choose_multiplicands.*
 
-class ChooseMultiplicandActivity : ScopedAppActivity() {
+class ChooseMultiplicandsActivity : ScopedAppActivity() {
     companion object {
-        const val PARAM_TASK_TYPE = "taskType"
-        private const val STATE_SELECTED_MULTIPLICAND = "selectedMultiplicand"
+        private const val STATE_SELECTED_MULTIPLICANDS = "selectedMultiplicands"
     }
 
-    private lateinit var taskType: TaskType
-    private var selectedMultiplicand: Int = 2
+    private lateinit var selectedMultiplicands: MutableSet<Int>
     private lateinit var multiplicand2button: Map<Int, Button>
-    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_choose_multiplicand)
+        setContentView(R.layout.activity_choose_multiplicands)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
         multiplicand2button = mapOf(
             1 to btn1,
-            3 to btn3,
             2 to btn2,
+            3 to btn3,
             4 to btn4,
             5 to btn5,
             6 to btn6,
@@ -40,8 +34,6 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
             10 to btn10
         )
 
-        taskType = intent!!.extras!![PARAM_TASK_TYPE] as TaskType
-        tbToolbarTitle.text = if (taskType == TaskType.Learn) "Learn" else "Practice"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         multiplicand2button.forEach { (multiplicand, button) ->
@@ -56,40 +48,33 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
 
         btnStart.setOnClickListener {
             startActivity(Intent(this, TrainingActivity::class.java).apply {
-                putExtra(TrainingActivity.PARAM_TASK_TYPE, taskType)
-                putExtra(TrainingActivity.PARAM_MULTIPLICAND, selectedMultiplicand)
+                putExtra(TestActivity.PARAM_MULTIPLICANDS, selectedMultiplicands.toTypedArray())
             })
         }
 
-        if (savedInstanceState != null)
-            selectedMultiplicand = savedInstanceState.getInt(STATE_SELECTED_MULTIPLICAND)
-
-        btnClick(selectedMultiplicand)
-
         btnStart.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
+
+        selectedMultiplicands = savedInstanceState?.getIntArray(STATE_SELECTED_MULTIPLICANDS)?.toMutableSet() ?: HashSet()
+        btnStart.isEnabled = !selectedMultiplicands.isEmpty()
+        for (m in selectedMultiplicands)
+            multiplicand2button[m]!!.isPressed = true
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putInt(STATE_SELECTED_MULTIPLICAND, selectedMultiplicand)
+        outState?.putIntArray(STATE_SELECTED_MULTIPLICANDS, selectedMultiplicands.toIntArray())
     }
 
     private fun btnClick(multiplicand: Int) {
-        multiplicand2button[selectedMultiplicand]!!.isPressed = false
-        selectedMultiplicand = multiplicand
-        tvMultiplicand.text = selectedMultiplicand.toString()
-
-        job?.cancel()
-        job = launch {
-            multiplicand2button[selectedMultiplicand]!!.isPressed = true
-            while (true) {
-                for (m in 1..10) {
-                    tvMultiplier.text = m.toString()
-                    tvProduct.text = (selectedMultiplicand * m).toString()
-                    delay(Settings.ChooseMultiplicandDelay)
-                }
+        if (selectedMultiplicands.contains(multiplicand))
+            selectedMultiplicands.remove(multiplicand)
+        else {
+            selectedMultiplicands.add(multiplicand)
+            multiplicand2button[multiplicand]!!.post {
+                multiplicand2button[multiplicand]!!.isPressed = selectedMultiplicands.contains(multiplicand)
             }
         }
+        btnStart.isEnabled = !selectedMultiplicands.isEmpty()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

@@ -2,6 +2,7 @@ package ru.mathtasks.multiplicationtable
 
 
 import android.animation.*
+import android.app.Activity
 import android.content.res.Resources
 import android.graphics.Paint
 import android.graphics.Rect
@@ -38,9 +39,9 @@ fun View.setBackgroundCompat(value: Drawable?) {
 }
 
 fun Resources.getFloat(resourceId: Int): Float {
-    val typedValue = TypedValue();
-    getValue(resourceId, typedValue, true);
-    return typedValue.float;
+    val typedValue = TypedValue()
+    getValue(resourceId, typedValue, true)
+    return typedValue.float
 }
 
 fun View.alphaAnimator(alpha: Float, duration: Long, startDelay: Long = 0): Animator {
@@ -166,4 +167,13 @@ fun View.onLayoutOnce(action: () -> Unit) {
             action()
         }
     })
+}
+
+fun Activity.fullScreen() {
+    window.decorView.systemUiVisibility = (SDK(android.os.Build.VERSION_CODES.JELLY_BEAN, android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE, 0)
+            or SDK(android.os.Build.VERSION_CODES.JELLY_BEAN, android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION, 0)
+            or SDK(android.os.Build.VERSION_CODES.JELLY_BEAN, android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN, 0)
+            or android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            or SDK(android.os.Build.VERSION_CODES.JELLY_BEAN, android.view.View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
+            or SDK(android.os.Build.VERSION_CODES.KITKAT, android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
 }

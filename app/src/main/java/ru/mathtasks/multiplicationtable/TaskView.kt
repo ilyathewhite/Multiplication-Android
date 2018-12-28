@@ -18,11 +18,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 
 
-class TaskView : LinearLayout {
+class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
     private var nextTvMultipliers = listOf<TextView>()
     private var nextMultiplierIdx = 0
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+    init {
         inflate(context, R.layout.task_view, this)
     }
 
@@ -39,23 +39,28 @@ class TaskView : LinearLayout {
                 setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
                 maxLines = 1
                 id = ViewCompat.generateViewId()
-                constraintSet.connect(this@apply.id, ConstraintSet.BOTTOM, this@TaskView.tvMultiplier.id, ConstraintSet.TOP)
-                constraintSet.setMargin(this@apply.id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
-                constraintSet.constrainWidth(this@apply.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                constraintSet.constrainHeight(this@apply.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                if (prevTv == null) {
-                    constraintSet.connect(this@apply.id, ConstraintSet.LEFT, this@TaskView.tvMultiplier.id, ConstraintSet.LEFT)
-                    constraintSet.setMargin(this@apply.id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
-                    constraintSet.connect(this@apply.id, ConstraintSet.RIGHT, this@TaskView.tvMultiplier.id, ConstraintSet.RIGHT)
-                } else {
-                    constraintSet.connect(this@apply.id, ConstraintSet.LEFT, prevTv!!.id, ConstraintSet.RIGHT)
-                    constraintSet.setMargin(this@apply.id, ConstraintSet.LEFT, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval))
-                }
+                layoutNextMultiplier(constraintSet, this@apply.id, prevTv?.id)
                 this@TaskView.clTask.addView(this@apply)
                 prevTv = this@apply
             }
         }.toList()
         constraintSet.applyTo(clTask)
+    }
+
+    private fun layoutNextMultiplier(constraintSet: ConstraintSet, id: Int, prevId: Int?) {
+        constraintSet.clear(id)
+        constraintSet.connect(id, ConstraintSet.BOTTOM, this@TaskView.tvMultiplier.id, ConstraintSet.TOP)
+        constraintSet.setMargin(id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
+        constraintSet.constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+        constraintSet.constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+        if (prevId == null) {
+            constraintSet.connect(id, ConstraintSet.LEFT, this@TaskView.tvMultiplier.id, ConstraintSet.LEFT)
+            constraintSet.setMargin(id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
+            constraintSet.connect(id, ConstraintSet.RIGHT, this@TaskView.tvMultiplier.id, ConstraintSet.RIGHT)
+        } else {
+            constraintSet.connect(id, ConstraintSet.LEFT, prevId, ConstraintSet.RIGHT)
+            constraintSet.setMargin(id, ConstraintSet.LEFT, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval))
+        }
     }
 
     fun setMultiplier(multiplier: Int) {
@@ -81,12 +86,7 @@ class TaskView : LinearLayout {
         }
         ConstraintSet().apply {
             clone(clTask)
-            clear(tvMovingNextMultiplier.id)
-            constrainWidth(tvMovingNextMultiplier.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-            constrainHeight(tvMovingNextMultiplier.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-            connect(tvMovingNextMultiplier.id, ConstraintSet.BOTTOM, tvMultiplier.id, ConstraintSet.TOP)
-            connect(tvMovingNextMultiplier.id, ConstraintSet.LEFT, tvMultiplier.id, ConstraintSet.LEFT)
-            connect(tvMovingNextMultiplier.id, ConstraintSet.RIGHT, tvMultiplier.id, ConstraintSet.RIGHT)
+            layoutNextMultiplier(this, tvMovingNextMultiplier.id, null)
             applyTo(clTask)
         }
 
@@ -122,14 +122,8 @@ class TaskView : LinearLayout {
                         connect(tvMovingNextMultiplier.id, ConstraintSet.BOTTOM, tvMultiplier.id, ConstraintSet.BOTTOM)
                         connect(tvMovingNextMultiplier.id, ConstraintSet.LEFT, tvMultiplier.id, ConstraintSet.LEFT)
                         connect(tvMovingNextMultiplier.id, ConstraintSet.RIGHT, tvMultiplier.id, ConstraintSet.RIGHT)
-                        if (tvNextNextMultiplier != null) {
-                            clear(tvNextNextMultiplier.id)
-                            constrainWidth(tvNextNextMultiplier.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                            constrainHeight(tvNextNextMultiplier.id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                            connect(tvNextNextMultiplier.id, ConstraintSet.BOTTOM, tvMultiplier.id, ConstraintSet.TOP)
-                            connect(tvNextNextMultiplier.id, ConstraintSet.LEFT, tvMultiplier.id, ConstraintSet.LEFT)
-                            connect(tvNextNextMultiplier.id, ConstraintSet.RIGHT, tvMultiplier.id, ConstraintSet.RIGHT)
-                        }
+                        if (tvNextNextMultiplier != null)
+                            layoutNextMultiplier(this, tvNextNextMultiplier.id, null)
                         applyTo(clTask)
                     }
                     tvMovingNextMultiplier.scaleX = tvMultiplier.textSize / tvMovingNextMultiplier.textSize
