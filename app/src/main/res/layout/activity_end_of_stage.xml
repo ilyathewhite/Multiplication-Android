@@ -15,10 +15,8 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="@+id/clBadge" app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent"
+            android:visibility="invisible">
         <Button
                 android:text="Next Drill"
                 android:layout_width="match_parent"
@@ -26,24 +24,25 @@
                 tools:layout_editor_absoluteX="148dp" android:id="@+id/btnNextDrill"
                 android:gravity="center_horizontal"
                 android:paddingLeft="30dp" android:paddingRight="30dp" android:paddingBottom="15dp"
-                android:paddingTop="15dp" android:textSize="20dp" android:layout_marginBottom="20dp"/>
+                android:paddingTop="15dp" android:textSize="20dp" android:layout_marginBottom="20dp" android:background="@drawable/desirable_button_background"
+                android:textAllCaps="false"/>
         <Button
                 android:text="End Practice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/btnEndPractice" android:paddingBottom="15dp"
                 android:paddingTop="15dp" android:paddingLeft="30dp" android:paddingRight="30dp"
-                android:textSize="20dp" style="@style/Widget.AppCompat.Button.Borderless"/>
+                android:textSize="20dp" style="@style/Widget.AppCompat.Button.Borderless" android:background="@drawable/undesirable_button_background" android:textAllCaps="false"/>
     </LinearLayout>
     <android.support.constraint.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="0dp" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintWidth_default="percent" app:layout_constraintWidth_percent="0.8"
+            app:layout_constraintWidth_default="percent" app:layout_constraintWidth_percent="0.7"
             android:id="@+id/clBadge">
 
-        <ImageView
-                android:id="@+id/iv_success_badge" app:srcCompat="@drawable/success_badge"
+        <ru.mathtasks.multiplicationtable.ShadowBadge
+                android:id="@+id/iv_success_badge"
                 android:layout_height="0dp" android:layout_width="0dp"
                 app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"

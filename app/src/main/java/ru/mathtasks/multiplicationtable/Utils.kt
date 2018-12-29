@@ -5,6 +5,7 @@ import android.animation.*
 import android.app.Activity
 import android.content.res.Resources
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -15,6 +16,7 @@ import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionValues
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import java.util.regex.Pattern
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -176,4 +179,22 @@ fun Activity.fullScreen() {
             or android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             or SDK(android.os.Build.VERSION_CODES.JELLY_BEAN, android.view.View.SYSTEM_UI_FLAG_FULLSCREEN, 0)
             or SDK(android.os.Build.VERSION_CODES.KITKAT, android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
+}
+
+fun string2GraphicsPath(s:String): Path {
+    val path = Path()
+    val m = Pattern.compile("(M|L) (\\d+\\.?\\d*) (\\d+\\.?\\d*)").matcher(s)
+    while (m.find()) {
+        try {
+            val x = m.group(2).toFloat();
+            val y = m.group(3).toFloat()
+            when (m.group(1)) {
+                "M" -> path.moveTo(x, y)
+                "L" -> path.lineTo(x, y)
+            }
+        } catch (e: NumberFormatException) {
+            Log.e("string2GraphicsPath", "Parsing path '$s': '${m.group(2)}' or '${m.group(3)}' not a float")
+        }
+    }
+    return path
 }
