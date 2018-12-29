@@ -24,14 +24,15 @@
                 tools:layout_editor_absoluteX="148dp" android:id="@+id/btnNextDrill"
                 android:gravity="center_horizontal"
                 android:paddingLeft="30dp" android:paddingRight="30dp" android:paddingBottom="15dp"
-                android:paddingTop="15dp" android:textSize="20dp" android:layout_marginBottom="20dp" android:background="@drawable/desirable_button_background"
-                android:textAllCaps="false"/>
+                android:paddingTop="15dp" android:layout_marginBottom="20dp" android:background="@drawable/desirable_button_background"
+                android:textAllCaps="false" android:textSize="24dp" android:textColor="@color/white"/>
         <Button
                 android:text="End Practice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/btnEndPractice" android:paddingBottom="15dp"
                 android:paddingTop="15dp" android:paddingLeft="30dp" android:paddingRight="30dp"
-                android:textSize="20dp" style="@style/Widget.AppCompat.Button.Borderless" android:background="@drawable/undesirable_button_background" android:textAllCaps="false"/>
+                android:textSize="24dp" style="@style/Widget.AppCompat.Button.Borderless" android:background="@drawable/undesirable_button_background" android:textAllCaps="false"
+                android:textColor="@color/appBlue"/>
     </LinearLayout>
     <android.support.constraint.ConstraintLayout
             android:layout_width="0dp"

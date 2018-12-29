@@ -7,6 +7,7 @@ import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
 import android.support.transition.Fade
 import android.support.transition.TransitionSet
+import android.support.v4.content.res.ResourcesCompat
 import android.view.View
 import kotlinx.android.synthetic.main.activity_end_of_stage.*
 import kotlinx.coroutines.launch
@@ -24,11 +25,13 @@ class EndOfStageActivity : ScopedAppActivity() {
 
         pvProgress.progress = intent.getFloatExtra(PARAM_PROGRESS, 0f)
 
+        btnNextDrill.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
         btnNextDrill.setOnClickListener {
             setResult(Activity.RESULT_OK, null)
             finish()
         }
 
+        btnEndPractice.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
         btnEndPractice.setOnClickListener {
             setResult(Activity.RESULT_CANCELED, null)
             finish()
