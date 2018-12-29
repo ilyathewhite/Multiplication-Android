@@ -59,6 +59,16 @@
                 android:layout_height="wrap_content" android:id="@+id/tvAnswer" android:textSize="35dp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/tvEquals" app:layout_constraintStart_toEndOf="@+id/tvEquals"
                 app:fontFamily="@font/lato_bolditalic" android:textColor="@color/appDarkBlue"/>
+        <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp" app:srcCompat="@drawable/checkmark"
+                android:id="@+id/ivCheckmark" app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:alpha="0"/>
+        <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:id="@+id/ivXmark" app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:alpha="0" app:srcCompat="@drawable/xmark"/>
     </android.support.constraint.ConstraintLayout>
 
     <fragment

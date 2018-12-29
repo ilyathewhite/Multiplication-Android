@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="testActivityTask">#000000</color>
+    <color name="testActivityNextFactor">@color/appDarkBlue</color>
+    <dimen name="testActivityNextFactorFontSize">14dp</dimen>
+    <dimen name="testActivityNextMultiplierInterval">8dp</dimen>
+    <dimen name="testActivityFirstNextMultiplierBottomMargin">8dp</dimen>
+    <dimen name="testActivityNextMultiplierBottomMargin">8dp</dimen>
+</resources>

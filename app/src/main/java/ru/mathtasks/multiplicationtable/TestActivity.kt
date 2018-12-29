@@ -61,40 +61,49 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
             }
         }
 
+        if (tasksLeft.tasks.size > 1) {
+            val constraintSet = ConstraintSet().apply { clone(clMain) }
+            this.nextTvMultipliers = nextTvFactors(constraintSet, tasksLeft.tasks.drop(1).map { it.multiplier }, tvMultiplier.id)
+            if (multiplicands.size > 1)
+                this.nextTvMultiplicands = nextTvFactors(constraintSet, tasksLeft.tasks.drop(1).map { it.multiplicand }, tvMultiplicand.id)
+            constraintSet.applyTo(clMain)
+        }
 
-        val constraintSet = ConstraintSet().apply { clone(clMain) }
-        var prevTv: TextView? = null
-        this.nextTvMultipliers = tasksLeft.tasks.map { task ->
-            TextView(this).apply {
-                text = task.multiplier.toString()
-                setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.taskViewNextMultiplierFontSize))
-                typeface = ResourcesCompat.getFont(context, R.font.lato_blackitalic)
-                setTextColor(ContextCompat.getColor(context, R.color.taskViewNextMultiplier))
-                maxLines = 1
-                id = ViewCompat.generateViewId()
-                layoutNextMultiplier(constraintSet, this@apply.id, prevTv?.id)
-                this@TestActivity.clMain.addView(this@apply)
-                prevTv = this@apply
-            }
-        }.toList()
-        constraintSet.applyTo(clMain)
+        tvMultiplier.text = tasksLeft.tasks[0].multiplier.toString()
+        tvMultiplicand.text = tasksLeft.tasks[0].multiplicand.toString()
 
         applyState()
     }
 
-    private fun layoutNextMultiplier(constraintSet: ConstraintSet, id: Int, prevId: Int?) {
+    private fun nextTvFactors(constraintSet: ConstraintSet, factors: List<Int>, onTopOfId: Int): List<TextView> {
+        var prevTv: TextView? = null
+        return factors.map { factor ->
+            TextView(this).apply {
+                text = factor.toString()
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.testActivityNextFactorFontSize))
+                typeface = ResourcesCompat.getFont(context, R.font.lato_blackitalic)
+                setTextColor(ContextCompat.getColor(context, R.color.testActivityNextFactor))
+                maxLines = 1
+                id = ViewCompat.generateViewId()
+                layoutNextFactor(constraintSet, this@apply.id, prevTv?.id, onTopOfId)
+                this@TestActivity.clMain.addView(this@apply)
+                prevTv = this@apply
+            }
+        }.toList()
+    }
+
+    private fun layoutNextFactor(constraintSet: ConstraintSet, id: Int, prevId: Int?, onTopOfId: Int) {
         constraintSet.clear(id)
-        constraintSet.connect(id, ConstraintSet.BOTTOM, this.tvMultiplier.id, ConstraintSet.TOP)
-        constraintSet.setMargin(id, ConstraintSet.BOTTOM, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics).toInt())
+        constraintSet.connect(id, ConstraintSet.LEFT, onTopOfId, ConstraintSet.LEFT)
+        constraintSet.connect(id, ConstraintSet.RIGHT, onTopOfId, ConstraintSet.RIGHT)
         constraintSet.constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
         constraintSet.constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
         if (prevId == null) {
-            constraintSet.connect(id, ConstraintSet.LEFT, this.tvMultiplier.id, ConstraintSet.LEFT)
-            constraintSet.setMargin(id, ConstraintSet.LEFT, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7f, resources.displayMetrics).toInt())
-            constraintSet.connect(id, ConstraintSet.RIGHT, this.tvMultiplier.id, ConstraintSet.RIGHT)
+            constraintSet.connect(id, ConstraintSet.BOTTOM, onTopOfId, ConstraintSet.TOP)
+            constraintSet.setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityFirstNextMultiplierBottomMargin))
         } else {
-            constraintSet.connect(id, ConstraintSet.LEFT, prevId, ConstraintSet.RIGHT)
-            constraintSet.setMargin(id, ConstraintSet.LEFT, resources.getDimensionPixelSize(R.dimen.taskViewNextMultiplierInterval))
+            constraintSet.connect(id, ConstraintSet.BOTTOM, prevId, ConstraintSet.TOP)
+            constraintSet.setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityNextMultiplierBottomMargin))
         }
     }
 
@@ -109,6 +118,7 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     }
 
     override fun onAnswerChanged(answer: Int?) {
+        tvAnswer.text = answer?.toString() ?: ""
     }
 
     override fun onOkPressed(answer: Int) {

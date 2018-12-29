@@ -8,10 +8,10 @@ class Settings {
         const val PrepareNextTaskDuration = 100L * DurationCoeff
         const val MoveNextTaskDuration = 400L * DurationCoeff
 
-        const val ShowIncorrectCheckMarkDuration = 250L * DurationCoeff
-        const val PauseAfterIncorrectCheckMarkDuration = 250L * DurationCoeff
-        const val HideIncorrectCheckMarkDuration = 250L * DurationCoeff
-        const val ShowVisibleAnswersDuration = 100L * DurationCoeff
+        const val TrainingActivityShowIncorrectCheckMarkDuration = 250L * DurationCoeff
+        const val TrainingActivityPauseAfterIncorrectCheckMarkDuration = 250L * DurationCoeff
+        const val TrainingActivityHideIncorrectCheckMarkDuration = 250L * DurationCoeff
+        const val TrainingActivityShowVisibleAnswersDuration = 100L * DurationCoeff
 
         const val ShowHintRowDuration = 400L * DurationCoeff
         const val ShowHintUnitRowDuration = 1000L * DurationCoeff
@@ -22,5 +22,8 @@ class Settings {
         const val RowMultiplicandInactiveAlpha = 0.6f
         const val RowUnitSwitchDuration = 10L
         const val ChooseMultiplicandDelay = 1000L
+
+        const val TestActivityShowMarkDuration = 250L
+        const val TestActivityHideMarkDuration = 250L
     }
 }

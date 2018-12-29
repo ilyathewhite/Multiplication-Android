@@ -2,10 +2,8 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import kotlinx.android.synthetic.main.activity_training.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -87,24 +85,24 @@ class TrainingActivity : ScopedAppActivity(), InputFragment.OnEventListener {
             input.resetAnswer()
             launch {
                 listOf(
-                    fieldView.animateRowText(listOf(), null, Settings.ShowIncorrectCheckMarkDuration),
-                    fieldView.animateMark(Mark.Incorrect, Settings.ShowIncorrectCheckMarkDuration)
+                    fieldView.animateRowText(listOf(), null, Settings.TrainingActivityShowIncorrectCheckMarkDuration),
+                    fieldView.animateMark(Mark.Incorrect, Settings.TrainingActivityShowIncorrectCheckMarkDuration)
                 ).flatten().run()
 
-                delay(Settings.PauseAfterIncorrectCheckMarkDuration)
+                delay(Settings.TrainingActivityPauseAfterIncorrectCheckMarkDuration)
 
                 fieldView.setRowText(listOf(taskProvider.hintFrom()), taskProvider.multiplier)
                 fieldView.setRowState(taskProvider.hintRowsState)
                 autoUpdateAnswer = true
                 taskView.setAnswer(input.answer)
 
-                fieldView.animateMark(Mark.None, Settings.HideIncorrectCheckMarkDuration).run()
+                fieldView.animateMark(Mark.None, Settings.TrainingActivityHideIncorrectCheckMarkDuration).run()
 
                 val duration = abs(taskProvider.hintFrom() - taskProvider.multiplier) *
                         if (taskProvider.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
                 fieldView.animateCountedRows(taskProvider.hintRowsState, taskProvider.rowsState, taskProvider.unitAnimation!!, duration).run()
 
-                fieldView.animateRowText(taskProvider.prevAnswers, taskProvider.multiplier, Settings.ShowVisibleAnswersDuration).run()
+                fieldView.animateRowText(taskProvider.prevAnswers, taskProvider.multiplier, Settings.TrainingActivityShowVisibleAnswersDuration).run()
             }
         } else {
             taskProvider.nextTask()

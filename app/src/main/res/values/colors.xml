@@ -10,6 +10,7 @@
 
     <color name="appOrange">#FFA100</color>
     <color name="appDarkRed">#E40000</color>
+    <color name="appLightBlue">#75C1FF</color>
     <color name="appBlue">#2792e9</color>
     <color name="appDarkBlue">#0d2b46</color>
     <color name="appLightGray">#b9b9b9</color>

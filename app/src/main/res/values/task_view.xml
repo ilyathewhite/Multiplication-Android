@@ -4,4 +4,6 @@
     <color name="taskViewNextMultiplier">@color/appDarkBlue</color>
     <dimen name="taskViewNextMultiplierFontSize">14dp</dimen>
     <dimen name="taskViewNextMultiplierInterval">20dp</dimen>
+    <dimen name="taskViewFirstNextMultiplierShift">7dp</dimen>
+    <dimen name="taskViewNextMultiplierBottomMargin">8dp</dimen>
 </resources>
