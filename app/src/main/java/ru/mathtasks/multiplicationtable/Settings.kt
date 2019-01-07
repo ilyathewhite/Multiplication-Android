@@ -16,7 +16,7 @@ class Settings {
         const val ShowHintRowDuration = 400L * DurationCoeff
         const val ShowHintUnitRowDuration = 1000L * DurationCoeff
 
-        const val EndOfStageCheckMarkAnimationDuration = 1000L
+        // for EndOfStageCheckMarkAnimationDuration see success_badge_mark.xml animation duration
         const val EndOfStageSuccessBadgeAnimationDuration = 1000L
 
         const val RowMultiplicandInactiveAlpha = 0.6f

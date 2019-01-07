@@ -25,13 +25,11 @@ class EndOfStageActivity : ScopedAppActivity() {
 
         pvProgress.progress = intent.getFloatExtra(PARAM_PROGRESS, 0f)
 
-        btnNextDrill.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
         btnNextDrill.setOnClickListener {
             setResult(Activity.RESULT_OK, null)
             finish()
         }
 
-        btnEndPractice.typeface = ResourcesCompat.getFont(this, R.font.lato_regular)
         btnEndPractice.setOnClickListener {
             setResult(Activity.RESULT_CANCELED, null)
             finish()

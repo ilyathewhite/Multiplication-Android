@@ -106,12 +106,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:layout_weight="1" android:id="@+id/clStart">
 
-        <Button
+        <ru.mathtasks.multiplicationtable.LatoRegularButton
                 android:text="Start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/btnStart" app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent"
-                android:paddingLeft="50dp" android:paddingRight="50dp" android:background="@drawable/desirable_button_background" android:textColor="@android:color/white"
-                android:layout_marginTop="20dp" android:textAllCaps="false"/>
+                android:paddingLeft="50dp" android:paddingRight="50dp" style="@style/DesirableButtonStyle"
+                android:layout_marginTop="20dp"/>
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>
