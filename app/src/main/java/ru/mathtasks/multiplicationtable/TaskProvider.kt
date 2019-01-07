@@ -20,7 +20,7 @@ class TaskProvider(
 ) : Parcelable {
 
     companion object {
-        private const val MAX_LAST_MULTIPLIERS = 3
+        private const val HINT_MAX_LAST_MULTIPLIERS = 3
     }
 
     constructor(type: TaskType, multiplicand: Int) : this(
@@ -69,15 +69,15 @@ class TaskProvider(
 
     val prevAnswers
         get() = when {
-            stages[0].showPrevAnswers -> prevMultipliers.toList()
             attempt != 0 -> listOf(hintFrom())
+            stages[0].showPrevAnswers -> prevMultipliers.toList()
             else -> listOf()
         }
 
     fun hintFrom(): Int {
         var min = 10
         var result = -1
-        for (m in if (prevMultipliers.size == 0) stages[0].hintFrom.toMutableList() else prevMultipliers) {
+        for (m in if (prevMultipliers.size == 0) stages[0].hintFrom.toMutableList() else prevMultipliers.takeLast(HINT_MAX_LAST_MULTIPLIERS)) {
             if (Math.abs(m - multiplier) in 1..(min - 1)) {
                 min = Math.abs(m - multiplier)
                 result = m
@@ -104,8 +104,6 @@ class TaskProvider(
         } else {
             attempt = 0
             prevMultipliers.add(multiplier)
-            if (prevMultipliers.size > MAX_LAST_MULTIPLIERS)
-                prevMultipliers.removeAt(0)
             multiplierIdx++
             if (endOfStage) {
                 prevMultipliers.clear()
