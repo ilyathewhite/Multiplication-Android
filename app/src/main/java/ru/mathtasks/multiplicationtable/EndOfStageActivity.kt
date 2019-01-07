@@ -41,14 +41,7 @@ class EndOfStageActivity : ScopedAppActivity() {
     override fun onEnterAnimationComplete() {
         super.onEnterAnimationComplete()
         launch {
-            clBadge.transition(Settings.EndOfStageCheckMarkAnimationDuration, ChangeBounds()) {
-                ConstraintSet().apply {
-                    clone(clBadge)
-                    setHorizontalBias(R.id.ivMarkCover, 0.8f)
-                    constrainPercentWidth(R.id.ivMarkCover, 0f)
-                    applyTo(clBadge)
-                }
-            }
+            ivMark.drawable.avdSuspendStartAnimation()
 
             clOuter.transition(Settings.EndOfStageSuccessBadgeAnimationDuration, TransitionSet().apply {
                 ordering = TransitionSet.ORDERING_TOGETHER

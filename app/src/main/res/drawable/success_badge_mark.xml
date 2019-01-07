@@ -1,14 +1,34 @@
-<vector
+<animated-vector
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="314dp"
-        android:height="314dp"
-        android:viewportWidth="314"
-        android:viewportHeight="314">
-    <path
-            android:name="mark"
-            android:pathData="M 105.975 170.345 L 138.945 203.315 L 236.285 112.255"
-            android:strokeColor="#FFFFFF"
-            android:strokeWidth="12.45"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"/>
-</vector>
+        xmlns:aapt="http://schemas.android.com/aapt"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:ignore="NewApi">
+    <aapt:attr name="android:drawable">
+        <vector
+                android:name="vector"
+                android:width="314dp"
+                android:height="314dp"
+                android:viewportWidth="314"
+                android:viewportHeight="314">
+            <path
+                    android:name="mark"
+                    android:pathData="M 105.975 170.345 L 138.945 203.315 L 236.285 112.255"
+                    android:strokeColor="#ffffff"
+                    android:strokeWidth="12.45"
+                    android:strokeLineCap="round"
+                    android:strokeLineJoin="round"
+                    android:trimPathEnd="0"/>
+        </vector>
+    </aapt:attr>
+    <target android:name="mark">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                    android:propertyName="trimPathEnd"
+                    android:duration="1000"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:anim/linear_interpolator"/>
+        </aapt:attr>
+    </target>
+</animated-vector>

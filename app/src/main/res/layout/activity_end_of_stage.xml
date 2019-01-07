@@ -43,7 +43,7 @@
             android:id="@+id/clBadge">
 
         <ru.mathtasks.multiplicationtable.ShadowBadge
-                android:id="@+id/iv_success_badge"
+                android:id="@+id/ivSuccessBadge"
                 android:layout_height="0dp" android:layout_width="0dp"
                 app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
@@ -52,21 +52,11 @@
                 app:srcCompat="@drawable/success_badge_mark"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:id="@+id/iv_mark"
+                android:id="@+id/ivMark"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
         />
-        <ImageView
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:id="@+id/ivMarkCover"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" android:background="@color/successBadge"
-                app:layout_constraintHeight_default="percent" app:layout_constraintHeight_percent="0.4"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" app:layout_constraintWidth_default="percent"
-                app:layout_constraintWidth_percent="0.6" app:layout_constraintHorizontal_bias="0.5"/>
     </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>

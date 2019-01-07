@@ -8,9 +8,13 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.support.constraint.ConstraintLayout
+import android.support.graphics.drawable.Animatable2Compat
+import android.support.graphics.drawable.AnimatedVectorDrawableCompat
 import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
@@ -62,6 +66,28 @@ suspend fun Animator.run(): Unit = suspendCoroutine { cont ->
         }
     })
     this@run.start()
+}
+
+suspend fun Drawable.avdSuspendStartAnimation(): Unit = suspendCoroutine { cont ->
+    when {
+        this is AnimatedVectorDrawableCompat -> {
+            this.registerAnimationCallback(object : Animatable2Compat.AnimationCallback() {
+                override fun onAnimationEnd(drawable: Drawable?) {
+                    cont.resume(Unit)
+                }
+            })
+            this.start()
+        }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this is AnimatedVectorDrawable -> {
+            this.registerAnimationCallback(object : Animatable2.AnimationCallback() {
+                override fun onAnimationEnd(drawable: Drawable?) {
+                    cont.resume(Unit)
+                }
+            })
+            this.start()
+        }
+        else -> Log.w("MultiplicationTable", "Drawable of type '${this.javaClass}' cannot be animated on device with SDK ${Build.VERSION.SDK_INT}")
+    }
 }
 
 suspend fun ConstraintLayout.transition(duration: Long, transition: Transition, layoutUpdate: () -> Unit): Unit = suspendCoroutine { cont ->
@@ -181,7 +207,7 @@ fun Activity.fullScreen() {
             or SDK(android.os.Build.VERSION_CODES.KITKAT, android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, 0))
 }
 
-fun string2GraphicsPath(s:String): Path {
+fun string2GraphicsPath(s: String): Path {
     val path = Path()
     val m = Pattern.compile("(M|L) (\\d+\\.?\\d*) (\\d+\\.?\\d*)").matcher(s)
     while (m.find()) {
