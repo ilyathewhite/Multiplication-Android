@@ -12,28 +12,24 @@ import android.view.MenuItem
 import android.widget.TextView
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_test.*
-import java.util.*
+import kotlinx.coroutines.launch
 
 class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
-    companion object {
-        const val PARAM_MULTIPLICANDS = "multiplicands"
-        private const val STATE_TOTAL_TASKS = "totalTasks"
-        private const val STATE_TASKS_LEFT = "tasksLeft"
-        private const val Q_TASKS_PER_MULTIPLICAND = 10
-    }
-
-    private var nextTvMultipliers = listOf<TextView>()
-    private var nextTvMultiplicands = listOf<TextView>()
-    private var nextIdx = 0
+    @Parcelize
+    class Params(val multiplicands: Array<Int>) : Parcelable
 
     @Parcelize
     class Task(val multiplicand: Int, val multiplier: Int) : Parcelable
 
     @Parcelize
-    class Tasks(val tasks: List<Task>) : Parcelable
+    class State(val tasks: List<Task>, var solvedTasks: Int) : Parcelable
 
-    private var totalTasks = 0
-    private lateinit var tasksLeft: Tasks
+
+    private var nextTvMultipliers = listOf<TextView>()
+    private var nextTvMultiplicands = listOf<TextView>()
+    private var okAllowed = true
+
+    private lateinit var state: State
     private val input
         get() = fInput as InputFragment
 
@@ -44,33 +40,30 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         fullScreen()
 
-        val multiplicands = intent.getIntArrayExtra(PARAM_MULTIPLICANDS)
-        tbToolbarTitle.text = "Test" + " \u25A1 \u00D7 " + (if (multiplicands.count() == 1) multiplicands.first().toString() else "\u25A1")
+        val params = intent.getParcelableExtra<Params>(PARAMS)
+        tbToolbarTitle.text = "Test" + " \u25A1 \u00D7 " + (if (params.multiplicands.count() == 1) params.multiplicands.first().toString() else "\u25A1")
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState == null) {
-            val r = Random()
-            totalTasks = Q_TASKS_PER_MULTIPLICAND * multiplicands.size
-            tasksLeft = Tasks((1..totalTasks).map { Task(multiplicands[r.nextInt(multiplicands.size)], r.nextInt(10) + 1) }.toList())
+            state = State(params.multiplicands.flatMap { multiplicand -> (1..10).map { multiplier -> Task(multiplicand, multiplier) } }.shuffled().toList(), 0)
         } else {
-            totalTasks = savedInstanceState.getInt(STATE_TOTAL_TASKS)
-            tasksLeft = savedInstanceState.getParcelable(STATE_TASKS_LEFT)!!
-            if (tasksLeft.tasks.isEmpty()) {
+            state = savedInstanceState.getParcelable(STATE)!!
+            if (state.solvedTasks == state.tasks.size) {
                 finish()
                 return
             }
         }
 
-        if (tasksLeft.tasks.size > 1) {
+        if (state.tasks.size - state.solvedTasks > 1) {
             val constraintSet = ConstraintSet().apply { clone(clMain) }
-            this.nextTvMultipliers = nextTvFactors(constraintSet, tasksLeft.tasks.drop(1).map { it.multiplier }, tvMultiplier.id)
-            if (multiplicands.size > 1)
-                this.nextTvMultiplicands = nextTvFactors(constraintSet, tasksLeft.tasks.drop(1).map { it.multiplicand }, tvMultiplicand.id)
+            this.nextTvMultipliers = nextTvFactors(constraintSet, state.tasks.drop(state.solvedTasks + 1).map { it.multiplier }, tvMultiplier.id)
+            if (params.multiplicands.size > 1)
+                this.nextTvMultiplicands = nextTvFactors(constraintSet, state.tasks.drop(state.solvedTasks + 1).map { it.multiplicand }, tvMultiplicand.id)
             constraintSet.applyTo(clMain)
         }
 
-        tvMultiplier.text = tasksLeft.tasks[0].multiplier.toString()
-        tvMultiplicand.text = tasksLeft.tasks[0].multiplicand.toString()
+        tvMultiplier.text = state.tasks[state.solvedTasks].multiplier.toString()
+        tvMultiplicand.text = state.tasks[state.solvedTasks].multiplicand.toString()
 
         applyState()
     }
@@ -78,43 +71,44 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     private fun nextTvFactors(constraintSet: ConstraintSet, factors: List<Int>, onTopOfId: Int): List<TextView> {
         var prevTv: TextView? = null
         return factors.map { factor ->
-            TextView(this).apply {
+            TextView(this).apply tv@{
                 text = factor.toString()
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.testActivityNextFactorFontSize))
                 typeface = ResourcesCompat.getFont(context, R.font.lato_blackitalic)
                 setTextColor(ContextCompat.getColor(context, R.color.testActivityNextFactor))
                 maxLines = 1
                 id = ViewCompat.generateViewId()
-                layoutNextFactor(constraintSet, this@apply.id, prevTv?.id, onTopOfId)
-                this@TestActivity.clMain.addView(this@apply)
-                prevTv = this@apply
+                layoutNextFactor(constraintSet, this@tv.id, prevTv?.id, onTopOfId)
+                this@TestActivity.clMain.addView(this@tv)
+                prevTv = this@tv
             }
         }.toList()
     }
 
     private fun layoutNextFactor(constraintSet: ConstraintSet, id: Int, prevId: Int?, onTopOfId: Int) {
-        constraintSet.clear(id)
-        constraintSet.connect(id, ConstraintSet.LEFT, onTopOfId, ConstraintSet.LEFT)
-        constraintSet.connect(id, ConstraintSet.RIGHT, onTopOfId, ConstraintSet.RIGHT)
-        constraintSet.constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-        constraintSet.constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-        if (prevId == null) {
-            constraintSet.connect(id, ConstraintSet.BOTTOM, onTopOfId, ConstraintSet.TOP)
-            constraintSet.setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityFirstNextMultiplierBottomMargin))
-        } else {
-            constraintSet.connect(id, ConstraintSet.BOTTOM, prevId, ConstraintSet.TOP)
-            constraintSet.setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityNextMultiplierBottomMargin))
+        constraintSet.apply {
+            clear(id)
+            connect(id, ConstraintSet.LEFT, onTopOfId, ConstraintSet.LEFT)
+            connect(id, ConstraintSet.RIGHT, onTopOfId, ConstraintSet.RIGHT)
+            constrainWidth(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            constrainHeight(id, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            if (prevId == null) {
+                connect(id, ConstraintSet.BOTTOM, onTopOfId, ConstraintSet.TOP)
+                setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityFirstNextMultiplierBottomMargin))
+            } else {
+                connect(id, ConstraintSet.BOTTOM, prevId, ConstraintSet.TOP)
+                setMargin(id, ConstraintSet.BOTTOM, resources.getDimensionPixelSize(R.dimen.testActivityNextMultiplierBottomMargin))
+            }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putInt(STATE_TOTAL_TASKS, totalTasks)
-        outState?.putParcelable(STATE_TASKS_LEFT, tasksLeft)
+        outState?.putParcelable(STATE, state)
     }
 
     private fun applyState() {
-        pvProgress.progress = tasksLeft.tasks.size / totalTasks.toFloat()
+        pvProgress.progress = state.solvedTasks.toFloat() / state.tasks.size
     }
 
     override fun onAnswerChanged(answer: Int?) {
@@ -122,6 +116,29 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     }
 
     override fun onOkPressed(answer: Int) {
+        if(!okAllowed)
+            return
+        okAllowed = false
+        input.resetAnswer()
+        if (state.tasks[state.solvedTasks].let { it.multiplier * it.multiplicand } == answer) {
+            launch {
+                ivCheckmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
+                ivCheckmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
+            }
+        }
+        else {
+            launch {
+                ivXmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
+                ivXmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
+            }
+        }
+        state.solvedTasks++
+        if(state.solvedTasks == state.tasks.size) {
+            finish()
+            return
+        }
+
+        okAllowed = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

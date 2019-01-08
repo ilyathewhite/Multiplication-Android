@@ -77,7 +77,7 @@ class TaskProvider(
     fun hintFrom(): Int {
         var min = 10
         var result = -1
-        for (m in if (prevMultipliers.size == 0) stages[0].hintFrom.toMutableList() else prevMultipliers.takeLast(HINT_MAX_LAST_MULTIPLIERS)) {
+        for (m in if (prevMultipliers.size == 0) stages[0].hintFrom.toList() else prevMultipliers.takeLast(HINT_MAX_LAST_MULTIPLIERS)) {
             if (Math.abs(m - multiplier) in 1..(min - 1)) {
                 min = Math.abs(m - multiplier)
                 result = m

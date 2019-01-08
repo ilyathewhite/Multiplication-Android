@@ -36,6 +36,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+const val PARAMS = "params"
+const val STATE = "state"
+
 fun <T> SDK(sdk: Int, value: T, default: T): T = if (Build.VERSION.SDK_INT >= sdk) value else default
 
 fun View.setBackgroundCompat(value: Drawable?) {

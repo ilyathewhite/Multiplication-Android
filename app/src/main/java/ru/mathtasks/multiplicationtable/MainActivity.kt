@@ -22,13 +22,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         ttvTest.setOnClickListener {
-            //startActivity(Intent(this, ChooseMultiplicandsActivity::class.java))
+            startActivity(Intent(this, ChooseMultiplicandsActivity::class.java))
 
-            startActivityForResult(Intent(this, EndOfStageActivity::class.java).apply {
-                putExtra(EndOfStageActivity.PARAM_Q_ERRORS, 0)
-                putExtra(EndOfStageActivity.PARAM_PROGRESS, 0.5f)
-            }, 0)
-
+//            startActivityForResult(Intent(this, EndOfStageActivity::class.java).apply {
+//                putExtra(EndOfStageActivity.PARAM_Q_ERRORS, 0)
+//                putExtra(EndOfStageActivity.PARAM_PROGRESS, 0.5f)
+//            }, 0)
         }
     }
 }

@@ -48,7 +48,7 @@ class ChooseMultiplicandsActivity : ScopedAppActivity() {
 
         btnStart.setOnClickListener {
             startActivity(Intent(this, TestActivity::class.java).apply {
-                putExtra(TestActivity.PARAM_MULTIPLICANDS, selectedMultiplicands.toIntArray())
+                putExtra(PARAMS, TestActivity.Params(selectedMultiplicands.toTypedArray()))
             })
         }
 
