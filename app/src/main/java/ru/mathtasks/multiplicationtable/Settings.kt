@@ -12,6 +12,8 @@ class Settings {
         const val TrainingActivityPauseAfterIncorrectCheckMarkDuration = 250L * DurationCoeff
         const val TrainingActivityHideIncorrectCheckMarkDuration = 250L * DurationCoeff
         const val TrainingActivityShowVisibleAnswersDuration = 100L * DurationCoeff
+        const val TrainingActivityPulseScale = 2f
+        const val TrainingActivityPulseHintFromDuration = 2000L * DurationCoeff
 
         const val ShowHintRowDuration = 400L * DurationCoeff
         const val ShowHintUnitRowDuration = 1000L * DurationCoeff

@@ -3,6 +3,8 @@ package ru.mathtasks.multiplicationtable
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.content.res.Resources
+import android.view.animation.Animation
+import android.view.animation.ScaleAnimation
 import android.widget.TextView
 
 enum class UnitAnimation { ByRow, ByUnit }
@@ -29,6 +31,20 @@ class Row(val multiplier: Int, val tvMultiplier: TextView, val units: Array<Unit
         tvProduct.alpha = 0f
         tvProduct.text = text
         return tvProduct.alphaAnimator(1f, duration)
+    }
+
+    suspend fun pulseRowText(scale: Float, duration: Long) {
+        ScaleAnimation(tvProduct.scaleX, scale, tvProduct.scaleY, scale, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f).apply {
+            fillAfter = true
+            this.duration = duration / 2
+            run(tvProduct)
+        }
+
+        ScaleAnimation(scale, 1f, scale, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f).apply {
+            fillAfter = true
+            this.duration = duration / 2
+            run(tvProduct)
+        }
     }
 
     fun setUnitState(state: UnitState) {

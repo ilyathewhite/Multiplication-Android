@@ -155,5 +155,10 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             rows[idx].animateUnitState(toState.unitState(rows[idx]), unitAnimation, to < from, duration / abs(to - from))
         }.playSequentially()
     }
+
+    suspend fun pulseRowText(row: Int, scale: Float, duration: Long) {
+        if (row < rows.size)
+            rows[row].pulseRowText(scale, duration)
+    }
 }
 

@@ -25,6 +25,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.animation.Animation
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.coroutines.CoroutineScope
@@ -60,6 +61,18 @@ fun View.alphaAnimator(alpha: Float, duration: Long, startDelay: Long = 0): Anim
 
 fun TextView.textColorAnimator(color: Int, duration: Long, startDelay: Long = 0): Animator {
     return ObjectAnimator.ofObject(this, "textColor", ArgbEvaluator(), this.currentTextColor, color).setDuration(duration).apply { setStartDelay(startDelay) }
+}
+
+suspend fun Animation.run(v: View): Unit = suspendCoroutine { cont ->
+    this@run.setAnimationListener(object : Animation.AnimationListener {
+        override fun onAnimationEnd(animation: Animation?) {
+            cont.resume(Unit)
+        }
+
+        override fun onAnimationRepeat(animation: Animation?) {}
+        override fun onAnimationStart(animation: Animation?) {}
+    })
+    v.startAnimation(this@run)
 }
 
 suspend fun Animator.run(): Unit = suspendCoroutine { cont ->
@@ -227,3 +240,5 @@ fun string2GraphicsPath(s: String): Path {
     }
     return path
 }
+
+ 

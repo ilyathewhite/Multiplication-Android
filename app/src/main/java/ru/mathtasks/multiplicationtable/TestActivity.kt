@@ -12,18 +12,16 @@ import android.view.MenuItem
 import android.widget.TextView
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_test.*
-import kotlinx.coroutines.launch
 
-class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
+class TestActivity : ScopedAppActivity(), InputFragment.EventListener {
     @Parcelize
     class Params(val multiplicands: Array<Int>) : Parcelable
 
     @Parcelize
-    class Task(val multiplicand: Int, val multiplier: Int) : Parcelable
+    private class Task(val multiplicand: Int, val multiplier: Int) : Parcelable
 
     @Parcelize
-    class State(val tasks: List<Task>, var solvedTasks: Int) : Parcelable
-
+    private class State(val tasks: List<Task>, val taskIdx2Correct: List<Int>) : Parcelable
 
     private var nextTvMultipliers = listOf<TextView>()
     private var nextTvMultiplicands = listOf<TextView>()
@@ -45,25 +43,25 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState == null) {
-            state = State(params.multiplicands.flatMap { multiplicand -> (1..10).map { multiplier -> Task(multiplicand, multiplier) } }.shuffled().toList(), 0)
+            state = State(params.multiplicands.flatMap { multiplicand -> (1..10).map { multiplier -> Task(multiplicand, multiplier) } }.shuffled().toList(), listOf())
         } else {
             state = savedInstanceState.getParcelable(STATE)!!
-            if (state.solvedTasks == state.tasks.size) {
+            if (state.taskIdx2Correct.size == state.tasks.size) {
                 finish()
                 return
             }
         }
 
-        if (state.tasks.size - state.solvedTasks > 1) {
+        if (state.tasks.size - state.taskIdx2Correct.size > 1) {
             val constraintSet = ConstraintSet().apply { clone(clMain) }
-            this.nextTvMultipliers = nextTvFactors(constraintSet, state.tasks.drop(state.solvedTasks + 1).map { it.multiplier }, tvMultiplier.id)
+            this.nextTvMultipliers = nextTvFactors(constraintSet, state.tasks.drop(state.taskIdx2Correct.size + 1).map { it.multiplier }, tvMultiplier.id)
             if (params.multiplicands.size > 1)
-                this.nextTvMultiplicands = nextTvFactors(constraintSet, state.tasks.drop(state.solvedTasks + 1).map { it.multiplicand }, tvMultiplicand.id)
+                this.nextTvMultiplicands = nextTvFactors(constraintSet, state.tasks.drop(state.taskIdx2Correct.size + 1).map { it.multiplicand }, tvMultiplicand.id)
             constraintSet.applyTo(clMain)
         }
 
-        tvMultiplier.text = state.tasks[state.solvedTasks].multiplier.toString()
-        tvMultiplicand.text = state.tasks[state.solvedTasks].multiplicand.toString()
+        tvMultiplier.text = state.tasks[state.taskIdx2Correct.size].multiplier.toString()
+        tvMultiplicand.text = state.tasks[state.taskIdx2Correct.size].multiplicand.toString()
 
         applyState()
     }
@@ -108,7 +106,7 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     }
 
     private fun applyState() {
-        pvProgress.progress = state.solvedTasks.toFloat() / state.tasks.size
+        //pvProgress.progress = state.solvedTasks.toFloat() / state.tasks.size
     }
 
     override fun onAnswerChanged(answer: Int?) {
@@ -116,29 +114,28 @@ class TestActivity : ScopedAppActivity(), InputFragment.OnEventListener {
     }
 
     override fun onOkPressed(answer: Int) {
-        if(!okAllowed)
+        if (!okAllowed)
             return
-        okAllowed = false
-        input.resetAnswer()
-        if (state.tasks[state.solvedTasks].let { it.multiplier * it.multiplicand } == answer) {
-            launch {
-                ivCheckmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
-                ivCheckmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
-            }
-        }
-        else {
-            launch {
-                ivXmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
-                ivXmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
-            }
-        }
-        state.solvedTasks++
-        if(state.solvedTasks == state.tasks.size) {
-            finish()
-            return
-        }
-
-        okAllowed = true
+//        okAllowed = false
+//        input.resetAnswer()
+//        if (state.tasks[state.solvedTasks].let { it.multiplier * it.multiplicand } == answer) {
+//            launch {
+//                ivCheckmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
+//                ivCheckmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
+//            }
+//        } else {
+//            launch {
+//                ivXmark.alphaAnimator(1f, Settings.TestActivityShowMarkDuration).run()
+//                ivXmark.alphaAnimator(0f, Settings.TestActivityHideMarkDuration).run()
+//            }
+//        }
+//        state.solvedTasks++
+//        if (state.solvedTasks == state.tasks.size) {
+//            finish()
+//            return
+//        }
+//
+//        okAllowed = true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

@@ -2,6 +2,7 @@ package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.transition.ChangeBounds
@@ -9,21 +10,25 @@ import android.support.transition.Fade
 import android.support.transition.TransitionSet
 import android.support.v4.content.res.ResourcesCompat
 import android.view.View
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_end_of_stage.*
 import kotlinx.coroutines.launch
 
 
+@Parcelize
+class EndOfStageActivityActivityParams(
+    val qErrors: Int,
+    val progress: Float
+) : Parcelable
+
 class EndOfStageActivity : ScopedAppActivity() {
-    companion object {
-        const val PARAM_Q_ERRORS = "qErrors"
-        const val PARAM_PROGRESS = "progress"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_end_of_stage)
 
-        pvProgress.progress = intent.getFloatExtra(PARAM_PROGRESS, 0f)
+        val params = intent.getParcelableExtra<EndOfStageActivityActivityParams>(PARAMS)
+        pvProgress.progress = params.progress
 
         btnNextDrill.setOnClickListener {
             setResult(Activity.RESULT_OK, null)
