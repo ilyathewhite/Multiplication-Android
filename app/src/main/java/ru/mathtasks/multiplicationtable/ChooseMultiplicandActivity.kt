@@ -56,8 +56,7 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
 
         btnStart.setOnClickListener {
             startActivity(Intent(this, TrainingActivity::class.java).apply {
-                putExtra(TrainingActivity.PARAM_TASK_TYPE, taskType)
-                putExtra(TrainingActivity.PARAM_MULTIPLICAND, selectedMultiplicand)
+                putExtra(PARAMS, TrainingActivityParams(taskType, selectedMultiplicand))
             })
         }
 

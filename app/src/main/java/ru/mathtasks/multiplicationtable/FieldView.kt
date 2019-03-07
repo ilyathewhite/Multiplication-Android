@@ -109,7 +109,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
             val productWidth = productSpaceRatio * unitSize
             val productX = originX + totalContentWidth - productWidth
-            row.tvProduct.apply {
+            row.tvText.apply {
                 setTextSize(TypedValue.COMPLEX_UNIT_PX, unitSize.toFloat() * resources.getFloat(R.dimen.fieldViewTextSizeRatio))
                 layoutParams = RelativeLayout.LayoutParams(productWidth.toInt(), unitSize).apply { setMargins(productX.toInt(), y, 0, 0) }
             }
@@ -148,17 +148,19 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         rows.forEach { row -> row.setUnitState(rowsState.unitState(row)) }
     }
 
+    fun crossFadeRowState(rowsState: RowsState, duration: Long): Animator {
+        return rows.map { row -> row.crossFadeUnitState(rowsState.unitState(row), duration) }.playTogether()
+    }
+
     fun animateCountedRows(fromState: RowsState, toState: RowsState, unitAnimation: UnitAnimation, duration: Long): Animator {
         val from = fromState.qCountedRows
         val to = toState.qCountedRows
-        return IntProgression.fromClosedRange(from, to, if (from < to) 1 else -1).map { idx ->
-            rows[idx].animateUnitState(toState.unitState(rows[idx]), unitAnimation, to < from, duration / abs(to - from))
+        return (if (from < to) (from..to - 1) else (to - 1 downTo from)).map { idx ->
+            rows[idx].animateUnitState(toState.unitState(rows[idx]), unitAnimation, from > to, duration / abs(to - from))
         }.playSequentially()
     }
 
-    suspend fun pulseRowText(row: Int, scale: Float, duration: Long) {
-        if (row < rows.size)
-            rows[row].pulseRowText(scale, duration)
+    suspend fun pulseRowText(multiplier: Int, scale: Float, duration: Long) {
+        rows[multiplier - 1].pulseRowText(scale, duration)
     }
 }
-

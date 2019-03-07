@@ -27,7 +27,6 @@ class TrainingActivityParams(
 class Stage(
     val showPrevAnswers: Boolean,
     val multipliers: Array<Int>,
-    val startHint: Int,
     val extraHints: Array<Int>
 ) : Parcelable
 
@@ -54,25 +53,29 @@ class TrainingActivityViewModel : ViewModel() {
 
     private var initialized = false
     private lateinit var s: TrainingActivityState
-    private var answerActive = true
+    private var answerFrozen = false
 
-    private val mutableEventAnswer = SingleLiveEvent<Int?>()
-    val eventAnswer: LiveData<Int?> get() = mutableEventAnswer
+    private val meVisibleAnswer = SingleLiveEvent<Int?>()
+    val eVisibleAnswer: LiveData<Int?> get() = meVisibleAnswer
 
-    private val mutableEventCorrect = SingleLiveEvent<Unit>()
-    val eventCorrect: LiveData<Unit> get() = mutableEventCorrect
+    private val meInvisibleAnswer = SingleLiveEvent<Int?>()
+    val eInvisibleAnswer: LiveData<Int?> get() = meInvisibleAnswer
 
-    private val mutableEventIncorrect = SingleLiveEvent<Unit>()
-    val eventIncorrect: LiveData<Unit> get() = mutableEventIncorrect
+    private val meCorrect = SingleLiveEvent<Unit>()
+    val eCorrect: LiveData<Unit> get() = meCorrect
 
-    private val mutableEventEndOfStage = SingleLiveEvent<Boolean>()
-    val eventEndOfStage: LiveData<Boolean> get() = mutableEventEndOfStage
+    private val meIncorrect = SingleLiveEvent<Unit>()
+    val eIncorrect: LiveData<Unit> get() = meIncorrect
 
-    private val mutableEventNextStage = SingleLiveEvent<Unit>()
-    val eventNextStage: LiveData<Unit> get() = mutableEventNextStage
+    private val meEndOfStage = SingleLiveEvent<Boolean>()
+    val eEndOfStage: LiveData<Boolean> get() = meEndOfStage
+
+    private val meNextStage = SingleLiveEvent<Unit>()
+    val eNextStage: LiveData<Unit> get() = meNextStage
 
     val type get() = s.type
     val multiplicand get() = s.multiplicand
+    val prevMultiplier get() = stage.multipliers[s.multiplierIdx - 1]
     val multiplier get() = stage.multipliers[s.multiplierIdx]
     val nextMultipliers get() = stage.multipliers.drop(s.multiplierIdx + 1).toTypedArray()
     val multipliersWithAnswers get() = if (stage.showPrevAnswers) stage.multipliers.take(s.multiplierIdx) else listOf()
@@ -80,14 +83,17 @@ class TrainingActivityViewModel : ViewModel() {
     val stageProgress get() = if (s.stages.size == s.stageIdx) 1f else (s.stageIdx + if (stage.multipliers.size == s.multiplierIdx) 1 else 0).toFloat() / s.stages.size
     val qErrors get() = s.qErrors
     val answer get() = s.answer
-    val state: Parcelable = s
-    val hintMultiplier
-        get() = ((arrayOf(stage.startHint) + stage.multipliers.take(s.multiplierIdx)).takeLast(HINT_LAST_MULTIPLIERS) + stage.extraHints)
+    val state: Parcelable get() = s
+    val hintMultiplier  // may be 0
+        get() = ((arrayOf(0) + stage.multipliers.take(s.multiplierIdx)).takeLast(HINT_LAST_MULTIPLIERS) + stage.extraHints)
             .filter { it != multiplier }
             .minBy { Math.abs(it - multiplier) }!!
 
     val rowsState: RowsState
         get() = RowsState(multiplier, 0, 0)
+
+    val prevRowsState: RowsState
+        get() = RowsState(prevMultiplier, 0, 0)
 
     val hintRowsState: RowsState
         get() {
@@ -117,16 +123,16 @@ class TrainingActivityViewModel : ViewModel() {
                 params.multiplicand,
                 when (params.type) {
                     TaskType.Learn -> listOf(
-                        Stage(true, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 0, arrayOf()),
-                        Stage(false, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 0, arrayOf()),
-                        Stage(true, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), 10, arrayOf()),
-                        Stage(false, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), 10, arrayOf()),
-                        Stage(true, arrayOf(1, 3, 5, 7, 9), 0, arrayOf()),
-                        Stage(true, arrayOf(9, 7, 5, 3, 1), 10, arrayOf()),
-                        Stage(true, arrayOf(2, 4, 6, 8, 10), 0, arrayOf()),
-                        Stage(true, arrayOf(10, 8, 6, 4, 2), 0, arrayOf())
+                        Stage(true, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf()),
+                        Stage(false, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf()),
+                        Stage(true, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
+                        Stage(false, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
+                        Stage(true, arrayOf(1, 3, 5, 7, 9), arrayOf()),
+                        Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf()),
+                        Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf()),
+                        Stage(true, arrayOf(10, 8, 6, 4, 2), arrayOf())
                     )
-                    TaskType.Practice -> listOf(Stage(false, (1..10).shuffled().toTypedArray(), 0, arrayOf(1, 5, 10)))
+                    TaskType.Practice -> listOf(Stage(false, (1..10).shuffled().toTypedArray(), arrayOf(1, 5, 10)))
                     else -> throw RuntimeException("Invalid params.type ${params.type}")
                 }
             )
@@ -135,38 +141,40 @@ class TrainingActivityViewModel : ViewModel() {
 
     fun onAnswerChanged(answer: Int?) {
         s.answer = answer
-        if (answerActive)
-            mutableEventAnswer.setValue(answer)
+        meInvisibleAnswer.setValue(answer)
+        if (!answerFrozen)
+            meVisibleAnswer.setValue(answer)
     }
 
     fun onPreAnimationEnded() {
-        answerActive = true
+        answerFrozen = false
+        meVisibleAnswer.setValue(answer)
     }
 
     fun onOkPressed(answer: Int) {
         when {
-            !answerActive ->
+            answerFrozen ->
                 return
             s.multiplicand * multiplier != answer -> {
                 s.answer = null
-                answerActive = false
+                answerFrozen = true
                 s.attempt++
                 s.qErrors++
-                mutableEventAnswer.setValue(s.answer)
-                mutableEventIncorrect.setValue(Unit)
+                meVisibleAnswer.setValue(s.answer)
+                meIncorrect.setValue(Unit)
             }
             s.multiplierIdx + 1 < s.stages[s.stageIdx].multipliers.size -> {
                 s.answer = null
-                answerActive = false
+                answerFrozen = true
                 s.attempt = 0
                 s.multiplierIdx++
-                mutableEventAnswer.setValue(s.answer)
-                mutableEventCorrect.setValue(Unit)
+                meVisibleAnswer.setValue(s.answer)
+                meCorrect.setValue(Unit)
             }
             s.stageIdx + 1 < s.stages.size ->
-                mutableEventEndOfStage.setValue(false)
+                meEndOfStage.setValue(false)
             else ->
-                mutableEventEndOfStage.setValue(true)
+                meEndOfStage.setValue(true)
         }
     }
 
@@ -176,8 +184,8 @@ class TrainingActivityViewModel : ViewModel() {
         s.answer = null
         s.attempt = 0
         s.multiplierIdx = 0
-        mutableEventAnswer.postValue(s.answer)
-        mutableEventNextStage.postValue(Unit)
+        meVisibleAnswer.postValue(s.answer)
+        meNextStage.postValue(Unit)
     }
 }
 
@@ -201,7 +209,7 @@ class TrainingActivity : ScopedAppActivity() {
         m.init(savedInstanceState, intent)
 
         tbToolbarTitle.text = (if (m.type == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 ${m.multiplicand}"
-        taskViewInitNewStage()
+        taskViewInitStage()
 
         pvProgress.progress = m.taskProgress
         taskView.setAnswer(m.answer)
@@ -226,11 +234,12 @@ class TrainingActivity : ScopedAppActivity() {
             }
         })
 
-        m.eventAnswer.observe(this, Observer { answer ->
+        m.eVisibleAnswer.observe(this, Observer { answer ->
             taskView.setAnswer(answer)
+            input.answer = answer
         })
 
-        m.eventEndOfStage.observe(this, Observer { endOfGame ->
+        m.eEndOfStage.observe(this, Observer { endOfGame ->
             if (endOfGame != null) {
                 startActivityForResult(Intent(this, EndOfStageActivity::class.java).apply {
                     putExtra(PARAMS, EndOfStageActivityActivityParams(m.qErrors, m.stageProgress))
@@ -238,11 +247,11 @@ class TrainingActivity : ScopedAppActivity() {
             }
         })
 
-        m.eventNextStage.observe(this, Observer {
-            taskViewInitNewStage()
+        m.eNextStage.observe(this, Observer {
+            taskViewInitStage()
         })
 
-        m.eventCorrect.observe(this, Observer {
+        m.eCorrect.observe(this, Observer {
             launch {
                 listOf(
                     async { pvProgress.animateProgress(m.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
@@ -260,10 +269,11 @@ class TrainingActivity : ScopedAppActivity() {
 
                 fieldView.setRowText(m.multipliersWithAnswers, m.multiplier)
                 fieldView.setLastActiveMultiplier(m.multiplier)
-                fieldView.setRowState(RowsState(m.multiplier, 0, 0))
                 m.onPreAnimationEnded()
                 taskView.setAnswer(m.answer)
                 taskView.setMultiplier(m.multiplier)
+
+                fieldView.animateCountedRows(m.prevRowsState, m.rowsState, UnitAnimation.ByRow, abs(m.multiplier - m.prevMultiplier) * Settings.ShowHintRowDuration).run()
 
                 listOf(
                     async { taskView.moveNextTask(this, Settings.MoveNextTaskDuration) },
@@ -272,35 +282,34 @@ class TrainingActivity : ScopedAppActivity() {
             }
         })
 
-        m.eventIncorrect.observe(this, Observer {
+        m.eIncorrect.observe(this, Observer {
             launch {
+                val hintMultiplier = m.hintMultiplier
+
                 listOf(
-                    fieldView.animateRowText(listOf(m.hintMultiplier), m.multiplier, Settings.TrainingActivityShowIncorrectCheckMarkDuration),
+                    fieldView.animateRowText(if (hintMultiplier == 0) listOf() else listOf(hintMultiplier), m.multiplier, Settings.TrainingActivityShowIncorrectCheckMarkDuration),
                     fieldView.animateMark(Mark.Incorrect, Settings.TrainingActivityShowIncorrectCheckMarkDuration)
                 ).flatten().run()
 
                 delay(Settings.TrainingActivityPauseAfterIncorrectCheckMarkDuration)
 
-                fieldView.setRowState(m.hintRowsState)
-                m.onPreAnimationEnded()
-                taskView.setAnswer(m.answer)
-
                 fieldView.animateMark(Mark.None, Settings.TrainingActivityHideIncorrectCheckMarkDuration).run()
 
-                val hintMultiplier = m.hintMultiplier
+                fieldView.crossFadeRowState(m.hintRowsState, Settings.TrainingActivityCrossFadeHintViewDuration).run()
 
-                fieldView.pulseRowText(hintMultiplier, Settings.TrainingActivityPulseScale, Settings.TrainingActivityPulseHintFromDuration)
+                m.onPreAnimationEnded()
 
-                val duration = abs(hintMultiplier - m.multiplier) *
+                if (hintMultiplier != 0)
+                    fieldView.pulseRowText(hintMultiplier, Settings.TrainingActivityPulseScale, Settings.TrainingActivityPulseHintFromDuration)
+
+                val duration = abs(m.multiplier - hintMultiplier) *
                         if (m.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
                 fieldView.animateCountedRows(m.hintRowsState, m.rowsState, m.unitAnimation!!, duration).run()
-
-                fieldView.animateRowText(m.multipliersWithAnswers, m.multiplier, Settings.TrainingActivityShowVisibleAnswersDuration).run()
             }
         })
     }
 
-    private fun taskViewInitNewStage() {
+    private fun taskViewInitStage() {
         taskView.apply {
             createNextMultipliers(m.nextMultipliers)
             setMultiplier(m.multiplier)
