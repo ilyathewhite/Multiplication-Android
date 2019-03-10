@@ -14,12 +14,14 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
     companion object {
         const val PARAM_TASK_TYPE = "taskType"
         private const val STATE_SELECTED_MULTIPLICAND = "selectedMultiplicand"
+        private const val TRAINING_ACTIVITY_REQUEST_CODE = 1
     }
 
     private lateinit var taskType: TaskType
     private var selectedMultiplicand: Int = 2
     private lateinit var multiplicand2button: Map<Int, Button>
     private var job: Job? = null
+    private var startClicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +57,12 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
         }
 
         btnStart.setOnClickListener {
-            startActivity(Intent(this, TrainingActivity::class.java).apply {
+            if (startClicked)
+                return@setOnClickListener
+            startClicked = true
+            startActivityForResult(Intent(this, TrainingActivity::class.java).apply {
                 putExtra(PARAMS, TrainingActivityParams(taskType, selectedMultiplicand))
-            })
+            }, TRAINING_ACTIVITY_REQUEST_CODE)
         }
 
         if (savedInstanceState != null)
@@ -77,7 +82,7 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
     }
 
     private fun btnClick(multiplicand: Int) {
-        multiplicand2button[selectedMultiplicand]!!.isPressed = false
+        multiplicand2button.getValue(selectedMultiplicand).isPressed = false
         selectedMultiplicand = multiplicand
         tvMultiplicand.text = selectedMultiplicand.toString()
 
@@ -92,6 +97,12 @@ class ChooseMultiplicandActivity : ScopedAppActivity() {
                 }
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == TRAINING_ACTIVITY_REQUEST_CODE)
+            startClicked = false
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

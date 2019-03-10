@@ -116,6 +116,10 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
+    fun clearMark() {
+        mark2iv.forEach { (_, iv) -> iv.alpha = 0f }
+    }
+
     fun animateMark(mark: Mark, duration: Long): List<Animator> {
         return mark2iv
             .filter { (ivMark, iv) -> iv.alpha != if (ivMark == mark) 1f else 0f }
@@ -126,7 +130,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         rows.forEach { row -> row.setIsMultiplierActive(row.multiplier <= lastActiveMultiplier) }
     }
 
-    fun animateIsMultiplierActive(lastActiveMultiplier: Int, duration: Long): List<Animator> {
+    fun animateLastActiveMultiplier(lastActiveMultiplier: Int, duration: Long): List<Animator> {
         return rows.mapNotNull { row -> row.animateIsMultiplierActive(row.multiplier <= lastActiveMultiplier, duration) }
     }
 
@@ -155,7 +159,7 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     fun animateCountedRows(fromState: RowsState, toState: RowsState, unitAnimation: UnitAnimation, duration: Long): Animator {
         val from = fromState.qCountedRows
         val to = toState.qCountedRows
-        return (if (from < to) (from..to - 1) else (to - 1 downTo from)).map { idx ->
+        return (if (from < to) (from..to - 1) else (from - 1 downTo to)).map { idx ->
             rows[idx].animateUnitState(toState.unitState(rows[idx]), unitAnimation, from > to, duration / abs(to - from))
         }.playSequentially()
     }

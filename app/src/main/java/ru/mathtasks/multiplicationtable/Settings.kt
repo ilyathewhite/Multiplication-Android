@@ -26,6 +26,7 @@ class Settings {
         const val ChooseMultiplicandDelay = 1000L
 
         const val TestActivityShowMarkDuration = 250L
+        const val TestActivityPauseAfterMarkDuration = 250L * DurationCoeff
         const val TestActivityHideMarkDuration = 250L
     }
 }
