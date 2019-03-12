@@ -3,6 +3,11 @@ package ru.mathtasks.multiplicationtable
 
 import android.animation.*
 import android.app.Activity
+import android.arch.lifecycle.LifecycleOwner
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Paint
 import android.graphics.Path
@@ -12,6 +17,8 @@ import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
 import android.support.constraint.ConstraintLayout
 import android.support.graphics.drawable.Animatable2Compat
 import android.support.graphics.drawable.AnimatedVectorDrawableCompat
@@ -19,6 +26,7 @@ import android.support.transition.Transition
 import android.support.transition.TransitionListenerAdapter
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionValues
+import android.support.v4.app.FragmentActivity
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.util.TypedValue
@@ -28,10 +36,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.widget.Button
 import android.widget.TextView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import java.util.regex.Pattern
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -241,4 +246,40 @@ fun string2GraphicsPath(s: String): Path {
     return path
 }
 
- 
+abstract class MyViewModel<Params : Parcelable, State : Parcelable, Update> : ViewModel() {
+    private var initialized = false
+    protected lateinit var s: State
+        private set
+    val state get() = s
+
+    private val eventUpdate = SingleLiveEvent<Update>()
+
+    fun observe(owner: LifecycleOwner, observer: (Update) -> Unit) {
+        eventUpdate.observe(owner, Observer { upd ->
+            if (upd != null)
+                observer(upd)
+        })
+    }
+
+    protected fun update(upd: Update) {
+        this.eventUpdate.value = upd
+    }
+
+    abstract fun create(params: Params): State
+    fun init(savedInstanceState: Bundle?, intent: Intent) {
+        if (initialized)
+            return
+        initialized = true
+        s = when {
+            savedInstanceState != null -> savedInstanceState.getParcelable(STATE) as State
+            else -> create(intent.getParcelableExtra(PARAMS) as Params)
+        }
+    }
+}
+
+inline fun <reified VM : MyViewModel<*, *, *>> getViewModel(activity: FragmentActivity, savedInstanceState: Bundle?) =
+    ViewModelProviders.of(activity).get(VM::class.java).apply { init(savedInstanceState, activity.intent) }
+
+suspend fun CoroutineScope.parallel(vararg functions: suspend CoroutineScope.() -> Unit) {
+    functions.map { func -> async { func() } }.map { it.await() }
+}
