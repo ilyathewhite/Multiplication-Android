@@ -29,11 +29,14 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         const val Q_ROWS = 10
     }
 
+    private var initialized = false
+    private var layoutReady = false
     private lateinit var mark2iv: Map<Mark, ImageView>
     private var multiplicand: Int = 0
     private lateinit var rows: Array<Row>
 
     fun initialize(multiplicand: Int) {
+        this.initialized = true
         this.multiplicand = multiplicand
 
         this.rows = (1..Q_ROWS).map { multiplier ->
@@ -69,9 +72,16 @@ class FieldView(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 this@FieldView.addView(this@apply)
             }
         }.toMap()
+
+        if(layoutReady)
+            layout()
     }
 
-    fun layout(width: Int, height: Int) {
+    fun layout() {
+        layoutReady = true
+        if (!initialized)
+            return
+
         val leftOffset = resources.getDimensionPixelSize(R.dimen.fieldViewLeftOffset)
         val rightOffset = resources.getDimensionPixelSize(R.dimen.fieldViewRightOffset)
         val topOffset = resources.getDimensionPixelSize(R.dimen.fieldViewTopOffset)

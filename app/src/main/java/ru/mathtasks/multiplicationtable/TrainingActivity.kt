@@ -1,7 +1,10 @@
 package ru.mathtasks.multiplicationtable
 
 import android.app.Activity
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModel
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
@@ -43,146 +46,307 @@ class TrainingActivityState(
     var answer: Int? = null
 ) : Parcelable
 
+sealed class TrainingActivityViewUpdate {
+    class SetToolbarText(
+        val text: String
+    ) : TrainingActivityViewUpdate()
+
+    class InitField(
+        val multiplicand: Int
+    ) : TrainingActivityViewUpdate()
+
+    class SetupStage(
+        val taskProgress: Float,
+        val multiplier: Int,
+        val multiplicand: Int,
+        val nextMultipliers: List<Int>,
+        val multipliersWithAnswers: List<Int>,
+        val rowsState: RowsState
+    ) : TrainingActivityViewUpdate()
+
+    class SetAnswer(
+        val answer: Int?
+    ) : TrainingActivityViewUpdate()
+
+    class ShowAnswer(
+        val answer: Int?
+    ) : TrainingActivityViewUpdate()
+
+    class AnimateRowText(
+        val visibleAnswers: List<Int>,
+        val multiplier: Int?,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class AnimateMark(
+        val mark: Mark,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class Delay(
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class CrossFadeRowState(
+        val state: RowsState,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class PulseRowText(
+        val multiplier: Int,
+        val scale: Float,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class AnimateCountedRows(
+        val startState: RowsState,
+        val endState: RowsState,
+        val animation: UnitAnimation,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class AnimateProgress(
+        val taskProgress: Float,
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class PrepareNextTask(
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class SetRowText(
+        val multipliersWithAnswers: List<Int>,
+        val multiplier: Int
+    ) : TrainingActivityViewUpdate()
+
+    class SetLastActiveMultiplier(
+        val multiplier: Int
+    ) : TrainingActivityViewUpdate()
+
+    class SetMultiplier(
+        val multiplier: Int
+    ) : TrainingActivityViewUpdate()
+
+    class MoveNextTask(
+        val duration: Long
+    ) : TrainingActivityViewUpdate()
+
+    class ShowEndOfStage(
+        val qErrors: Int,
+        val stageProgress: Float,
+        val endOfGame: Boolean
+    ) : TrainingActivityViewUpdate()
+
+    class ViewModelEvent(
+        val event: () -> Unit
+    ) : TrainingActivityViewUpdate()
+}
+
+class TrainingActivityViewUpdates(vararg list: TrainingActivityViewUpdate?) {
+    val updates = mutableListOf<List<TrainingActivityViewUpdate?>>()
+
+    init {
+        if (list.isNotEmpty())
+            updates.add(list.toList())
+    }
+
+    fun add(vararg list: TrainingActivityViewUpdate?) {
+        updates.add(list.toList())
+    }
+}
+
 class TrainingActivityViewModel : ViewModel() {
     companion object {
         private const val HINT_LAST_MULTIPLIERS = 3
     }
 
-    private var initialized = false
     private lateinit var s: TrainingActivityState
+    val state: Parcelable get() = s
+
+    private val meUpdate = SingleLiveEvent<TrainingActivityViewUpdates>()
+    val eUpdate: LiveData<TrainingActivityViewUpdates> get() = meUpdate
+
+    private var loaded = false
     private var answerFrozen = false
 
-    private val meInvisibleAnswer = SingleLiveEvent<Int?>()
-    val eInvisibleAnswer: LiveData<Int?> get() = meInvisibleAnswer
-
-    private val mdVisibleAnswer = MutableLiveData<Int?>()
-    val dVisibleAnswer: LiveData<Int?> get() = mdVisibleAnswer
-
-    private val meIncorrect = SingleLiveEvent<Unit>()
-    val eIncorrect: LiveData<Unit> get() = meIncorrect
-
-    private val meCorrect = SingleLiveEvent<Unit>()
-    val eCorrect: LiveData<Unit> get() = meCorrect
-
-    class EndOfStage(val endOfGame: Boolean)
-
-    private val meEndOfStage = SingleLiveEvent<EndOfStage>()
-    val eEndOfStage: LiveData<EndOfStage> get() = meEndOfStage
-
-    private val meNextStage = SingleLiveEvent<Unit>()
-    val eNextStage: LiveData<Unit> get() = meNextStage
-
-    val type get() = s.type
-    val multiplicand get() = s.multiplicand
-    val prevMultiplier get() = stage.multipliers[s.multiplierIdx - 1]
-    val multiplier get() = stage.multipliers[s.multiplierIdx]
-    val nextMultipliers get() = stage.multipliers.drop(s.multiplierIdx + 1).toTypedArray()
-    val multipliersWithAnswers get() = if (stage.showPrevAnswers) stage.multipliers.take(s.multiplierIdx) else listOf()
-    val taskProgress get() = if (stage.multipliers.size == s.multiplierIdx) 1f else s.multiplierIdx.toFloat() / stage.multipliers.size
-    val stageProgress get() = if (s.stages.size == s.stageIdx) 1f else (s.stageIdx + if (stage.multipliers.size == s.multiplierIdx) 1 else 0).toFloat() / s.stages.size
-    val qErrors get() = s.qErrors
-    val answer get() = s.answer
-    val state: Parcelable get() = s
-    val hintMultiplier  // may be 0
-        get() = ((arrayOf(0) + stage.multipliers.take(s.multiplierIdx)).takeLast(HINT_LAST_MULTIPLIERS) + stage.extraHints)
-            .filter { it != multiplier }
-            .minBy { Math.abs(it - multiplier) }!!
-
-    val startCorrectRowsState: RowsState
-        get() = RowsState(prevMultiplier, 0, 0)
-
-    val endCorrectRowState: RowsState
-        get() = RowsState(multiplier, 0, 0)
-
-    val startIncorrectRowsState: RowsState
-        get() {
-            val hint = hintMultiplier
-            return RowsState(hint, Math.max(multiplier - hint, 0), 0)
-        }
-
-    val endIncorrectRowsState: RowsState
-        get() {
-            val hint = hintMultiplier
-            return RowsState(multiplier, 0, Math.max(hint - multiplier, 0))
-        }
-
-    val unitAnimation
-        get() = when (s.attempt) {
-            0 -> null
-            1 -> UnitAnimation.ByRow
-            else -> UnitAnimation.ByUnit
-        }
-
-    private val stage get() = s.stages[s.stageIdx]
-
     fun init(savedInstanceState: Bundle?, intent: Intent) {
-        if (initialized)
-            return
-        initialized = true
-        s = if (savedInstanceState != null)
-            savedInstanceState.getParcelable(STATE) as TrainingActivityState
-        else {
-            val params = intent.getParcelableExtra(PARAMS) as TrainingActivityParams
-            TrainingActivityState(
-                params.type,
-                params.multiplicand,
-                when (params.type) {
-                    TaskType.Learn -> listOf(
+        if (!loaded) {
+            loaded = true
+            s = if (savedInstanceState != null)
+                savedInstanceState.getParcelable(STATE) as TrainingActivityState
+            else {
+                val params = intent.getParcelableExtra(PARAMS) as TrainingActivityParams
+                TrainingActivityState(
+                    params.type,
+                    params.multiplicand,
+                    when (params.type) {
+                        TaskType.Learn -> listOf(
 //                        Stage(true, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf()),
 //                        Stage(false, arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), arrayOf()),
-                        Stage(true, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
-                        Stage(false, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
-                        Stage(true, arrayOf(1, 3, 5, 7, 9), arrayOf()),
-                        Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf()),
-                        Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf()),
-                        Stage(true, arrayOf(10, 8, 6, 4, 2), arrayOf())
-                    )
-                    TaskType.Practice -> listOf(Stage(false, (1..10).shuffled().toTypedArray(), arrayOf(1, 5, 10)))
-                    else -> throw RuntimeException("Invalid params.type ${params.type}")
-                }
-            )
+                            Stage(true, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
+                            Stage(false, arrayOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1), arrayOf()),
+                            Stage(true, arrayOf(1, 3, 5, 7, 9), arrayOf()),
+                            Stage(true, arrayOf(9, 7, 5, 3, 1), arrayOf()),
+                            Stage(true, arrayOf(2, 4, 6, 8, 10), arrayOf()),
+                            Stage(true, arrayOf(10, 8, 6, 4, 2), arrayOf())
+                        )
+                        TaskType.Practice -> listOf(Stage(false, (1..10).shuffled().toTypedArray(), arrayOf(1, 5, 10)))
+                        else -> throw RuntimeException("Invalid params.type ${params.type}")
+                    }
+                )
+            }
         }
-        mdVisibleAnswer.value = s.answer
+
+        val updates = TrainingActivityViewUpdates(
+            TrainingActivityViewUpdate.SetToolbarText((if (s.type == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 ${s.multiplicand}"),
+            TrainingActivityViewUpdate.InitField(s.multiplicand),
+            TrainingActivityViewUpdate.SetAnswer(s.answer),
+            TrainingActivityViewUpdate.ShowAnswer(s.answer)
+        )
+        updates.add(setupStage)
+        meUpdate.value = updates
     }
 
     fun onAnswerChanged(answer: Int?) {
         s.answer = answer
         if (!answerFrozen)
-            mdVisibleAnswer.value = answer
+            meUpdate.value = TrainingActivityViewUpdates(TrainingActivityViewUpdate.ShowAnswer(answer))
     }
 
     fun onPreAnimationEnded() {
         answerFrozen = false
-        mdVisibleAnswer.value = answer
+        meUpdate.value = TrainingActivityViewUpdates(TrainingActivityViewUpdate.ShowAnswer(s.answer))
     }
 
     fun onOkPressed(answer: Int) {
         if (answerFrozen)
             return
         s.answer = null
-        meInvisibleAnswer.value = null
         answerFrozen = true
+        val updates = TrainingActivityViewUpdates(TrainingActivityViewUpdate.SetAnswer(null))
         if (s.multiplicand * multiplier != answer) {
             s.attempt++
             s.qErrors++
-            meIncorrect.value = Unit
+
+            val hintMultiplier = this.hintMultiplier
+
+            updates.add(TrainingActivityViewUpdate.ShowAnswer(null))
+            updates.add(
+                TrainingActivityViewUpdate.AnimateRowText(
+                    if (hintMultiplier == 0) listOf() else listOf(hintMultiplier),
+                    multiplier,
+                    Settings.TrainingActivityShowIncorrectCheckMarkDuration
+                ),
+                TrainingActivityViewUpdate.AnimateMark(Mark.Incorrect, Settings.TrainingActivityShowIncorrectCheckMarkDuration)
+            )
+
+            updates.add(TrainingActivityViewUpdate.Delay(Settings.TrainingActivityPauseAfterIncorrectCheckMarkDuration))
+
+            updates.add(TrainingActivityViewUpdate.AnimateMark(Mark.None, Settings.TrainingActivityHideIncorrectCheckMarkDuration))
+
+            updates.add(TrainingActivityViewUpdate.CrossFadeRowState(startIncorrectRowsState, Settings.TrainingActivityCrossFadeHintViewDuration))
+
+            updates.add(TrainingActivityViewUpdate.ViewModelEvent { onPreAnimationEnded() })
+
+            if (hintMultiplier != 0)
+                updates.add(TrainingActivityViewUpdate.PulseRowText(hintMultiplier, Settings.TrainingActivityPulseScale, Settings.TrainingActivityPulseHintFromDuration))
+
+            val duration = abs(multiplier - hintMultiplier) *
+                    if (unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
+            updates.add(TrainingActivityViewUpdate.AnimateCountedRows(startIncorrectRowsState, endIncorrectRowsState, unitAnimation!!, duration))
+
         } else {
             s.attempt = 0
             s.multiplierIdx++
-            when {
-                s.multiplierIdx < s.stages[s.stageIdx].multipliers.size -> meCorrect.value = Unit
-                s.stageIdx + 1 < s.stages.size -> meEndOfStage.value = EndOfStage(false)
-                else -> meEndOfStage.value = EndOfStage(true)
+
+            val endOfStage = s.multiplierIdx == s.stages[s.stageIdx].multipliers.size
+
+            updates.add(
+                TrainingActivityViewUpdate.AnimateProgress(taskProgress, Settings.ShowCorrectCheckMarkDuration),
+                if (endOfStage) null else TrainingActivityViewUpdate.CrossFadeRowState(startCorrectRowsState, Settings.ShowCorrectCheckMarkDuration),
+                if (endOfStage) null else TrainingActivityViewUpdate.AnimateRowText(multipliersWithAnswers, null, Settings.ShowCorrectCheckMarkDuration),
+                TrainingActivityViewUpdate.AnimateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
+            )
+
+            updates.add(TrainingActivityViewUpdate.Delay(Settings.PauseAfterCorrectCheckMarkDuration))
+
+            updates.add(
+                TrainingActivityViewUpdate.AnimateMark(Mark.None, Settings.TrainingActivityHideCorrectCheckMarkDuration),
+                TrainingActivityViewUpdate.ShowAnswer(null),
+                TrainingActivityViewUpdate.PrepareNextTask(Settings.PrepareNextTaskDuration)
+            )
+
+            if (!endOfStage) {
+                updates.add(TrainingActivityViewUpdate.ViewModelEvent { onPreAnimationEnded() })
+
+                updates.add(
+                    TrainingActivityViewUpdate.SetRowText(multipliersWithAnswers, multiplier),
+                    TrainingActivityViewUpdate.SetLastActiveMultiplier(multiplier),
+                    TrainingActivityViewUpdate.SetAnswer(answer),
+                    TrainingActivityViewUpdate.SetMultiplier(multiplier),
+                    TrainingActivityViewUpdate.AnimateCountedRows(
+                        startCorrectRowsState,
+                        endCorrectRowState,
+                        UnitAnimation.ByRow,
+                        abs(multiplier - prevMultiplier) * Settings.ShowHintRowDuration
+                    )
+                )
+
+                updates.add(TrainingActivityViewUpdate.MoveNextTask(Settings.MoveNextTaskDuration))
+            } else {
+                updates.add(TrainingActivityViewUpdate.ShowEndOfStage(s.qErrors, stageProgress, s.stageIdx + 1 == s.stages.size))
             }
         }
+
+        meUpdate.value = updates
     }
 
     fun onNextStage() {
         s.stageIdx++
         s.qErrors = 0
         s.multiplierIdx = 0
-        meNextStage.value = Unit
+        s.answer = null
+        meUpdate.value = TrainingActivityViewUpdates(
+            TrainingActivityViewUpdate.SetAnswer(null),
+            TrainingActivityViewUpdate.ShowAnswer(null),
+            setupStage
+        )
     }
+
+    private val prevMultiplier get() = stage.multipliers[s.multiplierIdx - 1]
+    private val multiplier get() = stage.multipliers[s.multiplierIdx]
+    private val nextMultipliers get() = stage.multipliers.drop(s.multiplierIdx + 1).toList()
+    private val multipliersWithAnswers get() = if (stage.showPrevAnswers) stage.multipliers.take(s.multiplierIdx) else listOf()
+    private val taskProgress get() = if (stage.multipliers.size == s.multiplierIdx) 1f else s.multiplierIdx.toFloat() / stage.multipliers.size
+    private val stageProgress get() = if (s.stages.size == s.stageIdx) 1f else (s.stageIdx + if (stage.multipliers.size == s.multiplierIdx) 1 else 0).toFloat() / s.stages.size
+    private val hintMultiplier  // may be 0
+        get() = ((arrayOf(0) + stage.multipliers.take(s.multiplierIdx)).takeLast(HINT_LAST_MULTIPLIERS) + stage.extraHints)
+            .filter { it != multiplier }
+            .minBy { Math.abs(it - multiplier) }!!
+
+    private val startCorrectRowsState get() = RowsState(prevMultiplier, 0, 0)
+    private val endCorrectRowState get() = RowsState(multiplier, 0, 0)
+    private val startIncorrectRowsState get() = hintMultiplier.let { hint -> RowsState(hint, Math.max(multiplier - hint, 0), 0) }
+    private val endIncorrectRowsState get() = RowsState(multiplier, 0, Math.max(hintMultiplier - multiplier, 0))
+
+    private val unitAnimation
+        get() = when (s.attempt) {
+            0 -> null
+            1 -> UnitAnimation.ByRow
+            else -> UnitAnimation.ByUnit
+        }
+
+    private val setupStage
+        get() = TrainingActivityViewUpdate.SetupStage(
+            taskProgress,
+            multiplier,
+            s.multiplicand,
+            nextMultipliers,
+            multipliersWithAnswers,
+            endCorrectRowState
+        )
+
+    private val stage get() = s.stages[s.stageIdx]
 }
 
 class TrainingActivity : ScopedAppActivity() {
@@ -202,18 +366,14 @@ class TrainingActivity : ScopedAppActivity() {
         fullScreen()
 
         m = ViewModelProviders.of(this).get(TrainingActivityViewModel::class.java)
+        m.eUpdate.observe(this, Observer { if (it != null) update(it) })
         m.init(savedInstanceState, intent)
 
-        tbToolbarTitle.text = (if (m.type == TaskType.Learn) "Learn" else "Practice") + " \u25A1 \u00D7 ${m.multiplicand}"
-        fieldView.initialize(m.multiplicand)
-        taskViewInitStage()
-
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
-            fieldView.layout(fieldView.width, fieldView.height)
+            fieldView.layout()
         }
 
-        val input = fInput as InputFragment
-        input.setListener(object : InputFragment.EventListener {
+        (fInput as InputFragment).setListener(object : InputFragment.EventListener {
             override fun onAnswerChanged(answer: Int?) {
                 m.onAnswerChanged(answer)
             }
@@ -222,121 +382,57 @@ class TrainingActivity : ScopedAppActivity() {
                 m.onOkPressed(answer)
             }
         })
-        input.answer = m.answer
-
-        m.eInvisibleAnswer.observe(this, Observer { answer ->
-            input.answer = answer
-        })
-
-        m.dVisibleAnswer.observe(this, Observer { answer ->
-            taskView.setAnswer(answer)
-        })
-
-        m.eNextStage.observe(this, Observer {
-            taskViewInitStage()
-        })
-
-        m.eIncorrect.observe(this, Observer {
-            launch {
-                val hintMultiplier = m.hintMultiplier
-
-                listOf(
-                    fieldView.animateRowText(if (hintMultiplier == 0) listOf() else listOf(hintMultiplier), m.multiplier, Settings.TrainingActivityShowIncorrectCheckMarkDuration),
-                    fieldView.animateMark(Mark.Incorrect, Settings.TrainingActivityShowIncorrectCheckMarkDuration)
-                ).flatten().run()
-
-                delay(Settings.TrainingActivityPauseAfterIncorrectCheckMarkDuration)
-
-                fieldView.animateMark(Mark.None, Settings.TrainingActivityHideIncorrectCheckMarkDuration).run()
-
-                fieldView.crossFadeRowState(m.startIncorrectRowsState, Settings.TrainingActivityCrossFadeHintViewDuration).run()
-
-                m.onPreAnimationEnded()
-
-                if (hintMultiplier != 0)
-                    fieldView.pulseRowText(hintMultiplier, Settings.TrainingActivityPulseScale, Settings.TrainingActivityPulseHintFromDuration)
-
-                val duration = abs(m.multiplier - hintMultiplier) *
-                        if (m.unitAnimation == UnitAnimation.ByUnit) Settings.ShowHintRowDuration else Settings.ShowHintUnitRowDuration
-                fieldView.animateCountedRows(m.startIncorrectRowsState, m.endIncorrectRowsState, m.unitAnimation!!, duration).run()
-            }
-        })
-
-        m.eCorrect.observe(this, Observer {
-            launch {
-                listOf(
-                    async { pvProgress.animateProgress(m.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
-                    async { fieldView.crossFadeRowState(m.startCorrectRowsState, Settings.ShowCorrectCheckMarkDuration).run() },
-                    async {
-                        listOf(
-                            fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.ShowCorrectCheckMarkDuration),
-                            fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
-                        ).flatten().run()
-                    }
-                ).map { it.await() }
-
-                delay(Settings.PauseAfterCorrectCheckMarkDuration)
-
-                taskView.prepareNextTask(Settings.PrepareNextTaskDuration)
-
-                fieldView.setRowText(m.multipliersWithAnswers, m.multiplier)
-                fieldView.setLastActiveMultiplier(m.multiplier)
-                m.onPreAnimationEnded()
-                taskView.setAnswer(m.answer)
-                taskView.setMultiplier(m.multiplier)
-
-                fieldView.animateCountedRows(
-                    m.startCorrectRowsState,
-                    m.endCorrectRowState,
-                    UnitAnimation.ByRow,
-                    abs(m.multiplier - m.prevMultiplier) * Settings.ShowHintRowDuration
-                ).run()
-
-                listOf(
-                    async { taskView.moveNextTask(this, Settings.MoveNextTaskDuration) },
-                    async { fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration).run() }
-                ).map { it.await() }
-            }
-        })
-
-        m.eEndOfStage.observe(this, Observer { p ->
-            if (p == null)
-                return@Observer
-            launch {
-                listOf(
-                    async { pvProgress.animateProgress(m.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
-                    async {
-                        listOf(
-                            fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.ShowCorrectCheckMarkDuration),
-                            fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration)
-                        ).flatten().run()
-                    }
-                ).map { it.await() }
-
-                delay(Settings.PauseAfterCorrectCheckMarkDuration)
-
-                fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration).run()
-
-                startActivityForResult(Intent(this@TrainingActivity, EndOfStageActivity::class.java).apply {
-                    putExtra(PARAMS, EndOfStageActivityActivityParams(m.qErrors, m.stageProgress))
-                }, if (p.endOfGame) END_OF_GAME_ACTIVITY_REQUEST_CODE else END_OF_SET_ACTIVITY_REQUEST_CODE)
-            }
-        })
     }
 
-    private fun taskViewInitStage() {
-        pvProgress.progress = m.taskProgress
+    private fun update(updates: TrainingActivityViewUpdates) {
+        launch {
+            for (list in updates.updates) {
+                list.filterNotNull().map { async { update(it) } }.map { it.await() }
+            }
+        }
+    }
+
+    private suspend fun update(u: TrainingActivityViewUpdate) = when (u) {
+        is TrainingActivityViewUpdate.SetToolbarText -> tbToolbarTitle.text = u.text
+        is TrainingActivityViewUpdate.InitField -> fieldView.initialize(u.multiplicand)
+        is TrainingActivityViewUpdate.SetupStage -> setupStage(u)
+        is TrainingActivityViewUpdate.SetAnswer -> (fInput as InputFragment).answer = u.answer
+        is TrainingActivityViewUpdate.ShowAnswer -> taskView.setAnswer(u.answer)
+        is TrainingActivityViewUpdate.AnimateRowText -> fieldView.animateRowText(u.visibleAnswers, u.multiplier, u.duration).run()
+        is TrainingActivityViewUpdate.AnimateMark -> fieldView.animateMark(u.mark, u.duration).run()
+        is TrainingActivityViewUpdate.Delay -> delay(u.duration)
+        is TrainingActivityViewUpdate.CrossFadeRowState -> fieldView.crossFadeRowState(u.state, u.duration).run()
+        is TrainingActivityViewUpdate.PulseRowText -> fieldView.pulseRowText(u.multiplier, u.scale, u.duration)
+        is TrainingActivityViewUpdate.AnimateCountedRows -> fieldView.animateCountedRows(u.startState, u.endState, u.animation, u.duration).run()
+        is TrainingActivityViewUpdate.AnimateProgress -> pvProgress.animateProgress(u.taskProgress, u.duration)
+        is TrainingActivityViewUpdate.PrepareNextTask -> taskView.prepareNextTask(u.duration)
+        is TrainingActivityViewUpdate.SetRowText -> fieldView.setRowText(u.multipliersWithAnswers, u.multiplier)
+        is TrainingActivityViewUpdate.SetLastActiveMultiplier -> fieldView.setLastActiveMultiplier(u.multiplier)
+        is TrainingActivityViewUpdate.SetMultiplier -> taskView.setMultiplier(u.multiplier)
+        is TrainingActivityViewUpdate.MoveNextTask -> taskView.moveNextTask(this, u.duration)
+        is TrainingActivityViewUpdate.ShowEndOfStage -> endOfStage(u)
+        is TrainingActivityViewUpdate.ViewModelEvent -> u.event()
+    }
+
+    private fun setupStage(u: TrainingActivityViewUpdate.SetupStage) {
+        pvProgress.progress = u.taskProgress
         fieldView.clearMark()
-        fieldView.setRowText(m.multipliersWithAnswers, questionMultiplier = m.multiplier)
-        fieldView.setLastActiveMultiplier(m.multiplier)
-        fieldView.setRowState(m.endCorrectRowState)
+        fieldView.setRowText(u.multipliersWithAnswers, questionMultiplier = u.multiplier)
+        fieldView.setLastActiveMultiplier(u.multiplier)
+        fieldView.setRowState(u.rowsState)
         m.onPreAnimationEnded()
         fullScreen()
         taskView.apply {
-            createNextMultipliers(m.nextMultipliers)
-            setMultiplier(m.multiplier)
-            setMultiplicand(m.multiplicand)
+            createNextMultipliers(u.nextMultipliers)
+            setMultiplier(u.multiplier)
+            setMultiplicand(u.multiplicand)
         }
+    }
+
+    private fun endOfStage(u: TrainingActivityViewUpdate.ShowEndOfStage) {
+        startActivityForResult(Intent(this@TrainingActivity, EndOfStageActivity::class.java).apply {
+            putExtra(PARAMS, EndOfStageActivityActivityParams(u.qErrors, u.stageProgress))
+        }, if (u.endOfGame) END_OF_GAME_ACTIVITY_REQUEST_CODE else END_OF_SET_ACTIVITY_REQUEST_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

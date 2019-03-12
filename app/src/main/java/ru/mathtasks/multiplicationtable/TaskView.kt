@@ -26,7 +26,7 @@ class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, at
         inflate(context, R.layout.task_view, this)
     }
 
-    fun createNextMultipliers(nextMultipliers: Array<Int>) {
+    fun createNextMultipliers(nextMultipliers: List<Int>) {
         nextMultiplierIdx = 0
         nextTvMultipliers.forEach { clTask.removeView(it) }
         val constraintSet = ConstraintSet().apply { clone(clTask) }
