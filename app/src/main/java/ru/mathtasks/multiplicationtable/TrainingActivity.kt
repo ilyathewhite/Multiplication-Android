@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.MenuItem
+import android.view.View
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_training.*
 import kotlinx.coroutines.async
@@ -213,7 +214,7 @@ class TrainingActivityViewModel : ViewModel() {
             meUpdate.value = TrainingActivityViewUpdates(TrainingActivityViewUpdate.ShowAnswer(answer))
     }
 
-    fun onPreAnimationEnded() {
+    fun unfreezeAnswer() {
         answerFrozen = false
         meUpdate.value = TrainingActivityViewUpdates(TrainingActivityViewUpdate.ShowAnswer(s.answer))
     }
@@ -246,7 +247,7 @@ class TrainingActivityViewModel : ViewModel() {
 
             updates.add(TrainingActivityViewUpdate.CrossFadeRowState(startIncorrectRowsState, Settings.TrainingActivityCrossFadeHintViewDuration))
 
-            updates.add(TrainingActivityViewUpdate.ViewModelEvent { onPreAnimationEnded() })
+            updates.add(TrainingActivityViewUpdate.ViewModelEvent { unfreezeAnswer() })
 
             if (hintMultiplier != 0)
                 updates.add(TrainingActivityViewUpdate.PulseRowText(hintMultiplier, Settings.TrainingActivityPulseScale, Settings.TrainingActivityPulseHintFromDuration))
@@ -273,17 +274,17 @@ class TrainingActivityViewModel : ViewModel() {
             updates.add(
                 TrainingActivityViewUpdate.AnimateMark(Mark.None, Settings.TrainingActivityHideCorrectCheckMarkDuration),
                 TrainingActivityViewUpdate.ShowAnswer(null),
-                TrainingActivityViewUpdate.PrepareNextTask(Settings.PrepareNextTaskDuration)
+                if (endOfStage) null else TrainingActivityViewUpdate.PrepareNextTask(Settings.PrepareNextTaskDuration)
             )
 
             if (!endOfStage) {
-                updates.add(TrainingActivityViewUpdate.ViewModelEvent { onPreAnimationEnded() })
-
                 updates.add(
+                    TrainingActivityViewUpdate.ViewModelEvent { unfreezeAnswer() },
                     TrainingActivityViewUpdate.SetRowText(multipliersWithAnswers, multiplier),
                     TrainingActivityViewUpdate.SetLastActiveMultiplier(multiplier),
-                    TrainingActivityViewUpdate.SetAnswer(answer),
-                    TrainingActivityViewUpdate.SetMultiplier(multiplier),
+                    TrainingActivityViewUpdate.SetMultiplier(multiplier)
+                )
+                updates.add(
                     TrainingActivityViewUpdate.AnimateCountedRows(
                         startCorrectRowsState,
                         endCorrectRowState,
@@ -369,8 +370,10 @@ class TrainingActivity : ScopedAppActivity() {
         m.eUpdate.observe(this, Observer { if (it != null) update(it) })
         m.init(savedInstanceState, intent)
 
+        fieldView.visibility = View.INVISIBLE
         llOuter.viewTreeObserver.addOnGlobalLayoutListener {
             fieldView.layout()
+            fieldView.visibility = View.VISIBLE
         }
 
         (fInput as InputFragment).setListener(object : InputFragment.EventListener {
@@ -420,7 +423,7 @@ class TrainingActivity : ScopedAppActivity() {
         fieldView.setRowText(u.multipliersWithAnswers, questionMultiplier = u.multiplier)
         fieldView.setLastActiveMultiplier(u.multiplier)
         fieldView.setRowState(u.rowsState)
-        m.onPreAnimationEnded()
+        m.unfreezeAnswer()
         fullScreen()
         taskView.apply {
             createNextMultipliers(u.nextMultipliers)
