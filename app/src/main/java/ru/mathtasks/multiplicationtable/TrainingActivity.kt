@@ -229,15 +229,15 @@ class TrainingActivity : ScopedAppActivity() {
     private fun onCorrect() {
         launch {
             parallel(
-                { pvProgress.animateProgress(m.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
-                { fieldView.crossFadeRowState(m.startCorrectRowsState, Settings.ShowCorrectCheckMarkDuration).run() },
-                { fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.ShowCorrectCheckMarkDuration).run() },
-                { fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration).run() }
+                { pvProgress.animateProgress(m.taskProgress, Settings.TrainingActivityShowCorrectCheckMarkDuration) },
+                { fieldView.crossFadeRowState(m.startCorrectRowsState, Settings.TrainingActivityShowCorrectCheckMarkDuration).run() },
+                { fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.TrainingActivityShowCorrectCheckMarkDuration).run() },
+                { fieldView.animateMark(Mark.Correct, Settings.TrainingActivityShowCorrectCheckMarkDuration).run() }
             )
 
-            delay(Settings.PauseAfterCorrectCheckMarkDuration)
+            delay(Settings.TrainingActivityPauseAfterCorrectCheckMarkDuration)
 
-            taskView.prepareNextTask(Settings.PrepareNextTaskDuration)
+            taskView.prepareNextTask(Settings.TrainingActivityPrepareNextTaskDuration)
 
             fieldView.setRowText(m.multipliersWithAnswers, m.multiplier)
             fieldView.setLastActiveMultiplier(m.multiplier)
@@ -253,8 +253,8 @@ class TrainingActivity : ScopedAppActivity() {
             ).run()
 
             parallel(
-                { taskView.moveNextTask(this, Settings.MoveNextTaskDuration) },
-                { fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration).run() }
+                { taskView.moveNextTask(this, Settings.TrainingActivityMoveNextTaskDuration) },
+                { fieldView.animateMark(Mark.None, Settings.TrainingActivityMoveNextTaskDuration).run() }
             )
         }
     }
@@ -262,14 +262,14 @@ class TrainingActivity : ScopedAppActivity() {
     private fun onEndOfStage(endOfGame: Boolean) {
         launch {
             parallel(
-                { pvProgress.animateProgress(m.taskProgress, Settings.ShowCorrectCheckMarkDuration) },
-                { fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.ShowCorrectCheckMarkDuration).run() },
-                { fieldView.animateMark(Mark.Correct, Settings.ShowCorrectCheckMarkDuration).run() }
+                { pvProgress.animateProgress(m.taskProgress, Settings.TrainingActivityShowCorrectCheckMarkDuration) },
+                { fieldView.animateRowText(m.multipliersWithAnswers, null, Settings.TrainingActivityShowCorrectCheckMarkDuration).run() },
+                { fieldView.animateMark(Mark.Correct, Settings.TrainingActivityShowCorrectCheckMarkDuration).run() }
             )
 
-            delay(Settings.PauseAfterCorrectCheckMarkDuration)
+            delay(Settings.TrainingActivityPauseAfterCorrectCheckMarkDuration)
 
-            fieldView.animateMark(Mark.None, Settings.MoveNextTaskDuration).run()
+            fieldView.animateMark(Mark.None, Settings.TrainingActivityMoveNextTaskDuration).run()
 
             startActivityForResult(Intent(this@TrainingActivity, EndOfStageActivity::class.java).apply {
                 putExtra(PARAMS, EndOfStageActivityActivityParams(m.qErrors, m.stageProgress))

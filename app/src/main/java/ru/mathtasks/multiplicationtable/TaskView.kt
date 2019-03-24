@@ -15,7 +15,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.android.synthetic.main.task_view.view.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 
 
 class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
@@ -103,11 +102,9 @@ class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, at
     suspend fun moveNextTask(scope: CoroutineScope, duration: Long) {
         val tvNextNextMultiplier = if (nextMultiplierIdx < nextTvMultipliers.size) nextTvMultipliers[nextMultiplierIdx] else null
 
-        listOf(
-            scope.async {
-                tvMovingNextMultiplier.textColorAnimator(ContextCompat.getColor(context, R.color.taskViewTask), duration).run()
-            },
-            scope.async {
+        scope.parallel(
+            { tvMovingNextMultiplier.textColorAnimator(ContextCompat.getColor(context, R.color.taskViewTask), duration).run() },
+            {
                 clTask.transition(duration, TransitionSet().apply {
                     ordering = TransitionSet.ORDERING_TOGETHER
                     addTransition(ChangeBounds()).addTransition(ScaleTransition())
@@ -130,7 +127,7 @@ class TaskView(context: Context, attrs: AttributeSet) : LinearLayout(context, at
                     tvMovingNextMultiplier.scaleY = tvMultiplier.textSize / tvMovingNextMultiplier.textSize
                 }
             }
-        ).map { it.await() }
+        )
 
         tvMovingNextMultiplier.alpha = 0f
         tvMovingNextMultiplier.scaleX = 1f

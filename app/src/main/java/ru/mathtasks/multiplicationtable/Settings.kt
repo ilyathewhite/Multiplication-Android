@@ -2,11 +2,11 @@ package ru.mathtasks.multiplicationtable
 
 class Settings {
     companion object {
-        private const val DurationCoeff = 1
-        const val ShowCorrectCheckMarkDuration = 250L * DurationCoeff
-        const val PauseAfterCorrectCheckMarkDuration = 250L * DurationCoeff
-        const val PrepareNextTaskDuration = 100L * DurationCoeff
-        const val MoveNextTaskDuration = 400L * DurationCoeff
+        private const val DurationCoeff = 10
+        const val TrainingActivityShowCorrectCheckMarkDuration = 250L * DurationCoeff
+        const val TrainingActivityPauseAfterCorrectCheckMarkDuration = 250L * DurationCoeff
+        const val TrainingActivityPrepareNextTaskDuration = 100L * DurationCoeff
+        const val TrainingActivityMoveNextTaskDuration = 400L * DurationCoeff
 
         const val TrainingActivityShowIncorrectCheckMarkDuration = 250L * DurationCoeff
         const val TrainingActivityPauseAfterIncorrectCheckMarkDuration = 250L * DurationCoeff
@@ -25,8 +25,9 @@ class Settings {
         const val RowUnitSwitchDuration = 10L
         const val ChooseMultiplicandDelay = 1000L
 
-        const val TestActivityShowMarkDuration = 250L
+        const val TestActivityShowMarkDuration = 250L * DurationCoeff
         const val TestActivityPauseAfterMarkDuration = 250L * DurationCoeff
-        const val TestActivityHideMarkDuration = 250L
+        const val TestActivityHideMarkDuration = 250L * DurationCoeff
+        const val TestActivityMoveTaskDuration = 250L * DurationCoeff
     }
 }

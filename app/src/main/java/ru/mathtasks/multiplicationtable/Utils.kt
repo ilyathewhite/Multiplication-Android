@@ -266,20 +266,24 @@ abstract class MyViewModel<Params : Parcelable, State : Parcelable, Update> : Vi
     }
 
     abstract fun create(params: Params): State
+    open fun onAttached() {}
     fun init(savedInstanceState: Bundle?, intent: Intent) {
-        if (initialized)
+        if (initialized) {
+            onAttached()
             return
+        }
         initialized = true
         s = when {
             savedInstanceState != null -> savedInstanceState.getParcelable(STATE) as State
             else -> create(intent.getParcelableExtra(PARAMS) as Params)
         }
+        onAttached()
     }
 }
 
 inline fun <reified VM : MyViewModel<*, *, *>> getViewModel(activity: FragmentActivity, savedInstanceState: Bundle?) =
     ViewModelProviders.of(activity).get(VM::class.java).apply { init(savedInstanceState, activity.intent) }
 
-suspend fun CoroutineScope.parallel(vararg functions: suspend CoroutineScope.() -> Unit) {
+suspend fun CoroutineScope.parallel(vararg functions: suspend CoroutineScope.() -> Unit) = coroutineScope {
     functions.map { func -> async { func() } }.map { it.await() }
 }

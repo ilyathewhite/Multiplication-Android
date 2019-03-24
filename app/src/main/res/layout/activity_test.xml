@@ -14,11 +14,16 @@
     <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent" android:id="@+id/clMain" android:layout_weight="1">
+        <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp" app:srcCompat="@drawable/vertical_alpha_gradient" android:id="@+id/tvVerticalAlphaGradient"
+                app:layout_constraintLeft_toLeftOf="parent" app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/tvMultiplication" app:layout_constraintTop_toTopOf="parent"/>
         <TextView
                 android:text="TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/tvProgress" app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintRight_toRightOf="parent" app:layout_constraintTop_toTopOf="parent" android:textColor="@color/appDarkBlue"/>
         <TextView
                 android:text="5"
                 android:layout_width="wrap_content"
@@ -29,7 +34,7 @@
         <TextView
                 android:text="7"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/tvMovingNextMultipliсand" android:textSize="14dp"
+                android:layout_height="wrap_content" android:id="@+id/tvMovingNextMultiplicand" android:textSize="14dp"
                 app:layout_constraintBottom_toTopOf="@+id/tvMultiplicand" app:layout_constraintLeft_toLeftOf="@+id/tvMultiplicand"
                 app:layout_constraintRight_toRightOf="@+id/tvMultiplicand" android:alpha="0" app:fontFamily="@font/lato_bolditalic" android:textColor="@color/appDarkBlue"
         />
